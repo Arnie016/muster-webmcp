@@ -70,7 +70,7 @@
   "proofInventory": [
     {
       "id": "command-room",
-      "claim": "The app presents an orbitable 18-floor building, guided workflow, trace, and conversation surface together.",
+      "claim": "The app presents an orbitable 18-floor building with visible Floor 07 signal and route state, guided workflow, trace, and conversation surface together.",
       "source": "docs/screenshots/muster-spatial-command.png",
       "destination": "proof/command-room.png",
       "status": "captured"
@@ -221,7 +221,7 @@
   },
   "threePlan": {
     "decision": "implemented-as-command-surface",
-    "reason": "The native CSS 3D building selects the loaded floor, then hands off to a pan-and-zoom plan where room inspection and route drawing change the agent workflow."
+    "reason": "The procedural WebGL building exposes eighteen selectable floors, site context, orbit controls, and the authored Floor 07 signal, then hands off to a pan-and-zoom plan where room inspection and route drawing change the agent workflow. A CSS model remains only as a no-WebGL fallback."
   },
   "scenes": [
     {

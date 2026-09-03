@@ -652,6 +652,15 @@ footer { padding: 13px 28px; background: #090a08; font-size: 10px; }
 .building-signal-marker i { position: absolute; top: 13px; left: 11px; width: 8px; height: 8px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 5px rgba(255,107,53,.14), 0 0 20px rgba(255,74,25,.8); }
 .building-signal-marker span, .building-signal-marker small { display: block; }.building-signal-marker span { font: 800 8px var(--mono); letter-spacing: .06em; text-transform: uppercase; }.building-signal-marker small { margin-top: 4px; color: #bf8d7b; font: 7px var(--mono); }
 .building-view.drill-live .building-signal-marker { opacity: 1; transform: translate(0,-50%) scale(1); animation: signal-marker 1.8s ease-in-out infinite; }
+.building-route-state { position: absolute; z-index: 19; top: 58px; right: 14px; width: 154px; padding: 9px 10px; display: grid; gap: 6px; border: 1px solid rgba(112,203,187,.24); border-radius: 9px; color: #b9d7d1; background: rgba(7,16,13,.88); box-shadow: 0 12px 30px rgba(0,0,0,.26); opacity: 0; pointer-events: none; transform: translateY(-5px); transition: opacity .25s ease, transform .25s ease; backdrop-filter: blur(12px); }
+.building-route-state.active { opacity: 1; transform: translateY(0); }
+.building-route-state > span { color: #79c9bc; font: 800 7px var(--mono); letter-spacing: .09em; text-transform: uppercase; }
+.building-route-state strong { display: flex; align-items: center; gap: 7px; font: 750 8px var(--mono); }
+.building-route-state strong i { width: 7px; height: 7px; border-radius: 50%; background: #70cbbb; box-shadow: 0 0 10px rgba(112,203,187,.55); }
+.building-route-state .route-state-b.blocked { color: #ffb099; }
+.building-route-state .route-state-b.blocked i { background: #ff6262; box-shadow: 0 0 12px rgba(255,98,98,.72); }
+.building-route-state.resolved strong:first-of-type { color: #b7e8ab; }
+.building-route-state.resolved strong:first-of-type i { background: var(--safe); box-shadow: 0 0 12px rgba(152,216,135,.65); }
 @keyframes signal-marker { 50% { box-shadow: 0 0 0 2px rgba(255,107,53,.1), 0 0 38px rgba(255,74,25,.34); } }
 .building-orbit { --orbit-x: 62deg; --orbit-z: -38deg; --orbit-scale: 1; position: absolute; inset: 4% 2% 12%; transform-style: preserve-3d; transform: rotateX(var(--orbit-x)) rotateZ(var(--orbit-z)) scale(var(--orbit-scale)); transition: transform .45s cubic-bezier(.22,1,.36,1); }
 .building-viewport.dragging .building-orbit { transition: none; }
@@ -811,6 +820,7 @@ footer { padding: 13px 28px; background: #090a08; font-size: 10px; }
   .plan-controls > div { justify-content: space-between; }
   .plan-gesture { display: none; }
   .narrative-caption { left: auto; right: 8px; bottom: 8px; max-width: 62%; transform: none; }
+  .building-route-state { top: 56px; right: 10px; width: 145px; }
 }
 
 @media (max-width: 480px) {
@@ -819,6 +829,7 @@ footer { padding: 13px 28px; background: #090a08; font-size: 10px; }
   .building-viewport { min-height: 360px; }
   .tower-core { width: 210px; height: 140px; }
   .building-status { display: none; }
+  .building-route-state { width: 136px; }
   .plan-controls strong { display: none; }
   .trace-inspector { grid-template-columns: 1fr; }
   .trace-inspector p { grid-column: 1; }

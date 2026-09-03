@@ -83,9 +83,28 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
     if (index === 0) {
       assert.ok(await page.locator('#buildingView').isVisible());
       assert.equal(await page.locator('#buildingCanvas').getAttribute('data-signal'), 'active');
+      assert.equal(await page.locator('#buildingCanvas').getAttribute('data-route-state'), 'candidate');
       assert.ok(await page.locator('#buildingSignalMarker').isVisible());
+      assert.ok(await page.locator('#buildingRouteState').isVisible());
+      assert.match(await page.locator('#buildingRouteState').innerText(), /Stair A available.*Stair B candidate/is);
       assert.match(await page.locator('#buildingSignalMarker').innerText(), /authored signal.*training only/is);
       await page.screenshot({ path: path.join(shots, 'muster-webgl-signal.png'), fullPage: false });
+    }
+    if (index === 3) {
+      await page.locator('#backToBuilding').click();
+      await page.waitForFunction(() => Number(document.querySelector('#buildingCanvas')?.dataset.renderWidth || 0) > 300);
+      assert.equal(await page.locator('#buildingCanvas').getAttribute('data-route-state'), 'blocked');
+      assert.match(await page.locator('#buildingRouteState').innerText(), /Stair A available.*Stair B unavailable/is);
+      await page.screenshot({ path: path.join(shots, 'muster-webgl-route.png'), fullPage: false });
+      await page.locator('#floorMode').click();
+    }
+    if (index === 4) {
+      await page.locator('#backToBuilding').click();
+      await page.waitForFunction(() => Number(document.querySelector('#buildingCanvas')?.dataset.renderWidth || 0) > 300);
+      assert.equal(await page.locator('#buildingCanvas').getAttribute('data-route-state'), 'recorded');
+      assert.match(await page.locator('#buildingRouteState').innerText(), /Stair A recorded.*Stair B unavailable/is);
+      await page.screenshot({ path: path.join(shots, 'muster-webgl-route-recorded.png'), fullPage: false });
+      await page.locator('#floorMode').click();
     }
     if (index === 1) assert.ok(await page.locator('#floorView').isVisible());
   }
@@ -156,7 +175,7 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
   assert.deepEqual(errors, []);
   assert.deepEqual(mobileErrors, []);
   await browser.close();
-  console.log('PASS · WebGL building exposes 18 selectable floors, raycast selection, orbit interaction, and a CSS fallback');
+  console.log('PASS · WebGL building exposes 18 selectable floors, raycast selection, orbit interaction, live route state, and a CSS fallback');
   console.log('PASS · Floor 07 opens, route analysis renders, and report remains human-approved');
   console.log('PASS · 390x844 mobile has no horizontal overflow or console errors');
 })().catch((error) => {

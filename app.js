@@ -562,6 +562,7 @@ function setSpatialMode(mode) {
     ? '18-floor building model'
     : preset ? `${preset.code} ${preset.label} plan` : `Floor ${String(selectedFloor).padStart(2, '0')} plan`;
   if (spatialMode === 'floor') requestAnimationFrame(applyFloorView);
+  else requestAnimationFrame(() => buildingScene?.refresh());
 }
 
 function renderTower() {
@@ -1111,6 +1112,7 @@ function renderMap() {
   const stairBlocked = state.injectIds.includes('stair');
   const rosterGap = state.injectIds.includes('roster');
   const assistResolved = state.decisions.some((item) => item.actionId === 'assist');
+  const routeRecorded = state.decisions.some((item) => item.actionId === 'reroute');
   $('#hazard').classList.toggle('active', actionableFloor && hasSmoke);
   $('#routeA').classList.toggle('active', actionableFloor && state.status !== 'ready');
   $('#routeB').classList.toggle('active', actionableFloor && state.status !== 'ready');
@@ -1126,6 +1128,11 @@ function renderMap() {
   floor.classList.toggle('story-critical', rosterGap && !assistResolved);
   $('#buildingView').classList.toggle('drill-live', hasSmoke);
   buildingScene?.setSignal(actionableFloor && hasSmoke);
+  buildingScene?.setRoutes({ active: actionableFloor && state.status !== 'ready', stairBlocked, resolved: routeRecorded });
+  const buildingRouteState = $('#buildingRouteState');
+  buildingRouteState.classList.toggle('active', actionableFloor && state.status !== 'ready');
+  buildingRouteState.classList.toggle('resolved', routeRecorded);
+  buildingRouteState.innerHTML = `<span>Floor 07 paths</span><strong><i></i>Stair A ${routeRecorded ? 'recorded' : 'available'}</strong><strong class="route-state-b ${stairBlocked ? 'blocked' : ''}"><i></i>Stair B ${stairBlocked ? 'unavailable' : 'candidate'}</strong>`;
   const narrative = $('#narrativeCaption');
   narrative.innerHTML = !selectedPreset
     ? `<span>Building context</span><strong>No training plan is loaded for Floor ${String(selectedFloor).padStart(2, '0')}.</strong>`

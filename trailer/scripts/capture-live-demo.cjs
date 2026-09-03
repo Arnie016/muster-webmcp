@@ -262,6 +262,15 @@ async function main() {
     await advanceGuide(guidedTitles[5], guidedTitles[6], 500);
     assert.equal(await guarded(locator('[data-action-id="reroute"]').getAttribute('class')).then((value) => value.includes('recorded')), true, 'The Stair A team decision was not recorded.');
 
+    await clickVisible('#backToBuilding', 'Return to 3D route state');
+    await guarded(page.waitForFunction(() => Number(document.querySelector('#buildingCanvas')?.dataset.renderWidth || 0) > 300));
+    assert.equal(await guarded(locator('#buildingCanvas').getAttribute('data-route-state')), 'recorded', 'The 3D building did not reflect the recorded route.');
+    await expectText('#buildingRouteState', /Stair A recorded.*Stair B unavailable/i, 'recorded 3D route state');
+    await visiblePause(700, 'showing the recorded route in the 3D building');
+    await clickVisible('#floorMode', 'Return to the Floor 07 plan');
+    await expectVisible('#floorView', 'Floor 07 plan after route-state cutaway');
+    await visiblePause(400, 'returning to the floor plan');
+
     await clickVisible('#resetPlanView', 'Reset floor-plan view');
     await guarded(page.waitForFunction(() => document.querySelector('#floorZoomLabel')?.textContent === '100%', null, { timeout: 5_000 }));
     await visiblePause(550, 'settling the full floor plan before drawing');

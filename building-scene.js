@@ -65,6 +65,32 @@ function makeSiteLabel(text, color = '#9bc9c1') {
   return sprite;
 }
 
+function makeRouteLine(points, color) {
+  const curve = new THREE.CatmullRomCurve3(points);
+  const routeMaterial = new THREE.LineDashedMaterial({
+    color,
+    transparent: true,
+    opacity: 0.72,
+    dashSize: 0.22,
+    gapSize: 0.13,
+    depthTest: false,
+  });
+  const line = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(curve.getPoints(36)),
+    routeMaterial,
+  );
+  line.computeLineDistances();
+  line.renderOrder = 20;
+  const glow = new THREE.Mesh(
+    new THREE.TubeGeometry(curve, 36, 0.055, 6, false),
+    new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.2, depthTest: false }),
+  );
+  glow.renderOrder = 19;
+  line.add(glow);
+  line.userData.glow = glow;
+  return line;
+}
+
 export function initBuildingScene(canvas, callbacks = {}) {
   if (!canvas || !window.WebGLRenderingContext) return null;
 
@@ -203,10 +229,65 @@ export function initBuildingScene(canvas, callbacks = {}) {
   signalLight.position.copy(signal.position);
   root.add(signalLight);
 
+  const routeLevelY = FLOOR_BASE_Y + 6 * FLOOR_HEIGHT + 0.25;
+  const floorRouteGroup = new THREE.Group();
+  floorRouteGroup.name = 'floor-07-route-state';
+  floorRouteGroup.visible = false;
+  const routeA = makeRouteLine([
+    new THREE.Vector3(2.25, routeLevelY, 1.25),
+    new THREE.Vector3(0.5, routeLevelY, 1.55),
+    new THREE.Vector3(-1.35, routeLevelY, 1.28),
+    new THREE.Vector3(-2.9, routeLevelY, 1.72),
+  ], palette.cyan);
+  const routeB = makeRouteLine([
+    new THREE.Vector3(2.25, routeLevelY, 1.25),
+    new THREE.Vector3(2.65, routeLevelY, 0.2),
+    new THREE.Vector3(2.85, routeLevelY, -1.55),
+  ], palette.cyan);
+  floorRouteGroup.add(routeA, routeB);
+  const routeOrigin = new THREE.Mesh(
+    new THREE.SphereGeometry(0.13, 16, 10),
+    new THREE.MeshBasicMaterial({ color: palette.amber, depthTest: false }),
+  );
+  routeOrigin.position.set(2.25, routeLevelY, 1.25);
+  routeOrigin.renderOrder = 21;
+  floorRouteGroup.add(routeOrigin);
+  const routeAEnd = new THREE.Mesh(
+    new THREE.SphereGeometry(0.13, 16, 10),
+    new THREE.MeshBasicMaterial({ color: palette.cyan, depthTest: false }),
+  );
+  routeAEnd.position.set(-2.9, routeLevelY, 1.72);
+  routeAEnd.renderOrder = 21;
+  floorRouteGroup.add(routeAEnd);
+  const routeBEndMaterial = new THREE.MeshBasicMaterial({ color: palette.cyan, depthTest: false });
+  const routeBEnd = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 10), routeBEndMaterial);
+  routeBEnd.position.set(2.85, routeLevelY, -1.55);
+  routeBEnd.renderOrder = 21;
+  floorRouteGroup.add(routeBEnd);
+  const routeALabel = makeSiteLabel('Stair A / available', '#8fddd1');
+  routeALabel.position.set(-2.75, routeLevelY + 0.52, 1.8);
+  routeALabel.scale.set(2.25, 0.42, 1);
+  routeALabel.material.depthTest = false;
+  routeALabel.renderOrder = 22;
+  const routeBCandidateLabel = makeSiteLabel('Stair B / candidate', '#8fddd1');
+  routeBCandidateLabel.position.set(2.85, routeLevelY + 0.52, -1.55);
+  routeBCandidateLabel.scale.set(2.25, 0.42, 1);
+  routeBCandidateLabel.material.depthTest = false;
+  routeBCandidateLabel.renderOrder = 22;
+  const routeBBlockedLabel = makeSiteLabel('Stair B / unavailable', '#ff8d68');
+  routeBBlockedLabel.position.copy(routeBCandidateLabel.position);
+  routeBBlockedLabel.scale.copy(routeBCandidateLabel.scale);
+  routeBBlockedLabel.material.depthTest = false;
+  routeBBlockedLabel.renderOrder = 22;
+  routeBBlockedLabel.visible = false;
+  floorRouteGroup.add(routeALabel, routeBCandidateLabel, routeBBlockedLabel);
+  root.add(floorRouteGroup);
+
   let currentView = { x: 62, z: -38, scale: 1 };
   let selectedFloor = 7;
   let selectedSitePoint = null;
   let signalActive = false;
+  let routeState = { active: false, stairBlocked: false, resolved: false };
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
 
@@ -240,11 +321,30 @@ export function initBuildingScene(canvas, callbacks = {}) {
     });
   };
 
+  const applyRouteState = () => {
+    const { active, stairBlocked, resolved } = routeState;
+    floorRouteGroup.visible = active && selectedFloor === 7;
+    routeA.material.opacity = resolved ? 1 : 0.68;
+    routeA.material.color.setHex(resolved ? 0x98d887 : palette.cyan);
+    routeA.userData.glow.material.color.setHex(resolved ? 0x98d887 : palette.cyan);
+    routeA.userData.glow.material.opacity = resolved ? 0.42 : 0.22;
+    routeB.material.opacity = stairBlocked ? 0.92 : resolved ? 0.25 : 0.68;
+    routeB.material.color.setHex(stairBlocked ? 0xff6262 : palette.cyan);
+    routeB.userData.glow.material.color.setHex(stairBlocked ? 0xff6262 : palette.cyan);
+    routeB.userData.glow.material.opacity = stairBlocked ? 0.42 : resolved ? 0.08 : 0.22;
+    routeBEndMaterial.color.setHex(stairBlocked ? 0xff6262 : palette.cyan);
+    routeBCandidateLabel.visible = !stairBlocked;
+    routeBBlockedLabel.visible = stairBlocked;
+    canvas.dataset.routeState = !active ? 'idle' : resolved ? 'recorded' : stairBlocked ? 'blocked' : 'candidate';
+  };
+
   const resize = () => {
     const rect = canvas.parentElement.getBoundingClientRect();
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
     renderer.setSize(width, height, false);
+    canvas.dataset.renderWidth = String(width);
+    canvas.dataset.renderHeight = String(height);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
   };
@@ -267,6 +367,7 @@ export function initBuildingScene(canvas, callbacks = {}) {
   updateCamera();
   applyFloorState();
   applySiteState();
+  applyRouteState();
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   renderer.setAnimationLoop((time) => {
@@ -276,6 +377,13 @@ export function initBuildingScene(canvas, callbacks = {}) {
       signalRing.scale.setScalar(1 + Math.sin(time * 0.006) * 0.12);
       signalRing.material.opacity = 0.66 + Math.sin(time * 0.006) * 0.22;
       signalLight.intensity = 28 + Math.sin(time * 0.006) * 8;
+    }
+    if (routeState.active && !reduceMotion) {
+      routeA.material.dashOffset -= 0.012;
+      routeB.material.dashOffset -= 0.012;
+      const routePulse = 0.82 + Math.sin(time * 0.005) * 0.18;
+      routeA.userData.glow.material.opacity = (routeState.resolved ? 0.42 : 0.22) * routePulse;
+      routeB.userData.glow.material.opacity = (routeState.stairBlocked ? 0.42 : routeState.resolved ? 0.08 : 0.22) * routePulse;
     }
     renderer.render(scene, camera);
   });
@@ -294,6 +402,7 @@ export function initBuildingScene(canvas, callbacks = {}) {
       canvas.dataset.sitePoint = '';
       applyFloorState();
       applySiteState();
+      applyRouteState();
     },
     selectSitePoint(pointId) {
       selectedSitePoint = pointId;
@@ -307,6 +416,14 @@ export function initBuildingScene(canvas, callbacks = {}) {
       signalRing.visible = signalActive;
       signalLabel.visible = signalActive;
       signalLight.intensity = signalActive ? 28 : 0;
+    },
+    setRoutes(nextState) {
+      routeState = { ...routeState, ...nextState };
+      applyRouteState();
+    },
+    refresh() {
+      resize();
+      updateCamera();
     },
     pick(clientX, clientY) {
       hitTest(clientX, clientY);
