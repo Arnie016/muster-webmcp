@@ -1,2 +1,7 @@
-*.png
-docs/
+trailer
+docs
+scripts
+tests.mjs
+stress-tests.mjs
+package-lock.json
+node_modules

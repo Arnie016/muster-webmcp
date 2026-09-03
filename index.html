@@ -172,6 +172,10 @@
             <g class="hazard" id="hazard" filter="url(#glow)">
               <circle cx="526" cy="296" r="19" /><circle cx="526" cy="296" r="7" />
             </g>
+            <g class="fire-trail" id="fireTrail" aria-hidden="true">
+              <path d="M526 296C506 318 500 349 478 372C451 399 424 405 392 424" />
+              <circle cx="514" cy="322" r="5" /><circle cx="493" cy="357" r="4" /><circle cx="457" cy="392" r="6" /><circle cx="418" cy="414" r="4" />
+            </g>
             <g class="assistance" id="assistance">
               <circle cx="704" cy="397" r="17" /><text x="699" y="402">2</text>
             </g>
@@ -229,6 +233,7 @@
             <p>The agent can read routes, roles, and plan revision. It cannot control building systems.</p>
           </div>
           <div class="simulation-status"><i></i><span id="simulationLabel">Simulation idle</span></div>
+          <div class="narrative-caption" id="narrativeCaption"><span>Authored exercise story</span><strong>Plan ready · no active signal</strong></div>
           <div class="plan-gesture" id="planGesture">Click a room · drag to pan · scroll to zoom</div>
           <div class="scan-beam" aria-hidden="true"></div>
         </div>

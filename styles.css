@@ -682,6 +682,18 @@ footer { padding: 13px 28px; background: #090a08; font-size: 10px; }
 .floor-viewport.drawing { cursor: crosshair; }
 .user-route { fill: none; stroke: #70e1d0; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; opacity: 0; filter: drop-shadow(0 0 7px rgba(112,225,208,.7)); pointer-events: none; }
 .user-route.active { opacity: 1; stroke-dasharray: 10 7; animation: route-flow 1.1s linear infinite; }
+.fire-trail { opacity: 0; pointer-events: none; transition: opacity .45s ease; }
+.fire-trail path { fill: none; stroke: #ff6b35; stroke-width: 8; stroke-linecap: round; stroke-dasharray: 4 18; filter: drop-shadow(0 0 10px rgba(255,74,25,.8)); }
+.fire-trail circle { fill: #ff8b4f; filter: drop-shadow(0 0 12px #ff552a); transform-box: fill-box; transform-origin: center; }
+.story-signal .fire-trail { opacity: .26; }
+.story-spread .fire-trail { opacity: .82; }
+.story-spread .fire-trail path { animation: ember-travel 1.15s linear infinite; }
+.story-spread .fire-trail circle { animation: ember-pulse 1.4s ease-in-out infinite; }
+.story-spread .fire-trail circle:nth-child(3) { animation-delay: -.4s; }.story-spread .fire-trail circle:nth-child(4) { animation-delay: -.8s; }
+.narrative-caption { position: absolute; z-index: 7; left: 50%; bottom: 13px; max-width: 370px; min-height: 44px; padding: 8px 12px; display: grid; gap: 4px; border: 1px solid rgba(255,107,53,.25); border-radius: 9px; background: rgba(24,12,8,.84); transform: translateX(-50%); backdrop-filter: blur(12px); }
+.narrative-caption span { color: #ff9d78; font: 800 7px var(--mono); letter-spacing: .09em; text-transform: uppercase; }.narrative-caption strong { color: #f5d7cb; font-size: 9px; }
+.story-critical .narrative-caption { border-color: rgba(255,92,92,.38); background: rgba(30,9,9,.88); }
+.building-view.drill-live .tower-floor.loaded { box-shadow: 0 0 0 2px rgba(255,107,53,.28), 0 0 42px rgba(255,74,25,.38); animation: floor-alert 1.7s ease-in-out infinite; }
 .plan-gesture { position: absolute; z-index: 6; right: 14px; bottom: 13px; max-width: 290px; min-height: 27px; padding: 0 9px; display: flex; align-items: center; border: 1px solid rgba(145,203,194,.2); border-radius: 7px; color: rgba(185,216,209,.66); background: rgba(7,12,10,.86); font: 700 8px var(--mono); text-transform: uppercase; backdrop-filter: blur(10px); }
 
 .operation-card { margin-top: 10px; padding: 11px; display: grid; grid-template-columns: auto 1fr; gap: 9px; border: 1px solid rgba(136,199,190,.18); border-radius: 12px; background: linear-gradient(135deg, rgba(77,162,151,.08), rgba(255,255,255,.012)); }
@@ -732,6 +744,9 @@ footer { padding: 13px 28px; background: #090a08; font-size: 10px; }
 
 @keyframes route-flow { to { stroke-dashoffset: -17; } }
 @keyframes beacon { 50% { opacity: .38; transform: scale(.76); } }
+@keyframes ember-travel { to { stroke-dashoffset: -22; } }
+@keyframes ember-pulse { 50% { opacity: .35; transform: scale(.58); } }
+@keyframes floor-alert { 50% { filter: brightness(1.35); } }
 
 @media (max-width: 1180px) {
   .building-view { grid-template-columns: minmax(220px,.8fr) minmax(360px,1.4fr); }
@@ -749,6 +764,7 @@ footer { padding: 13px 28px; background: #090a08; font-size: 10px; }
   .plan-controls { align-items: stretch; flex-direction: column; }
   .plan-controls > div { justify-content: space-between; }
   .plan-gesture { display: none; }
+  .narrative-caption { left: auto; right: 8px; bottom: 8px; max-width: 62%; transform: none; }
 }
 
 @media (max-width: 480px) {

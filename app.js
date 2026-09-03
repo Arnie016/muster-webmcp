@@ -812,6 +812,18 @@ function renderMap() {
   const floor = document.querySelector('.floor-wrap');
   floor.classList.toggle('simulation-running', state.status === 'running');
   floor.classList.toggle('simulation-review', state.status === 'review' || state.status === 'complete');
+  floor.classList.toggle('story-signal', hasSmoke);
+  floor.classList.toggle('story-spread', stairBlocked);
+  floor.classList.toggle('story-critical', rosterGap && !assistResolved);
+  $('#buildingView').classList.toggle('drill-live', hasSmoke);
+  const narrative = $('#narrativeCaption');
+  narrative.innerHTML = rosterGap && !assistResolved
+    ? '<span>T+04:00 · authored exercise story</span><strong>Two people still need a named assistance owner.</strong>'
+    : stairBlocked
+      ? '<span>T+02:00 · authored exercise story</span><strong>Scripted smoke removes Stair B. Compare another path.</strong>'
+      : hasSmoke
+        ? '<span>T+00:00 · authored exercise story</span><strong>Detector signal appears beside room 7-E.</strong>'
+        : '<span>Authored exercise story</span><strong>Plan ready · no active signal</strong>';
   const callout = $('#mapCallout');
   const zoneButton = document.querySelector(`[data-zone="${state.focusZone}"]`);
   document.querySelectorAll('[data-zone]').forEach((button) => button.classList.toggle('active', button === zoneButton));
