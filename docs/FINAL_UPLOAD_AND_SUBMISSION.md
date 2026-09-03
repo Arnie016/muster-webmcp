@@ -16,6 +16,8 @@ Try the live demo: https://muster-fire-drill.vercel.app/
 
 Source and setup: https://github.com/Arnie016/muster-webmcp
 
+Agent operator skill: https://muster-fire-drill.vercel.app/SKILL.md
+
 Devpost: https://devpost.com/software/muster-the-agentic-fire-drill
 
 Muster exposes one manager and 18 bounded page tools through WebMCP. In the tested Chrome 152 tab, `document.modelContext` discovered all 19 tools, executed `read_plan`, and updated the same visible trace. The product also works as a guided manual rehearsal when WebMCP is unavailable.
@@ -40,12 +42,21 @@ Built for The WebMCP Challenge.
 - Audience: Not made for kids
 - Category: Science & Technology
 - Language: English
+- AI use / altered or synthetic content: Yes. The opening planning-room visual is photorealistic and generated, and the narration is AI-generated. It does not imitate a named person.
 - Thumbnail: `trailer/out/muster-youtube-thumbnail.jpg`
 - Video: `trailer/out/muster-demo.mp4`
 
 **Tags**
 
 WebMCP, OpenAI, agentic AI, fire drill, emergency preparedness, human AI collaboration, incident command, safety training, explainable AI, tabletop exercise
+
+**Verified master**
+
+- Duration: 135.061 seconds
+- Picture: H.264, 1920 by 1080, 30 fps
+- Audio: AAC, 48 kHz stereo; measured integrated loudness -16.1 LUFS and true peak -4.5 dBTP
+- SHA-256: `7567c47f5d157dafd23e8275378908b3df10f920273d0f2440bd2684d6d849c3`
+- Local speech-to-text check begins with the emergency problem, contains the complete product story and safety boundary, and contains no generator preamble or sign-off.
 
 ## Devpost update
 
