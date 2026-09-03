@@ -1,82 +1,96 @@
-# Devpost draft — Muster: The Agentic Fire Drill
+# Muster: The Agentic Fire Drill
 
-## Project name
+**Tagline:** A WebMCP command room where a facilitator and an agent rehearse a changing building incident on the same visible plan.
 
-Muster — The Agentic Fire Drill
+## Hook
 
-## Tagline
+Muster turns a tabletop fire drill into one shared, inspectable sequence. A Fire Safety Manager can read a fictional building plan, introduce a scripted condition such as an unavailable stair, record the response the team actually chose, find responsibilities without owners, and prepare an after-action draft. The agent works on the same page and leaves a visible receipt for every call, while the final decision remains with the human facilitator.
 
-A WebMCP command room where fire-safety teams and an agent rehearse building incidents on the same live blueprint.
+## The problem
 
-## Short pitch
-
-Fire drills usually scatter the building plan, floor register, equipment list, team roles, scenario script, and final review across separate files. Muster turns those materials into one guided command room. The Fire Safety Manager leads. A WebMCP agent reads the visible plan, advances controlled scenario events, checks whether every problem has a recorded owner, and prepares a review. The agent cannot approve the report, claim a floor is clear, or contact emergency services.
-
-## Inspiration
-
-The hardest part of a fire drill is not drawing another checklist. It is keeping a team oriented when the plan changes: one exit becomes unavailable, two people need assistance, and a responsibility has no owner. We wanted an agent to help with that coordination while remaining visibly subordinate to the human facilitator.
+Tabletop drills often split the plan, occupant register, team roles, scenario notes, decisions, and review across separate files and conversations. When a condition changes, the team can lose track of what changed, who owns the response, and what evidence belongs in the review.
 
 ## What it does
 
-Muster gives the team one five-step drill:
+- Guides a facilitator through five steps: read the plan, start the fictional scenario, change one condition, record the team response, and review the evidence.
+- Shows an orbitable 18-floor training twin, an inspectable Floor 07 plan, fictional people and roles, two route options, planned equipment, and a facilitator-drawn route receipt.
+- Keeps every tool call in a live trace with its input, result, purpose, visible page change, and boundary.
+- Checks whether each active exercise problem has a recorded owner, then stages an after-action draft for human approval.
+- Includes three loaded plan fixtures. Only the Floor 07 office rehearsal is currently executable; the retail and care-suite plans are reference views.
 
-1. The agent reads the selected fictional floor plan and aggregate exercise register.
-2. The facilitator starts a scripted smoke scenario beside room 7-E.
-3. A new condition changes the plan, such as Stair B becoming unavailable.
-4. The facilitator records the route, accounting action, and assistance owner that the team actually chose.
-5. The agent checks responsibility coverage and stages an after-action report for human approval.
+## How it works
 
-The page includes an orbitable 18-floor building, a pan-and-zoom Floor 07 blueprint, directly inspectable rooms, a route-drawing tool, Plan, People, Equipment, and Roles desks, a conversational Incident Commander, and an explainable WebMCP call trace. The displayed 84-person count is clearly labeled as fictional exercise data, not a live sensor feed.
+A deterministic JavaScript state machine holds the fictional drill state in the browser. One manager routes requests to plan, people, equipment, and review specialists, which use 18 bounded page tools. Those tools read or update the same interface the facilitator sees. The current demo stores its state locally and has no server connection to building systems, responders, or emergency services.
 
-## How WebMCP is used
+## Why WebMCP matters
 
-Muster registers one manager tool and eighteen bounded page tools through `document.modelContext.registerTool`. An agent can inspect the same plan the person sees, focus rooms, measure a facilitator-drawn path, compare scripted route availability, read the exercise register, inspect planned equipment, record facilitator-confirmed actions, find missing owners, and prepare a review. Tool results update the live interface, so the human can see and correct the agent's work.
+Without WebMCP, the visible controls still run the rehearsal manually. When `document.modelContext` is available, Muster attempts to register the same 19 contracts so an agent can discover named actions, receive structured results, and make its work visible on the page. This makes the website a shared work surface rather than a chat window beside a disconnected plan.
 
-Human approval is deliberately not a tool. The agent cannot approve the report, infer a person's competence or intent, claim real building clearance, trigger alarms, call responders, control doors, or provide live emergency directions.
+The proof has two distinct layers. The source contains the registration code, and the test suite verifies one manager plus 18 page tools. Those checks do not prove browser discovery. Separately, a current local Chrome capture using experimental WebMCP features shows all 19 tools registered through `document.modelContext`; `read_plan` was invoked through the browser testing surface and appeared in the page's Live trace. That is local compatible-browser discovery and invocation proof. It is not proof that the public deployment or every judge browser exposes the API.
 
-## How we built it
+## Human and agent boundary
 
-- A deterministic JavaScript state machine models the fictional drill, injects, actions, review, and approval boundary.
-- Nineteen WebMCP tool contracts expose only bounded page actions.
-- A CSS 3D building and interactive SVG blueprint visualize floors, rooms, dimensions, two exits, planned safety equipment, route changes, and facilitator-drawn paths.
-- A command desk routes plain-language requests to Plan, People, Equipment, or Review specialists.
-- Local storage preserves the current fictional exercise without sending personal data to a server.
-- The interface is responsive and deployed on Vercel.
-- Automated tests run 500 shuffled workflows to check idempotency, invalid transitions, approval gates, and the no-external-effects boundary.
+The agent can read fictional plan context, focus a room, compare scripted route availability, measure a drawn path, add an authored exercise change when asked, record a facilitator-confirmed action, check ownership gaps, and stage a report. It cannot approve that report. The human chooses when to run or advance the exercise, supplies observations, confirms actions and owners, and uses the separate approval control.
 
-## Challenges
+All names, people, counts, locations, dimensions, equipment records, timestamps, and incidents in this demo are fictional training fixtures. Muster does not monitor a real building, infer real clearance, certify equipment or routes, trigger alarms, control doors, dispatch responders, or provide instructions for a live emergency. Real operational use is not demonstrated by this submission.
 
-The central design challenge was making the agent useful without making it look like an emergency authority. We separated authored scenario changes from real sensor evidence, aggregate exercise counts from live occupancy, equipment symbols from serviceability, and a staged report from human approval. We also replaced a raw agent dashboard with a guided five-step workflow so first-time users always know what happens next.
+## Challenge and build notes
+
+The first design exposed many useful controls but left a new user unsure where to begin or what a route change meant. We rebuilt the experience around one step-at-a-time rehearsal, made the building and floor plan directly inspectable, added fictional responder profiles and assistance ownership, and made route state visible in both the 3D twin and plan. We also made each tool contract readable before use and each runtime call inspectable afterward.
+
+The product is static HTML, CSS, and JavaScript with a vendored Three.js runtime and a CSS fallback. The trailer package is driven by an editable manifest. Its local replacement master validates at 135 seconds, 1920 by 1080, 30 fps, with 17 contiguous scenes and product proof beginning at 11.5 seconds.
 
 ## Accomplishments
 
-- The person and agent operate the same visual plan.
-- Every agent call is visible and inspectable in the page, including why it ran, what changed, and what remains outside its authority.
-- The workflow fails closed on invalid state changes.
-- The final approval remains human-only.
-- Desktop and 390×844 mobile walkthroughs complete without overflow or console errors.
-- Five hundred shuffled drill workflows preserve the safety and approval boundaries.
+- Built a complete fictional rehearsal from plan read through staged review and human approval.
+- Kept 19 page-tool contracts visible and aligned with the current source.
+- Passed the current local test suite, including six people-data tests and 500 shuffled workflows covering repeat-safe actions, invalid transitions, route boundaries, and approval gates.
+- Preserved one visible trail from human request to manager, specialist, tool result, page change, and open gap.
+- Produced desktop and mobile evidence captures plus a validated 135-second replacement film master.
 
 ## What we learned
 
-WebMCP is strongest when it turns a website into a shared work surface, not when it merely exposes search. The useful unit is a reviewable decision: read current context, change one controlled variable, record what the team did, reveal a gap, and let the human decide.
+WebMCP is most useful when an agent changes a visible, reviewable work surface and the person can inspect the consequence. We also learned that operational-looking data needs precise labels: a fictional count is not occupancy, a drawn path is not an approved evacuation route, and a prepared report is not a human decision.
 
-## What's next
+## Future work
 
-The next safe step is an approved importer for real building plans and role templates, followed by authenticated multi-user facilitation and carefully permissioned integrations. Any real occupancy or building-system adapter would remain separate from the training demo and would require professional review, owner permission, privacy controls, and explicit operational boundaries.
+First, commit and publish the local native-browser capture, then repeat it against the current public deployment. Next, publish the local UI revisions and upload the validated replacement film so the public links match the latest evidence. Any move beyond fictional training would be a separate, permissioned project requiring approved plan imports, authentication, access controls, professional review, and evidence from real users. It is not part of the current proof.
 
-## Links and proof gates
+## Links and proof status
 
-- Live site: https://muster-fire-drill.vercel.app
-- Source repository: https://github.com/Arnie016/muster-webmcp
-- Current public video: https://youtu.be/FOoBfOHPIho (earlier 90-second cut)
-- Verified replacement master awaiting upload: `trailer/out/muster-demo.mp4` (135-second narrated film)
-- Native WebMCP proof: pending one recorded run in a WebMCP-enabled browser
+- **Live demo:** https://muster-fire-drill.vercel.app/
 
-## Submission receipt
+  Verified reachable on 4 September 2026. Its `index.html` and `app.js` match public `main` at commit `1113b882cb967bd9679c4109a08a67cf1649d85a`, not the newer local UI revisions.
 
-- Submitted: 2026-09-04 02:31 SGT
-- Public Devpost project: https://devpost.com/software/muster-the-agentic-fire-drill
-- Public YouTube demo: https://youtu.be/FOoBfOHPIho
-- Source commit at submission: `8b957f7`
-- Proof boundary: Devpost submission, public video, live deployment, source contracts, and local/browser tests are verified. Native `document.modelContext` discovery was not observed in the available test browser and remains explicitly pending.
+- **Public source:** https://github.com/Arnie016/muster-webmcp
+
+  Verified public. Exact published commit: https://github.com/Arnie016/muster-webmcp/commit/1113b882cb967bd9679c4109a08a67cf1649d85a
+
+- **WebMCP registration source:** https://github.com/Arnie016/muster-webmcp/blob/1113b882cb967bd9679c4109a08a67cf1649d85a/app.js#L946-L951
+- **Tool-count test:** https://github.com/Arnie016/muster-webmcp/blob/1113b882cb967bd9679c4109a08a67cf1649d85a/tests.mjs#L57-L60
+
+- **Current public video:** https://youtu.be/FOoBfOHPIho
+
+  Verified public. This is the earlier short cut, not the 135-second local replacement.
+
+- **Devpost project:** https://devpost.com/software/muster-the-agentic-fire-drill
+
+  Exact URL recorded in the submission receipt. **RECHECK REQUIRED:** the unauthenticated audit received HTTP 403, so public page access was not independently confirmed.
+
+- **Replacement 135-second video:** `[PENDING PUBLIC URL]`
+
+  Local validated master: `trailer/out/muster-demo.mp4`.
+
+- **Latest local UI and source:** `[PENDING PUSH AND REDEPLOY]`
+
+- **Native WebMCP local evidence:** `[PENDING COMMIT AND PUBLIC LINK]`
+
+  Current local capture: `docs/screenshots/muster-native-webmcp.png`. It shows 19 registered tools and a browser-invoked `read_plan` result in the visible trace. The public deployment has not been rechecked with this native-browser path.
+
+## 30-second judge path
+
+1. Open the live demo and click **Inspect Floor 07**.
+2. In the Incident Commander dock, click **Run demo**.
+3. Watch the authored signal appear, Stair B become unavailable, and the missing assistance owner become explicit.
+4. Open a **Live trace** row to inspect why the tool ran and what changed on the page.
+5. Find the staged after-action draft and the separate human approval control. Treat every person and count shown as fictional training data.
