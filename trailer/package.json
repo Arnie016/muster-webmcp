@@ -2,11 +2,11 @@
   "name": "muster-demo-video",
   "version": "1.0.0",
   "private": true,
-  "description": "Editable 75-second Remotion demo package for Muster.",
+  "description": "Editable 135-second Remotion product film for Muster.",
   "scripts": {
     "proof:sync": "node scripts/sync-proof.mjs",
+    "capture:live": "node scripts/capture-live-demo.cjs",
     "voice": "node scripts/generate-realtime-voice.mjs",
-    "voice:repair": "node scripts/repair-narration.mjs",
     "validate": "node scripts/validate-package.mjs",
     "typecheck": "tsc --noEmit",
     "still": "remotion still src/index.tsx MusterDemo out/muster-poster.png --frame=240 --image-format=png",

@@ -34,7 +34,7 @@
           <div class="responder-mark" aria-hidden="true">
             <svg viewBox="0 0 64 64"><path d="M19 33c0-10 5-18 13-18s13 8 13 18"/><path d="M14 36h36l-4 8H18z"/><path d="M24 17c1-6 4-9 8-9s7 3 8 9"/><path d="M29 11h6v16h-6z"/></svg>
           </div>
-          <div><span class="eyebrow">Exercise MST-0742</span><strong>Fire drill command</strong></div>
+          <div><span class="eyebrow">Exercise MST-0742</span><strong>Table-top command</strong></div>
           <span class="status-dot" id="statusDot">Ready</span>
         </div>
         <div class="clock-card">
@@ -54,7 +54,7 @@
           <div>
             <span class="eyebrow">Fire drill workspace</span>
             <h1 id="planTitle">Run the drill before the fire.</h1>
-            <p class="stage-copy">One floor. One team. One safe rehearsal.</p>
+            <p class="stage-copy">One floor. One team. One controlled rehearsal.</p>
           </div>
           <div class="plan-meta">
             <span>Floor 07 of 18</span>
@@ -64,11 +64,22 @@
         </div>
 
         <div class="assumption-strip" aria-label="Exercise data boundaries">
-          <span><i></i> Scripted conditions</span>
+          <span><i></i> Table-top scenario</span>
           <span><i></i> Fixture occupants</span>
           <span><i></i> Plan distances</span>
           <strong>No sensors or emergency connection</strong>
         </div>
+
+        <section class="guided-brief" id="guidedBrief" aria-live="polite">
+          <div class="guided-step-count"><span id="guidedStepIndex">01</span><small id="guidedStepTotal">of 11</small></div>
+          <div class="guided-copy">
+            <span class="eyebrow" id="guidedEyebrow">Guided rehearsal</span>
+            <strong id="guidedTitle">Begin with the building file</strong>
+            <p id="guidedDescription">Read the visible plan before introducing a training condition.</p>
+          </div>
+          <div class="guided-change" id="guidedChange"><span>Nothing has changed yet</span><strong>The exercise is waiting for you.</strong></div>
+          <button class="primary-button" id="guidedNextButton" type="button">Read the plan →</button>
+        </section>
 
         <section class="spatial-console" aria-label="Interactive building model">
           <header class="spatial-toolbar">
@@ -78,7 +89,7 @@
             </div>
             <div class="view-switch" role="group" aria-label="Spatial view">
               <button class="active" id="buildingMode" type="button">3D building</button>
-              <button id="floorMode" type="button">Floor 07 plan</button>
+              <button id="floorMode" type="button">Floor plan</button>
             </div>
           </header>
 
@@ -86,11 +97,17 @@
             <div class="building-copy">
               <span class="building-kicker">Meridian Exchange · training twin</span>
               <h2>Select the floor.<br />Then read the plan.</h2>
-              <p>Drag to orbit. Scroll to zoom. Floor 07 is the loaded exercise file.</p>
+              <p>Drag to orbit, scroll to zoom, or choose one of three loaded training plans.</p>
               <div class="building-metrics">
                 <div><strong>18</strong><span>floors</span></div>
                 <div><strong>84</strong><span>people · L07</span></div>
                 <div><strong>2</strong><span>need assistance</span></div>
+              </div>
+              <div class="floor-library" aria-label="Loaded training plans">
+                <span>Loaded plans</span>
+                <button type="button" data-plan-floor="3">F03 <small>Retail</small></button>
+                <button type="button" class="active" data-plan-floor="7">F07 <small>Office</small></button>
+                <button type="button" data-plan-floor="12">F12 <small>Care</small></button>
               </div>
               <button class="primary-button" id="enterFloorButton" type="button">Inspect Floor 07 →</button>
             </div>
@@ -103,7 +120,7 @@
                 <button type="button" id="orbitReset">Reset view</button>
                 <button type="button" id="orbitRight" aria-label="Rotate building right">↷</button>
               </div>
-              <div class="floor-beacon"><i></i><span>F07 · exercise loaded</span></div>
+              <div class="floor-beacon"><i></i><span id="floorBeaconLabel">F07 · exercise loaded</span></div>
             </div>
             <div class="building-status" id="buildingStatus"><span>Selected</span><strong>Floor 07</strong><p>Fire protection and egress plan · revision 04</p></div>
           </div>
@@ -111,7 +128,7 @@
 
         <div class="floor-wrap view-hidden" id="floorView">
           <div class="plan-controls">
-            <div><button id="backToBuilding" type="button">← Building</button><strong>Floor 07 · 1:200</strong></div>
+            <div><button id="backToBuilding" type="button">← Building</button><strong id="floorPlanHeading">Floor 07 · office command · 1:200</strong></div>
             <div><button id="drawRouteButton" type="button">Draw a route</button><button id="resetPlanView" type="button">Reset view</button><span id="floorZoomLabel">100%</span></div>
           </div>
           <div class="floor-viewport" id="floorViewport">
@@ -125,11 +142,11 @@
               <filter id="glow"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             </defs>
             <rect x="0" y="0" width="900" height="610" fill="url(#grid)" />
-            <g class="walls">
-              <path d="M70 72H830V535H70Z" />
-              <path d="M330 72V210H568V72M330 210V535M568 210V535" />
-              <path d="M70 350H330M568 350H830" />
-              <path d="M420 210V350M478 210V350" />
+            <g class="walls" id="planWalls">
+              <path id="perimeterWall" d="M70 72H830V535H70Z" />
+              <path id="coreWall" d="M330 72V210H568V72M330 210V535M568 210V535" />
+              <path id="roomWall" d="M70 350H330M568 350H830" />
+              <path id="serviceWall" d="M420 210V350M478 210V350" />
             </g>
             <g class="fire-compartments">
               <path d="M330 72V535M568 72V535" />
@@ -137,7 +154,7 @@
             <g class="doors">
               <path d="M330 294h-32m32 0a32 32 0 0 0-32 32M568 294h32m-32 0a32 32 0 0 1 32 32M205 448v-28m0 28a28 28 0 0 0-28-28M742 448v-28m0 28a28 28 0 0 1 28-28" />
             </g>
-            <g class="room-labels">
+            <g class="room-labels" id="roomLabels">
               <text x="108" y="116">WEST WORKPLACE</text>
               <text x="608" y="116">EAST WORKPLACE</text>
               <text x="365" y="118">LIFT LOBBY</text>
@@ -151,17 +168,17 @@
               <rect x="74" y="76" width="252" height="270" rx="2" />
               <rect x="572" y="76" width="254" height="270" rx="2" />
             </g>
-            <g class="desks">
+            <g class="desks" id="planFixtures">
               <path d="M115 165h70v34h-70zM215 165h70v34h-70zM115 235h70v34h-70zM215 235h70v34h-70z" />
               <path d="M615 165h70v34h-70zM715 165h70v34h-70zM615 235h70v34h-70zM715 235h70v34h-70z" />
             </g>
             <g class="route route-a" id="routeA">
-              <path d="M744 280C700 320 620 330 570 340C490 355 360 400 205 474" />
-              <circle cx="744" cy="280" r="6" /><circle cx="205" cy="474" r="7" />
+              <path d="M704 397C650 405 585 410 520 420C420 436 310 454 205 474" />
+              <circle cx="704" cy="397" r="6" /><circle cx="205" cy="474" r="7" />
             </g>
             <g class="route route-b" id="routeB">
-              <path d="M162 280C220 325 285 330 330 346C430 380 560 420 742 474" />
-              <circle cx="162" cy="280" r="6" /><circle cx="742" cy="474" r="7" />
+              <path d="M704 397C720 420 733 446 742 474" />
+              <circle cx="704" cy="397" r="6" /><circle cx="742" cy="474" r="7" />
             </g>
             <g class="stair stair-a">
               <rect x="105" y="448" width="132" height="62" rx="5" /><text x="139" y="484">STAIR A</text>
@@ -202,20 +219,23 @@
               <rect data-floor-zone="lobby" x="330" y="72" width="238" height="138" rx="4"><title>Inspect Lift lobby</title></rect>
               <rect data-floor-zone="electrical" x="478" y="210" width="90" height="140" rx="4"><title>Inspect Electrical room</title></rect>
             </g>
+            <g class="people-layer" id="peopleLayer" aria-label="Fictional responders and occupant groups"></g>
             <polyline class="user-route" id="userRoute" points="" />
           </svg>
           </div>
           <div class="drawing-title-block" aria-label="Drawing title block">
             <div><span>Project</span><strong>Meridian Exchange · fictional training fixture</strong></div>
-            <div><span>Drawing</span><strong>Level 07 fire protection &amp; egress plan</strong></div>
+            <div><span>Drawing</span><strong id="drawingTitle">Level 07 fire protection &amp; egress plan</strong></div>
             <div><span>Scale</span><strong>1:200 @ A3</strong></div>
-            <div><span>Drawing no.</span><strong>MX-FS-07-004</strong></div>
-            <div><span>Revision</span><strong>04 · training</strong></div>
+            <div><span>Drawing no.</span><strong id="drawingNumber">MX-FS-07-004</strong></div>
+            <div><span>Revision</span><strong id="drawingRevision">04 · training</strong></div>
           </div>
           <div class="map-key">
-            <span><i class="key-route"></i> Available route</span>
-            <span><i class="key-signal"></i> Exercise inject</span>
-            <span><i class="key-assist"></i> Assistance register</span>
+            <span><i class="key-route"></i> Available route to Stair A</span>
+            <span><i class="key-blocked"></i> Route unavailable after inject</span>
+            <span><i class="key-signal"></i> Authored smoke signal</span>
+            <span><i class="key-responder"></i> Exercise responder</span>
+            <span><i class="key-occupant"></i> Occupant group</span>
             <span><b>E</b> Extinguisher</span>
             <span><b>H</b> Hose reel</span>
             <span><b>M</b> Call point</span>
@@ -232,18 +252,22 @@
             <strong>Two exits available</strong>
             <p>The agent can read routes, roles, and plan revision. It cannot control building systems.</p>
           </div>
+          <aside class="route-receipt" id="routeReceipt" hidden aria-live="polite"></aside>
           <div class="simulation-status"><i></i><span id="simulationLabel">Simulation idle</span></div>
           <div class="narrative-caption" id="narrativeCaption"><span>Authored exercise story</span><strong>Plan ready · no active signal</strong></div>
           <div class="plan-gesture" id="planGesture">Click a room · drag to pan · scroll to zoom</div>
           <div class="scan-beam" aria-hidden="true"></div>
         </div>
 
-        <div class="crew-strip" aria-label="Exercise roles" id="crewStrip"></div>
+        <section class="people-board" aria-labelledby="peopleBoardTitle">
+          <header><div><span class="eyebrow">People on this plan</span><strong id="peopleBoardTitle">Responders and occupant groups</strong></div><small>Click a person on the plan or roster</small></header>
+          <div class="crew-strip" aria-label="Exercise roles" id="crewStrip"></div>
+        </section>
 
         <section class="conversation-dock" aria-label="Conversation with the drill manager">
           <header class="conversation-head">
             <div class="commander-avatar" aria-hidden="true">IC</div>
-            <div><span class="eyebrow">Incident Commander</span><strong>Choose a desk or ask plainly</strong></div>
+            <div><span class="eyebrow">Incident Commander</span><strong>Ask the plan, people, equipment, or review desk</strong></div>
             <span class="conversation-state"><i></i> Ready</span>
           </header>
           <div class="conversation-history" id="conversationHistory" role="log" aria-live="polite">
@@ -254,7 +278,7 @@
             <button type="button" data-agent-prompt="people">People</button>
             <button type="button" data-agent-prompt="equipment">Equipment</button>
             <button type="button" data-agent-prompt="roles">Roles</button>
-            <button type="button" data-agent-prompt="rehearse">Run demo</button>
+            <button type="button" data-agent-prompt="rehearse">Guide me</button>
           </div>
           <form class="agent-composer" id="agentForm">
             <label class="sr-only" for="agentPrompt">Ask the Incident Commander</label>
@@ -283,7 +307,7 @@
 
       <aside class="decision-deck" aria-label="Team decisions and report">
         <div class="deck-head">
-          <div><span class="eyebrow">Drill path</span><strong>What happens next</strong></div>
+            <div><span class="eyebrow">Your next decision</span><strong>One step at a time</strong></div>
           <span class="runtime-connection" id="runtimeConnection"><i></i> Manual mode</span>
           <button class="icon-button" id="resetButton" type="button" aria-label="Reset fictional exercise">Reset</button>
         </div>
@@ -327,16 +351,21 @@
         <div><span class="eyebrow">Incident Commander</span><h2>One manager, four specialists.</h2></div>
         <button class="icon-button" id="closeTools" type="button" aria-label="Close agent tools">Close</button>
       </div>
-      <p class="dialog-intro">The manager routes work to these page tools. Each call is visible in the Live trace. None contacts emergency services or controls a building.</p>
+      <p class="dialog-intro">Select a tool to see its purpose, input, output, visible page change, and boundary. The manager routes the same tools for an enabled browser agent. None contacts emergency services or controls a building.</p>
       <div class="rehearsal-row">
-        <div><strong>See the agent loop</strong><small>Runs only this fictional page and pauses for human report approval.</small></div>
-        <button class="primary-button" id="rehearsalButton" type="button">Run guided rehearsal</button>
+        <div><strong>Open the guided rehearsal</strong><small>Each step waits for you. Nothing auto-completes the exercise.</small></div>
+        <button class="primary-button" id="rehearsalButton" type="button">Guide me step by step</button>
       </div>
       <div class="tool-list" id="toolList"></div>
       <div class="tool-log">
         <span class="eyebrow">Latest tool result</span>
         <pre id="toolResult">No tool called yet.</pre>
       </div>
+    </dialog>
+
+    <dialog id="personDialog" class="person-dialog">
+      <div class="person-card" id="personCard"></div>
+      <button class="icon-button" id="closePerson" type="button">Close</button>
     </dialog>
 
     <script type="module" src="app.js"></script>

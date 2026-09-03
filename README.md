@@ -4,7 +4,7 @@ Muster is a WebMCP-enabled tabletop fire-drill command room for building Fire Sa
 
 **Live demo:** https://muster-fire-drill.vercel.app
 
-![Muster command room](docs/screenshots/muster-command-room.png)
+![Muster spatial command room](docs/screenshots/muster-spatial-command.png)
 
 The interface makes the next action explicit:
 
@@ -14,7 +14,9 @@ The interface makes the next action explicit:
 4. Record facilitator-confirmed team actions and owners.
 5. Check the exercise and stage an after-action report for human approval.
 
-The spatial command starts with an orbitable 18-floor building, then opens Floor 07 as a pan-and-zoom response plan. Rooms are directly inspectable, and a facilitator can draw a route for the agent to measure against the scripted exit state. The bottom command desk gives the person four plain entry points—Plan, People, Equipment, and Roles—plus a full demonstration. The right rail explains the current step and lets a reviewer open every WebMCP call to see its purpose, visible effect, and safety boundary.
+The spatial command starts with an orbitable 18-floor building and three loaded plan files: a retail podium, the active office rehearsal, and a care suite. Floor 07 opens as a pan-and-zoom response plan. Rooms, aggregate occupant groups, and fictional response-team profiles are directly inspectable. A facilitator can draw a route for the agent to measure against the scripted exit state, then keep the returned route receipt on the plan while reviewing the exact call input, result, purpose, visible effect, and guardrail.
+
+The guided rehearsal is intentionally decision-by-decision. It never auto-completes the exercise. Each step explains what will change, invokes one named tool, updates the same visible plan, and leaves report acceptance to the Fire Safety Manager.
 
 ## Safety boundary
 
@@ -44,7 +46,7 @@ Muster is training software. It does not monitor a real building, place calls, r
 
 The tools update the same interface the person is using. Human report approval is deliberately not exposed as a tool.
 
-The bottom command desk is also usable in a normal browser. Its deterministic question router can answer from the building file, focus a zone, inspect equipment or history, find ownership gaps, and run the complete scripted rehearsal. In a WebMCP-capable browser, the same tools are registered through `document.modelContext.registerTool` for agent discovery.
+The bottom command desk is also usable in a normal browser. Its deterministic question router can answer from the building file, focus a zone, inspect equipment or history, find ownership gaps, and open the guided rehearsal. It never advances or completes the sequence without the facilitator. In a WebMCP-capable browser, the same tools are registered through `document.modelContext.registerTool` for agent discovery.
 
 ```js
 for (const tool of toolDefinitions) {
@@ -67,7 +69,7 @@ npm run serve
 
 Open `http://localhost:4179` in ChatGPT's in-app browser or a WebMCP-enabled Chrome build. The visible controls also provide a manual rehearsal when WebMCP is unavailable.
 
-`npm test` includes 500 shuffled workflows that check idempotency, route-sketch boundaries, invalid transitions, human approval gates, and the no-external-effects boundary. `npm run test:browser` exercises the 3D building, Floor 07 transition, guided rehearsal, report approval, and 390×844 mobile layout when Playwright is available.
+`npm test` includes 500 shuffled workflows that check idempotency, route-sketch boundaries, invalid transitions, human approval gates, fictional-person referential integrity, and the no-external-effects boundary. `npm run test:browser` exercises the 18-floor model, all three loaded plan types, guided rehearsal, persistent route receipt, inspectable tool and person details, report approval, and 390×844 mobile layout when Playwright is available.
 
 ## What existed before
 
@@ -87,6 +89,9 @@ This MVP is publicly deployed and the local verification proves the deterministi
 - [Public source repository](https://github.com/Arnie016/muster-webmcp)
 - [Chrome WebMCP workflow guidance](https://developer.chrome.com/docs/ai/webmcp/build-tools)
 - [SCDF Emergency Response Plan guidance](https://www.scdf.gov.sg/fire-safety-services-listing/emergency-response-plan)
+- [SCDF table-top exercise guidance](https://www.scdf.gov.sg/docs/default-source/fire-safety-docs/emergency-response-plan/erp-guidelines-on-table-top-exercise.pdf?sfvrsn=d19bc380_1)
+- [OSHA emergency action plan guidance](https://www.osha.gov/emergency-preparedness/getting-started)
+- [FEMA HSEEP evaluation workflow](https://preptoolkit.fema.gov/web/training/evaluation)
 
 ## License
 

@@ -69,7 +69,7 @@ socket.on("open", () => {
           voice: "marin",
         },
       },
-      instructions: "You are a calm, precise documentary narrator. Speak clearly at a brisk but unhurried pace. Respect paragraph pauses. Do not add, omit, or rephrase words.",
+      instructions: "You are a calm, emotionally present documentary narrator. Speak at roughly 145 words per minute with natural sentence rhythm and no theatrical gaps. Begin immediately with the supplied first word. Do not introduce the reading, describe the task, add commentary, omit words, or rephrase anything.",
     },
   }));
   socket.send(JSON.stringify({
@@ -79,7 +79,7 @@ socket.on("open", () => {
       role: "user",
       content: [{
         type: "input_text",
-        text: `Read the following narration exactly once. Do not announce the task or add commentary.\n\n${script}`,
+        text: `The text between NARRATION_START and NARRATION_END is the entire voiceover. Speak only that text, beginning immediately with its first word.\n\nNARRATION_START\n${script}\nNARRATION_END`,
       }],
     },
   }));
@@ -87,7 +87,7 @@ socket.on("open", () => {
     type: "response.create",
     response: {
       output_modalities: ["audio"],
-      instructions: "Read the supplied narration exactly once, with a short pause between paragraphs.",
+      instructions: "Speak only the narration between the markers. Use connected documentary pacing, natural emotion, and brief sentence-level breaths. Do not speak the markers or add a preamble or sign-off.",
     },
   }));
 });
@@ -116,4 +116,4 @@ const generationTimeout = setTimeout(() => {
     socket.close();
     throw new Error("Realtime narration timed out.");
   }
-}, 120000);
+}, 300000);

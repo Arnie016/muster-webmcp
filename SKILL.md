@@ -23,7 +23,7 @@ Muster defines one manager and eighteen specialist tools:
 
 | Tool | Input | Operator use |
 |---|---|---|
-| `run_drill_manager` | `intent`: `orient`, `find_gaps`, `inspect_equipment`, `read_history`, `read_status`, `inspect_zone`, `rehearse`, or `prepare_review`; optional `zone_id` | Route a high-level request. `rehearse` runs the scripted sequence and stages a report; use it only when the human explicitly asks for the full demo. |
+| `run_drill_manager` | `intent`: `orient`, `find_gaps`, `inspect_equipment`, `read_history`, `read_status`, `inspect_zone`, `rehearse`, or `prepare_review`; optional `zone_id` | Route a high-level request. `rehearse` opens the guided sequence; every state change still waits for a human step and report approval is never exposed as a tool. |
 | `read_plan` | none | Read the selected fictional building, floor, plan revision, aggregate occupants, exits, and missing role. |
 | `start_drill` | none | Start the fictional scenario and add the initial smoke inject. No alarm, call, dispatch, or building control occurs. |
 | `send_inject` | `inject_id`: `stair` or `roster` | Add one authored complication after the exercise has started. |

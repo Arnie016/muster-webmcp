@@ -1,12 +1,12 @@
 {
   "project": {
     "title": "Muster — The Agentic Fire Drill",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "aspectRatio": "16:9",
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "durationSeconds": 75,
+    "durationSeconds": 135,
     "audience": "WebMCP Challenge judges and safety-training facilitators",
     "promise": "Rehearse a changing building incident on one visible, reviewable command surface."
   },
@@ -83,6 +83,33 @@
       "status": "captured"
     },
     {
+      "id": "guided-live",
+      "claim": "A single real browser take advances the visible rehearsal and stops before human approval.",
+      "source": "trailer/public/captures/guided-demo.webm",
+      "status": "captured-and-verified-1920x1080"
+    },
+    {
+      "id": "people-profile",
+      "claim": "A fictional responder has a visible role, location, task, authority boundary, and page-only movement control.",
+      "source": "docs/screenshots/muster-person-profile.png",
+      "destination": "proof/person-profile.png",
+      "status": "captured"
+    },
+    {
+      "id": "tool-contracts",
+      "claim": "One manager exposes four specialist lanes and nineteen inspectable page-tool contracts.",
+      "source": "docs/screenshots/muster-tool-contracts.png",
+      "destination": "proof/tool-contracts.png",
+      "status": "captured"
+    },
+    {
+      "id": "after-action-report",
+      "claim": "The staged report preserves scope, objective, plan basis, route evidence, actions, open gaps, and human approval.",
+      "source": "docs/screenshots/muster-after-action-report.png",
+      "destination": "proof/after-action-report.png",
+      "status": "captured"
+    },
+    {
       "id": "workflow-tests",
       "claim": "Five hundred shuffled workflows preserve state and approval boundaries.",
       "source": "tests.mjs and stress-tests.mjs",
@@ -108,6 +135,27 @@
       "destination": "public/proof/review.png",
       "minimumWidth": 1280,
       "minimumHeight": 720
+    },
+    {
+      "id": "people-profile",
+      "source": "docs/screenshots/muster-person-profile.png",
+      "destination": "public/proof/person-profile.png",
+      "minimumWidth": 1280,
+      "minimumHeight": 720
+    },
+    {
+      "id": "tool-contracts",
+      "source": "docs/screenshots/muster-tool-contracts.png",
+      "destination": "public/proof/tool-contracts.png",
+      "minimumWidth": 1280,
+      "minimumHeight": 720
+    },
+    {
+      "id": "after-action-report",
+      "source": "docs/screenshots/muster-after-action-report.png",
+      "destination": "public/proof/after-action-report.png",
+      "minimumWidth": 1280,
+      "minimumHeight": 720
     }
   ],
   "timingPlan": {
@@ -122,35 +170,38 @@
       {"id": "caption-lower", "x": 0.06, "y": 0.78, "w": 0.82, "h": 0.15}
     ],
     "screenPlan": [
-      {"sceneId": "rupture", "start": 0, "end": 6, "owner": "human-context", "screenShare": 0.78, "reason": "Start with why teams rehearse before an emergency."},
-      {"sceneId": "orientation", "start": 6, "end": 13, "owner": "team-context", "screenShare": 0.82, "reason": "Show the coordination problem before the software."},
-      {"sceneId": "plan", "start": 13, "end": 24, "owner": "runtime-reconstruction", "screenShare": 0.90, "reason": "Type one request and show the manager calling named tools."},
-      {"sceneId": "condition", "start": 24, "end": 35, "owner": "product-blueprint", "screenShare": 0.82, "reason": "Hold on the real changed route and affected zone."},
-      {"sceneId": "architecture", "start": 35, "end": 43, "owner": "architecture-diagram", "screenShare": 0.88, "reason": "Connect a human request to concrete tool results and visible state."},
-      {"sceneId": "trace", "start": 43, "end": 49, "owner": "trace-reconstruction", "screenShare": 0.92, "reason": "Make actual tool names, results, reasons, changes, and guardrails readable."},
-      {"sceneId": "authority", "start": 49, "end": 60, "owner": "review-report", "screenShare": 0.84, "reason": "Make the human approval boundary unmistakable."},
-      {"sceneId": "proof", "start": 60, "end": 69, "owner": "proof-ledger", "screenShare": 0.82, "reason": "Separate working and tested proof from the pending native capture."},
-      {"sceneId": "cta", "start": 69, "end": 75, "owner": "cta", "screenShare": 0.68, "reason": "End on one action."}
+      {"sceneId": "rupture", "start": 0, "end": 10, "owner": "human-context", "screenShare": 0.78, "reason": "Begin with why missing decisions matter before an emergency."},
+      {"sceneId": "orientation", "start": 11.5, "end": 20, "owner": "product-context", "screenShare": 0.88, "reason": "Show the whole command surface before explaining technology."},
+      {"sceneId": "plan", "start": 20, "end": 45, "owner": "real-browser-capture", "screenShare": 0.97, "reason": "Run one continuous guided rehearsal and stop before approval."},
+      {"sceneId": "condition", "start": 46.5, "end": 58, "owner": "route-proof", "screenShare": 0.91, "reason": "Make the persistent sketch receipt and boundary readable."},
+      {"sceneId": "people", "start": 58, "end": 68, "owner": "role-proof", "screenShare": 0.88, "reason": "Tie the route to a fictional responder and named responsibility."},
+      {"sceneId": "architecture", "start": 69.5, "end": 84, "owner": "architecture-diagram", "screenShare": 0.9, "reason": "Connect the human request to specialists, tools, state, and trace."},
+      {"sceneId": "trace", "start": 84, "end": 96, "owner": "trace-explainer", "screenShare": 0.92, "reason": "Make input, output, why, visible change, and guardrail readable."},
+      {"sceneId": "authority", "start": 97.5, "end": 108, "owner": "review-report", "screenShare": 0.86, "reason": "Make the human-only approval boundary unmistakable."},
+      {"sceneId": "proof", "start": 108, "end": 116, "owner": "proof-ledger", "screenShare": 0.82, "reason": "Separate working and tested proof from pending native discovery."},
+      {"sceneId": "contracts", "start": 117.5, "end": 126, "owner": "contract-proof", "screenShare": 0.9, "reason": "Show the actual manager and page-tool browser."},
+      {"sceneId": "review-proof", "start": 126, "end": 130, "owner": "report-proof", "screenShare": 0.92, "reason": "End product proof on the reviewable report and approval control."},
+      {"sceneId": "cta", "start": 130, "end": 135, "owner": "cta", "screenShare": 0.68, "reason": "End on one action and the training boundary."}
     ]
   },
   "interactionEvents": [
     {
       "id": "event-read-plan",
-      "atSeconds": 14.5,
-      "label": "Ask about Stair B",
-      "visibleResponse": "The Incident Commander begins inspecting the Studio and its routes.",
-      "tool": "run_drill_manager"
+      "atSeconds": 22,
+      "label": "Read the visible plan",
+      "visibleResponse": "Floor 07, its revision, exits, roles, and fictional register become visible context.",
+      "tool": "read_plan"
     },
     {
       "id": "event-change-condition",
-      "atSeconds": 25.5,
+      "atSeconds": 31,
       "label": "Stair B unavailable",
       "visibleResponse": "The route changes from available to blocked and the Studio becomes the focus.",
       "tool": "send_inject"
     },
     {
       "id": "event-stage-review",
-      "atSeconds": 51.5,
+      "atSeconds": 41,
       "label": "Prepare review",
       "visibleResponse": "The after-action draft appears while approval stays human-only.",
       "tool": "stage_report"
@@ -177,105 +228,193 @@
       "id": "rupture",
       "type": "why",
       "start": 0,
-      "end": 6,
+      "end": 10,
       "asset": "generated/incident-commander-planning.png",
       "secondaryAsset": "generated/fire-warden-team.png",
-      "headline": "The fire is not rehearsal time.",
-      "support": "Teams need to find route and responsibility gaps before an emergency.",
-      "narration": "A fire drill changes when an exit fails and two people need help.",
+      "headline": "A fire exposes every missing decision.",
+      "support": "An unavailable exit. Two people needing help. A role nobody owns yet.",
+      "narration": "In an emergency, there is no time to discover an exit changed or an assistance role has no owner. Teams need to rehearse those decisions together.",
       "focus": {"x": 50, "y": 50, "scale": 1.03},
       "transitionOut": "route-line match cut",
       "intelligenceRole": "The changed condition creates a coordination problem the agent must help the facilitator resolve."
     },
     {
+      "id": "card-rehearse",
+      "type": "card",
+      "start": 10,
+      "end": 11.5,
+      "headline": "Rehearse before conditions change.",
+      "support": "Controlled scenario. Shared plan. Human authority.",
+      "narration": "Rehearse before conditions change.",
+      "intelligenceRole": "The first divider turns urgency into a concrete preparation task."
+    },
+    {
       "id": "orientation",
       "type": "proof",
-      "start": 6,
-      "end": 13,
+      "start": 11.5,
+      "end": 20,
       "asset": "proof/command-room.png",
-      "headline": "A plan is more than a map.",
-      "support": "An exit changes. Two people need help. Someone must own the response.",
-      "narration": "Muster brings the building, people, equipment, and decisions onto one visible command surface.",
+      "headline": "The plan becomes a shared rehearsal.",
+      "support": "Building, people, scenario, decisions, and evidence stay on one screen.",
+      "narration": "The facilitator gets one command room for the plan, fictional occupants, response roles, scripted changes, and review evidence.",
       "focus": {"x": 50, "y": 50, "scale": 1.03},
       "transitionOut": "measured push into plan",
       "intelligenceRole": "The whole product is visible before any architecture explanation."
     },
     {
       "id": "plan",
-      "type": "runtime",
-      "start": 13,
-      "end": 24,
-      "headline": "Ask once. Watch the plan change.",
-      "support": "The manager calls named page tools against the same open drill.",
-      "narration": "Open Floor Seven, inspect a room, and draw a route. The agent reads the fictional occupants, exits, assistance needs, and assigned roles.",
+      "type": "live",
+      "start": 20,
+      "end": 45,
+      "asset": "captures/guided-demo.webm",
+      "videoStartSeconds": 0,
+      "headline": "One guided rehearsal, captured live.",
+      "support": "Every visible change waits for the facilitator.",
+      "narration": "This is one real page take. The facilitator selects Floor Seven and advances one declared tool at a time. The plan is read before the scenario starts. The Studio is inspected, Stair B becomes unavailable, exits are compared, and the decision is recorded. Nothing auto-completes the exercise or contacts a building system.",
       "transitionOut": "fixture chips become scenario facts",
       "intelligenceRole": "The agent begins from the same visible and revisioned context as the facilitator."
     },
     {
+      "id": "card-change",
+      "type": "card",
+      "start": 45,
+      "end": 46.5,
+      "headline": "The plan changed.",
+      "support": "Now the team must respond to the same visible condition.",
+      "narration": "The plan changed.",
+      "intelligenceRole": "The divider marks the moment the authored scenario creates a decision."
+    },
+    {
       "id": "condition",
       "type": "proof",
-      "start": 24,
-      "end": 35,
+      "start": 46.5,
+      "end": 58,
       "asset": "proof/review.png",
-      "headline": "Stair B is unavailable.",
-      "support": "Studio · 6 people · 2 assisted · 18 m",
-      "narration": "The facilitator introduces a controlled change: six people are in the studio, two need assistance, and Stair B is blocked. The drawn path is checked against that state.",
+      "headline": "A sketch becomes reviewable evidence.",
+      "support": "Length · endpoint · scripted availability · human-review boundary",
+      "narration": "The facilitator draws a path. The page measures it, checks its endpoint against the scenario's exit status, and keeps the result visible without calling it a real evacuation route.",
       "focus": {"x": 40, "y": 56, "scale": 1.34},
       "transitionOut": "route lines fan into specialist connections",
       "intelligenceRole": "A visible scenario change requires route comparison and named responsibility, not generic chat."
     },
     {
+      "id": "people",
+      "type": "proof",
+      "start": 58,
+      "end": 68,
+      "asset": "proof/person-profile.png",
+      "headline": "A route still needs an owner.",
+      "support": "Fictional role · current position · task · authority boundary",
+      "narration": "The people layer makes responsibility visible. Each fictional responder has a role, exercise position, task, and boundary. The facilitator records only confirmed actions.",
+      "focus": {"x": 50, "y": 50, "scale": 1.18},
+      "intelligenceRole": "Role ownership turns a route suggestion into a coordinated rehearsal action."
+    },
+    {
+      "id": "card-trace",
+      "type": "card",
+      "start": 68,
+      "end": 69.5,
+      "headline": "Every call leaves a trace.",
+      "support": "Input, result, purpose, visible change, and guardrail.",
+      "narration": "Every call leaves a trace.",
+      "intelligenceRole": "The divider moves from spatial work to inspectable agent behavior."
+    },
+    {
       "id": "architecture",
       "type": "architecture",
-      "start": 35,
-      "end": 43,
-      "headline": "A request becomes a visible plan.",
-      "support": "Named tools read the room, compare exits, and expose missing ownership.",
-      "narration": "An incident commander routes work to bounded plan, people, equipment, and review tools, all sharing the visible drill state.",
+      "start": 69.5,
+      "end": 84,
+      "headline": "One manager. Four bounded specialists.",
+      "support": "Named page tools read or update one deterministic in-page state.",
+      "narration": "A human request enters the Incident Commander, which routes to plan, people, equipment, or review specialists. Named page tools read or update one deterministic state. The interface changes, the trace records the result, and the human controls the final decision.",
       "transitionOut": "tool nodes collapse into visible receipts",
       "intelligenceRole": "This makes the manager-specialist-tool hierarchy legible without overstating autonomy."
     },
     {
       "id": "trace",
       "type": "trace",
-      "start": 43,
-      "end": 49,
-      "headline": "Every call explains itself.",
-      "support": "Tool · result · reason · screen change · guardrail",
-      "narration": "Each call explains what happened, why it was allowed, and what visibly changed.",
+      "start": 84,
+      "end": 96,
+      "headline": "The runtime explains its own work.",
+      "support": "Selected call · input · output · why · screen change · boundary",
+      "narration": "Select any call to see its input, output, purpose, visible page change, duration, and guardrail. Open gaps remain visible instead of being silently resolved.",
       "transitionOut": "last receipt expands into review",
       "intelligenceRole": "The agent's activity is inspectable in the same product surface."
     },
     {
+      "id": "card-authority",
+      "type": "card",
+      "start": 96,
+      "end": 97.5,
+      "headline": "The agent prepares. The human decides.",
+      "support": "Report approval is not a page tool.",
+      "narration": "The agent prepares. The human decides.",
+      "intelligenceRole": "The authority divider makes the final control boundary unmistakable."
+    },
+    {
       "id": "authority",
       "type": "report",
-      "start": 49,
-      "end": 60,
-      "headline": "Agent prepares. Human approves.",
-      "support": "No inferred intent. No emergency control.",
-      "narration": "The agent compares routes, records confirmed actions, and stages the report. It cannot infer intent, contact responders, or approve the outcome.",
+      "start": 97.5,
+      "end": 108,
+      "headline": "A draft is not an approval.",
+      "support": "Scope, actions, route evidence, and open gaps remain reviewable.",
+      "narration": "When every problem has an owner, the agent stages an after-action draft. A Fire Safety Manager reviews the evidence and uses the separate human approval control.",
       "transitionOut": "approval boundary becomes proof ledger",
       "intelligenceRole": "The system is useful because it coordinates evidence while preserving human accountability."
     },
     {
       "id": "proof",
       "type": "ledger",
-      "start": 60,
-      "end": 69,
-      "headline": "Proof, with boundaries.",
-      "support": "Native discovery capture remains pending.",
-      "narration": "Five hundred shuffled workflows test the state transitions and human approval gate. Native WebMCP capture remains pending.",
+      "start": 108,
+      "end": 116,
+      "headline": "Proof stays separate from promise.",
+      "support": "Working interface. Tested contracts. Explicit remaining gate.",
+      "narration": "Five hundred shuffled workflows test transitions, repeat-safe actions, route boundaries, and human approval. Native discovery still needs a compatible-browser recording.",
       "transitionOut": "quiet fade to CTA",
       "intelligenceRole": "The video distinguishes tested contracts from an unobserved browser capability."
     },
     {
+      "id": "card-contract",
+      "type": "card",
+      "start": 116,
+      "end": 117.5,
+      "headline": "Bounded tools, visible consequences.",
+      "support": "No alarms, dispatch, doors, sensors, or autonomous approval.",
+      "narration": "Every tool has clear limits and visible consequences.",
+      "intelligenceRole": "The divider introduces the declared tool surface and its limits."
+    },
+    {
+      "id": "contracts",
+      "type": "proof",
+      "start": 117.5,
+      "end": 126,
+      "asset": "proof/tool-contracts.png",
+      "headline": "Nineteen contracts. One visible state.",
+      "support": "One manager plus eighteen bounded page tools.",
+      "narration": "One manager and eighteen page tools expose purpose, example input, visible effect, and safety boundary before the fixture can be run.",
+      "focus": {"x": 50, "y": 49, "scale": 1.13},
+      "intelligenceRole": "The real contract browser makes the WebMCP surface inspectable rather than magical."
+    },
+    {
+      "id": "review-proof",
+      "type": "proof",
+      "start": 126,
+      "end": 130,
+      "asset": "proof/after-action-report.png",
+      "headline": "The result stays reviewable.",
+      "support": "Training evidence only · human authority retained",
+      "narration": "The result is a reviewable training record, not a safety certification.",
+      "focus": {"x": 82, "y": 58, "scale": 1.38},
+      "intelligenceRole": "The final product proof shows the evidence package and approval control together."
+    },
+    {
       "id": "cta",
       "type": "cta",
-      "start": 69,
-      "end": 75,
-      "headline": "Try the live drill.",
-      "support": "Fictional training software · Not for live emergencies",
-      "narration": "Muster is fictional training software. Try the live drill.",
+      "start": 130,
+      "end": 135,
+      "headline": "Run the drill before the fire.",
+      "support": "Fictional table-top training · Not for live emergencies",
+      "narration": "This is fictional table-top training software. Try the live drill.",
       "transitionOut": "none",
       "intelligenceRole": "One clear next action follows an honest proof boundary."
     }

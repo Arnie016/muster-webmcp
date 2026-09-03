@@ -32,15 +32,68 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
   assert.match(await page.locator('#floorZoomLabel').innerText(), /100%/);
 
   await page.locator('#toolButton').click();
+  await page.locator('[data-tool-card="inspect_zone"]').click();
+  assert.match(await page.locator('#toolResult').innerText(), /example_input/);
+  await page.screenshot({ path: path.join(shots, 'muster-tool-contracts.png'), fullPage: false });
   await page.locator('#rehearsalButton').click();
+  assert.match(await page.locator('#guidedTitle').innerText(), /Read the visible plan/i);
+  assert.ok(await page.locator('#reportPanel').isHidden());
+
+  const expectedSteps = [
+    /Start one authored signal/i,
+    /Inspect the affected group/i,
+    /Change one condition/i,
+    /Compare both exits/i,
+    /Record the team decision/i,
+    /Reveal the people gap/i,
+    /Assign assistance/i,
+    /Reconcile the register/i,
+    /Check every responsibility/i,
+    /Prepare the review draft/i,
+    /ready for a human/i,
+  ];
+  for (const expected of expectedSteps) {
+    await page.locator('#guidedNextButton').click();
+    await page.waitForFunction((pattern) => new RegExp(pattern, 'i').test(document.querySelector('#guidedTitle')?.textContent || ''), expected.source);
+  }
   await page.waitForFunction(() => !document.querySelector('#reportPanel').hidden);
+
+  await page.locator('#backToBuilding').click();
+  await page.locator('[data-plan-floor="12"]').click();
+  assert.match(await page.locator('#buildingStatus').innerText(), /Reference training plan/i);
+  await page.locator('#enterFloorButton').click();
+  assert.match(await page.locator('#floorPlanHeading').innerText(), /F12 · Care suite/);
+  await page.locator('#backToBuilding').click();
+  await page.locator('[data-plan-floor="7"]').click();
+  await page.locator('#enterFloorButton').click();
+
+  await page.locator('#drawRouteButton').click();
+  const plan = page.locator('#floorPlan');
+  const planBox = await plan.boundingBox();
+  assert.ok(planBox);
+  await page.mouse.move(planBox.x + planBox.width * .77, planBox.y + planBox.height * .65);
+  await page.mouse.down();
+  await page.mouse.move(planBox.x + planBox.width * .23, planBox.y + planBox.height * .79, { steps: 14 });
+  await page.mouse.up();
+  await page.waitForFunction(() => document.querySelector('#userRoute')?.classList.contains('active'));
+  await page.waitForFunction(() => /reaches|stops before|unavailable/i.test(document.querySelector('#planGesture')?.textContent || ''));
   assert.ok(await page.locator('#userRoute.active').isVisible());
+  assert.ok(await page.locator('#routeReceipt').isVisible());
+  assert.match(await page.locator('#routeReceipt').innerText(), /Route analysis receipt/i);
   assert.match(await page.locator('#traceInspector').innerText(), /why this call/i);
+  assert.match(await page.locator('#traceInspector').innerText(), /Input/i);
+  assert.match(await page.locator('#traceInspector').innerText(), /Output/i);
+
+  await page.locator('#crewStrip [data-person-id="responder-s-tan"]').first().click();
+  assert.match(await page.locator('#personDialog').innerText(), /Fictional exercise profile/i);
+  await page.screenshot({ path: path.join(shots, 'muster-person-profile.png'), fullPage: false });
+  await page.locator('#closePerson').click();
   await page.screenshot({ path: path.join(shots, 'muster-floor-route.png'), fullPage: false });
   await page.locator('#reportPanel').scrollIntoViewIfNeeded();
   await page.screenshot({ path: path.join(shots, 'muster-after-action-report.png'), fullPage: false });
   await page.locator('#approveButton').click();
   assert.match(await page.locator('#reportPanel').innerText(), /Human approved/);
+  assert.match(await page.locator('#runtimeEvents').innerText(), /Human approval/i);
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
   const mobileErrors = [];

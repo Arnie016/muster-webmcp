@@ -59,7 +59,7 @@ export const ACTIONS = {
   assist: {
     id: 'assist',
     label: 'Assign mobility assistance pair',
-    owner: 'CERT Lead',
+    owner: 'S. Tan · assistance rehearsal lead',
     addresses: ['roster'],
   },
 };

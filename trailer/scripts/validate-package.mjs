@@ -11,12 +11,13 @@ const failures = [];
 
 const fail = (message) => failures.push(message);
 const duration = manifest.project?.durationSeconds;
-if (!Number.isFinite(duration) || duration < 75 || duration > 100) fail(`duration must be 75–100 seconds; received ${duration}`);
+if (!Number.isFinite(duration) || duration < 120 || duration > 180) fail(`duration must be 120–180 seconds; received ${duration}`);
 if (manifest.project?.width !== 1920 || manifest.project?.height !== 1080) fail('composition must be 1920×1080');
 if (manifest.project?.fps !== 30) fail('composition must be 30 fps');
 
 const scenes = manifest.scenes ?? [];
 if (!scenes.length) fail('manifest has no scenes');
+if (scenes.length < 15) fail(`the long-form cut needs at least 15 visual beats; received ${scenes.length}`);
 if (scenes[0]?.start !== 0) fail('first scene must begin at zero');
 if (scenes.at(-1)?.end !== duration) fail('last scene must end at project duration');
 for (let index = 0; index < scenes.length; index += 1) {

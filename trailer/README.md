@@ -1,6 +1,6 @@
 # Muster editable demo package
 
-This folder owns the 75-second judge-facing video. It does not modify the app source.
+This folder owns the 135-second judge-facing product film. It does not modify the app source.
 
 ## Refresh proof
 
@@ -10,15 +10,28 @@ The default command copies the current real captures from `../docs/screenshots/`
 npm run proof:sync
 ```
 
-To ingest refreshed captures without changing timeline code:
+To ingest refreshed stills without changing timeline code:
 
 ```bash
 node scripts/sync-proof.mjs \
   --command-room /absolute/path/to/new-command-room.png \
-  --review /absolute/path/to/new-review.png
+  --route /absolute/path/to/new-floor-route.png \
+  --person /absolute/path/to/new-person-profile.png \
+  --contracts /absolute/path/to/new-tool-contracts.png \
+  --report /absolute/path/to/new-after-action-report.png
 ```
 
-Use captures at 1280×720 or larger. Keep the full command surface visible in `command-room`; keep the changed route and staged review visible in `review`.
+Use captures at 1280×720 or larger. Keep the full command surface visible in `command-room`; keep the changed route, person boundary, tool contracts, and staged report legible in their named captures.
+
+## Capture the real guided interaction
+
+Start the app on `127.0.0.1:4173`, then record the deterministic guided flow:
+
+```bash
+MUSTER_PLAYWRIGHT_PATH=/absolute/path/to/playwright npm run capture:live
+```
+
+The recorder blocks external requests, refuses a non-local URL, exercises the real page controls, and writes `public/captures/guided-demo.webm`. It deliberately stops before the human-only approval button.
 
 ## Validate and render
 
@@ -37,13 +50,7 @@ Outputs:
 
 ## Narration
 
-The approved narration was generated from `manifest.json` with GPT Realtime 2.1 and saved as `public/audio/narration.wav`. The original take included an unwanted spoken preamble. Rebuild the corrected, scene-aligned track from the retained raw take with:
-
-```bash
-npm run voice:repair
-```
-
-Only generate a completely new take when explicitly authorized:
+The narration is generated from `manifest.json` with GPT Realtime 2.1 and saved as `public/audio/narration.wav`. Only generate a new take when explicitly authorized:
 
 ```bash
 OPENAI_API_KEY="$(apikey get OPENAI_API_KEY)" npm run voice
@@ -59,4 +66,4 @@ YouTube upload and Devpost publication remain separate, explicit release steps.
 2. Replace screenshots with `proof:sync`.
 3. Change React components only when the layout or motion system itself must change.
 
-The current cut opens with two generated documentary-style context images, then moves to real app captures. Runtime and trace motion graphics reconstruct the actual source-defined tool calls at a readable scale; they are not a native-browser WebMCP capture. The architecture scene connects a human request to concrete tool results, one visible state, and the human approval boundary.
+The current cut opens with the operational reason for rehearsal, reaches real product proof at 11.5 seconds, and includes a 25-second browser-recorded interaction. The architecture and trace scenes explain the source-defined WebMCP contracts at a readable scale; they are not a native-browser discovery capture. The proof ledger states that remaining gate explicitly.

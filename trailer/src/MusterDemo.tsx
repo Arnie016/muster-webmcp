@@ -4,6 +4,7 @@ import {
   Audio,
   Img,
   Sequence,
+  Video,
   interpolate,
   spring,
   staticFile,
@@ -14,7 +15,7 @@ import {
 type Focus = {x: number; y: number; scale: number};
 type Scene = {
   id: string;
-  type: 'why' | 'proof' | 'architecture' | 'runtime' | 'trace' | 'report' | 'ledger' | 'cta';
+  type: 'why' | 'card' | 'proof' | 'live' | 'architecture' | 'runtime' | 'trace' | 'report' | 'ledger' | 'cta';
   start: number;
   end: number;
   asset?: string;
@@ -23,6 +24,7 @@ type Scene = {
   support: string;
   narration: string;
   focus?: Focus;
+  videoStartSeconds?: number;
 };
 
 export type Manifest = {
@@ -121,6 +123,42 @@ const WhyScene: React.FC<{scene: Scene}> = ({scene}) => {
         <p style={{fontSize: 25, color: '#d0d3cb', lineHeight: 1.42, maxWidth: 650}}>{scene.support}</p>
       </div>
       <div style={{position: 'absolute', left: 82, bottom: 58, display: 'flex', alignItems: 'center', gap: 12, color: palette.paper}}><span style={{width: 11, height: 11, borderRadius: 99, background: palette.orange, boxShadow: `0 0 20px ${palette.orange}`}} /><strong style={{fontSize: 18}}>Prepare together before conditions change.</strong></div>
+    </AbsoluteFill>
+  );
+};
+
+const CardScene: React.FC<{scene: Scene}> = ({scene}) => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const enter = revealAt(frame, fps, 0, 105);
+  const line = interpolate(frame, [0, Math.max(1, fps * 0.75)], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  return (
+    <AbsoluteFill style={{...base, background: palette.ink, alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>
+      <div style={{position: 'absolute', width: 720, height: 720, borderRadius: '50%', border: `1px solid ${palette.line}`, opacity: 0.45, transform: `scale(${0.86 + line * 0.18})`}} />
+      <div style={{width: 1160, textAlign: 'center', opacity: enter, transform: `translateY(${(1 - enter) * 18}px)`}}>
+        <Mono style={{fontSize: 14, color: palette.orange}}>MUSTER · ONE DECISION AT A TIME</Mono>
+        <h1 style={{margin: '22px 0 0', fontSize: 86, lineHeight: 0.94, letterSpacing: '-0.06em'}}>{scene.headline}</h1>
+        <p style={{margin: '24px auto 0', maxWidth: 860, color: palette.muted, fontSize: 22, lineHeight: 1.4}}>{scene.support}</p>
+      </div>
+      <div style={{position: 'absolute', bottom: 72, left: 480, right: 480, height: 2, background: `linear-gradient(90deg, transparent, ${palette.orange} ${line * 50}%, ${palette.cyan} ${line * 100}%, transparent)`}} />
+    </AbsoluteFill>
+  );
+};
+
+const LiveScene: React.FC<{scene: Scene}> = ({scene}) => {
+  const {fps} = useVideoConfig();
+  return (
+    <AbsoluteFill style={{...base, background: '#030504'}}>
+      <div style={{position: 'absolute', inset: 18, overflow: 'hidden', borderRadius: 18, border: `1px solid ${palette.line}`, boxShadow: '0 24px 90px rgba(0,0,0,.55)'}}>
+        <Video
+          src={staticFile(scene.asset ?? '')}
+          startFrom={Math.round((scene.videoStartSeconds ?? 0) * fps)}
+          volume={0}
+          style={{width: '100%', height: '100%', objectFit: 'cover'}}
+        />
+      </div>
+      <div style={{position: 'absolute', left: 38, top: 38, padding: '9px 12px', borderRadius: 999, background: 'rgba(4,8,6,.88)', border: `1px solid ${palette.cyan}`, color: palette.cyan}}><Mono style={{fontSize: 12}}>REAL GUIDED PAGE CAPTURE</Mono></div>
+      <div style={{position: 'absolute', right: 38, bottom: 38, padding: '10px 13px', borderRadius: 10, background: 'rgba(4,8,6,.9)', border: `1px solid ${palette.line}`, color: palette.muted}}><Mono style={{fontSize: 11}}>MANUAL PAGE MODE · SOURCE-DEFINED WEBMCP CONTRACTS</Mono></div>
     </AbsoluteFill>
   );
 };
@@ -382,6 +420,8 @@ const CtaScene: React.FC<{scene: Scene; cta: Manifest['cta']}> = ({scene, cta}) 
 
 const SceneRenderer: React.FC<{scene: Scene; manifest: Manifest}> = ({scene, manifest}) => {
   if (scene.type === 'why') return <WhyScene scene={scene} />;
+  if (scene.type === 'card') return <CardScene scene={scene} />;
+  if (scene.type === 'live') return <LiveScene scene={scene} />;
   if (scene.type === 'architecture') return <ArchitectureScene scene={scene} authorityBoundary={manifest.architecture.authorityBoundary} />;
   if (scene.type === 'runtime') return <RuntimeScene scene={scene} />;
   if (scene.type === 'trace') return <TraceScene scene={scene} />;
