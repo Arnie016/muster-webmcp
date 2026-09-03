@@ -14,7 +14,7 @@ The interface makes the next action explicit:
 4. Record facilitator-confirmed team actions and owners.
 5. Check the exercise and stage an after-action report for human approval.
 
-The spatial command starts with an orbitable 18-floor building and three loaded plan files: a retail podium, the active office rehearsal, and a care suite. Floor 07 opens as a pan-and-zoom response plan. Rooms, aggregate occupant groups, and fictional response-team profiles are directly inspectable. A facilitator can draw a route for the agent to measure against the scripted exit state, then keep the returned route receipt on the plan while reviewing the exact call input, result, purpose, visible effect, and guardrail.
+The spatial command starts with an orbitable 18-floor building and three loaded plan files: a retail podium, the active office rehearsal, and a care suite. Floor 07 opens as a pan-and-zoom response plan. Rooms, aggregate occupant groups, and fictional response-team profiles are directly inspectable. A compact exercise sequence keeps the causal chain visible from plan read through signal, route condition, assistance ownership, and human review. A facilitator can draw a route for the agent to measure against the scripted exit state, then keep the returned route receipt on the plan while reviewing the exact call input, result, purpose, visible effect, and guardrail.
 
 The guided rehearsal is intentionally decision-by-decision. It never auto-completes the exercise. Each step explains what will change, invokes one named tool, updates the same visible plan, and leaves report acceptance to the Fire Safety Manager.
 
@@ -44,7 +44,7 @@ Muster is training software. It does not monitor a real building, place calls, r
 - `read_lessons` — retrieve dated fictional exercise findings and the changes they motivated.
 - `record_human_signal` — preserve a facilitator-observed confirmation, uncertainty, disagreement, or delay without inferring intent.
 
-The tools update the same interface the person is using. Human report approval is deliberately not exposed as a tool.
+The tools update the same interface the person is using. Selecting a live-trace event shows the delegation path from human request through the Incident Commander and bounded specialist to the named tool and visible page change. Human report approval is deliberately not exposed as a tool.
 
 The bottom command desk is also usable in a normal browser. Its deterministic question router can answer from the building file, focus a zone, inspect equipment or history, find ownership gaps, and open the guided rehearsal. It never advances or completes the sequence without the facilitator. In a WebMCP-capable browser, the same tools are registered through `document.modelContext.registerTool` for agent discovery.
 

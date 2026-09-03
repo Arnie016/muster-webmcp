@@ -819,6 +819,38 @@ function renderTimeline() {
   }).join('');
 }
 
+function renderScenarioSequence() {
+  const container = $('#scenarioSequence');
+  if (!container) return;
+  container.hidden = selectedFloor !== 7;
+  if (container.hidden) return;
+
+  const stairBlocked = state.injectIds.includes('stair');
+  const rosterGap = state.injectIds.includes('roster');
+  const routeRecorded = state.decisions.some((item) => item.actionId === 'reroute');
+  const assistanceAssigned = state.decisions.some((item) => item.actionId === 'assist');
+  const reportStaged = Boolean(state.report);
+  const approved = Boolean(state.approved);
+  const currentIndex = approved ? 5
+    : !planRead ? 0
+      : state.status === 'ready' ? 1
+        : !stairBlocked || !routeRecorded ? 2
+          : !rosterGap || !assistanceAssigned ? 3 : 4;
+  const stages = [
+    { key: 'plan', label: 'Plan read', detail: 'F07 · revision 04', tone: 'observe' },
+    { key: 'signal', label: 'Signal at 7-E', detail: state.status === 'ready' ? 'Waiting for facilitator' : 'Authored scenario only', tone: 'signal' },
+    { key: 'route', label: stairBlocked ? 'Stair B unavailable' : 'Route decision', detail: routeRecorded ? 'Stair A recorded' : stairBlocked ? 'Compare both exits' : 'Condition not introduced', tone: stairBlocked && !routeRecorded ? 'alert' : 'route' },
+    { key: 'people', label: rosterGap ? 'Assistance owner' : 'People check', detail: assistanceAssigned ? 'Responder pair assigned' : rosterGap ? '2 people need an owner' : 'Register not challenged', tone: rosterGap && !assistanceAssigned ? 'warning' : 'people' },
+    { key: 'review', label: reportStaged ? 'Review draft' : 'Human review', detail: approved ? 'Approved by FSM' : reportStaged ? 'Waiting for human' : 'Evidence not staged', tone: 'review' },
+  ];
+
+  container.innerHTML = `<header><span>Exercise sequence</span><strong>${approved ? 'Human-approved record' : `Decision ${Math.min(currentIndex + 1, stages.length)} of ${stages.length}`}</strong></header><ol>${stages.map((stage, index) => {
+    const isDone = approved || index < currentIndex;
+    const isCurrent = !approved && index === currentIndex;
+    return `<li class="${isDone ? 'done' : ''} ${isCurrent ? 'current' : ''} tone-${stage.tone}" data-sequence-stage="${stage.key}" ${isCurrent ? 'aria-current="step"' : ''}><i>${isDone ? '✓' : index + 1}</i><div><strong>${stage.label}</strong><span>${stage.detail}</span></div></li>`;
+  }).join('')}</ol>`;
+}
+
 const personUi = {
   'responder-a-rahman': { initials: 'AR', role: 'Exercise coordinator', start: [300, 402], portrait: '0% 0%', zone: 'meeting' },
   'responder-mei-lin': { initials: 'ML', role: 'Accounting lead', start: [338, 232], portrait: '100% 0%', zone: 'lobby' },
@@ -1203,7 +1235,12 @@ function renderRuntime() {
   const bars = timings.length ? timings.map((event) => `<i title="${event.title} · ${event.durationMs} ms" style="height:${Math.max(4, Math.round((event.durationMs / maxDuration) * 26))}px"></i>`).join('') : '<i style="height:4px"></i>';
   const input = selected?.input === undefined ? {} : selected.input;
   const output = selected?.output === undefined ? { summary: selected?.detail || 'No output yet.' } : selected.output;
-  $('#traceInspector').innerHTML = `<div><span>Why this call</span><strong>${details.why}</strong></div><div><span>Visible change</span><strong>${details.change}</strong></div><div class="trace-payload"><div><span>Input</span><pre>${escapeHtml(JSON.stringify(input, null, 2))}</pre></div><div><span>Output</span><pre>${escapeHtml(JSON.stringify(output, null, 2))}</pre></div></div><div class="trace-bars" aria-label="Recent tool duration chart">${bars}</div><p>${details.boundary}</p>`;
+  const selectedLabel = friendlyToolNames[selected?.title] || selected?.title?.replaceAll('_', ' ') || 'Exercise state';
+  const traceNodes = selected?.type === 'human'
+    ? ['Human authority', 'Approval gate', selectedLabel, 'Visible record']
+    : ['Human request', 'Incident Commander', `${details.owner} · ${selectedLabel}`, 'Visible page'];
+  const traceGraph = `<div class="trace-orchestration" aria-label="Delegation path for selected call">${traceNodes.map((node, index) => `<span class="${index === traceNodes.length - 1 ? 'output' : ''}">${escapeHtml(node)}</span>`).join('')}</div>`;
+  $('#traceInspector').innerHTML = `${traceGraph}<div><span>Why this call</span><strong>${details.why}</strong></div><div><span>Visible change</span><strong>${details.change}</strong></div><div class="trace-payload"><div><span>Input</span><pre>${escapeHtml(JSON.stringify(input, null, 2))}</pre></div><div><span>Output</span><pre>${escapeHtml(JSON.stringify(output, null, 2))}</pre></div></div><div class="trace-bars" aria-label="Recent tool duration chart">${bars}</div><p>${details.boundary}</p>`;
 }
 
 function render() {
@@ -1216,6 +1253,7 @@ function render() {
   renderPrompt();
   renderMap();
   renderControls();
+  renderScenarioSequence();
   renderPhaseGuide();
   renderGuidedBrief();
   renderStatus();

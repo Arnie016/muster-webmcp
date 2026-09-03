@@ -1,6 +1,8 @@
-# Muster demo video
+# Muster demo video · legacy 75-second cut
 
-Target: 75 seconds, 1920×1080, 30 fps. The cut remains understandable without audio; the approved AI narration reinforces the visible proof.
+This original shot sheet is retained for provenance. The current judge-facing cut is the 135-second film described in [`FILM_V2_TREATMENT.md`](FILM_V2_TREATMENT.md) and built from the editable package in `trailer/`.
+
+Original target: 75 seconds, 1920×1080, 30 fps. The cut remains understandable without audio; the approved AI narration reinforces the visible proof.
 
 ## Narrative promise
 

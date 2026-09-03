@@ -131,6 +131,7 @@
             <div><button id="backToBuilding" type="button">← Building</button><strong id="floorPlanHeading">Floor 07 · office command · 1:200</strong></div>
             <div><button id="drawRouteButton" type="button">Draw a route</button><button id="resetPlanView" type="button">Reset view</button><span id="floorZoomLabel">100%</span></div>
           </div>
+          <section class="scenario-sequence" id="scenarioSequence" aria-label="Current exercise sequence" aria-live="polite"></section>
           <div class="floor-viewport" id="floorViewport">
           <svg class="floor-plan" id="floorPlan" viewBox="0 0 900 610" role="img" aria-labelledby="floorTitle floorDesc">
             <title id="floorTitle">Fictional Floor 7 fire drill plan</title>
@@ -271,7 +272,7 @@
             <span class="conversation-state"><i></i> Ready</span>
           </header>
           <div class="conversation-history" id="conversationHistory" role="log" aria-live="polite">
-            <article class="conversation-turn assistant"><span>IC</span><p>I can inspect the plan, roles, equipment, routes, history, and run the complete rehearsal.</p></article>
+            <article class="conversation-turn assistant"><span>IC</span><p>Start with the plan. I will open one decision at a time, show every tool call, and wait for you before anything changes.</p></article>
           </div>
           <div class="quick-actions command-desks" aria-label="Command desks">
             <button type="button" data-agent-prompt="plan">Plan</button>

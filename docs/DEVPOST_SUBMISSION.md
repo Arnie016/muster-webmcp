@@ -69,7 +69,8 @@ The next safe step is an approved importer for real building plans and role temp
 
 - Live site: https://muster-fire-drill.vercel.app
 - Source repository: https://github.com/Arnie016/muster-webmcp
-- Demo video: https://youtu.be/FOoBfOHPIho (90-second narrated public demo)
+- Current public video: https://youtu.be/FOoBfOHPIho (earlier 90-second cut)
+- Verified replacement master awaiting upload: `trailer/out/muster-demo.mp4` (135-second narrated film)
 - Native WebMCP proof: pending one recorded run in a WebMCP-enabled browser
 
 ## Submission receipt
