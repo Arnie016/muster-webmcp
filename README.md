@@ -14,7 +14,7 @@ The interface makes the next action explicit:
 4. Record facilitator-confirmed team actions and owners.
 5. Check the exercise and stage an after-action report for human approval.
 
-The spatial command starts with an orbitable 18-floor training twin set on a visible site plan with a public podium, facade bays, roof plant, appliance approach, service road, and two assembly areas. Three loaded plan files cover a retail podium, the active office rehearsal, and a care suite. Floor 07 opens as a pan-and-zoom response plan. Rooms, aggregate occupant groups, and fictional response-team profiles are directly inspectable. A compact exercise sequence keeps the causal chain visible from plan read through signal, route condition, assistance ownership, and human review. A facilitator can draw a route for the agent to measure against the scripted exit state, then keep the returned route receipt on the plan while reviewing the exact call input, result, purpose, visible effect, and guardrail.
+The spatial command starts with an orbitable WebGL 18-floor training twin set on a visible site plan with a public podium, facade bays, roof plant, appliance approach, service road, and two assembly areas. Its geometry is deterministic and fictional; a CSS model remains as a no-WebGL fallback. Three loaded plan files cover a retail podium, the active office rehearsal, and a care suite. Floor 07 opens as a pan-and-zoom response plan. Rooms, aggregate occupant groups, and fictional response-team profiles are directly inspectable. A compact exercise sequence keeps the causal chain visible from plan read through signal, route condition, assistance ownership, and human review. A facilitator can draw a route for the agent to measure against the scripted exit state, then keep the returned route receipt on the plan while reviewing the exact call input, result, purpose, visible effect, and guardrail.
 
 The guided rehearsal is intentionally decision-by-decision. It never auto-completes the exercise. Each step explains what will change, invokes one named tool, updates the same visible plan, and leaves report acceptance to the Fire Safety Manager.
 
@@ -95,4 +95,4 @@ This MVP is publicly deployed and the local verification proves the deterministi
 
 ## License
 
-MIT
+Muster is MIT licensed. The vendored Three.js 0.180.0 browser runtime is also MIT licensed; its upstream notice is preserved in `vendor/THREE-LICENSE.txt`.

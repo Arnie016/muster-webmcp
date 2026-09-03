@@ -18,6 +18,9 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
 
   assert.equal(await page.locator('[data-building-floor]').count(), 18);
   assert.ok(await page.locator('#buildingView').isVisible());
+  assert.ok(await page.locator('#buildingViewport.webgl-ready').isVisible());
+  assert.ok(await page.locator('#buildingCanvas').isVisible());
+  assert.equal(await page.locator('#buildingCanvas').getAttribute('data-selected-floor'), '7');
   assert.ok(await page.locator('.site-plane').isVisible());
   assert.ok(await page.locator('.tower-podium').isVisible());
   assert.ok(await page.locator('.roof-plant').isVisible());
@@ -26,6 +29,13 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
   assert.match(await page.locator('#buildingStatus').innerText(), /Assembly A · West court/i);
   assert.ok(await page.locator('.site-point-controls [data-site-point="assembly-a"]').evaluate((element) => element.classList.contains('selected')));
   await page.screenshot({ path: path.join(shots, 'muster-site-context.png'), fullPage: false });
+  await page.locator('[data-plan-floor="7"]').click();
+  const canvas = page.locator('#buildingCanvas');
+  const canvasBox = await canvas.boundingBox();
+  assert.ok(canvasBox);
+  await canvas.click({ position: { x: canvasBox.width * .55, y: canvasBox.height * .25 } });
+  assert.match(await canvas.getAttribute('data-last-hit'), /^floor-\d+$/);
+  assert.notEqual(await canvas.getAttribute('data-selected-floor'), '7');
   await page.locator('[data-plan-floor="7"]').click();
   await page.screenshot({ path: path.join(shots, 'muster-spatial-command.png'), fullPage: false });
 
@@ -52,8 +62,8 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
 
   await page.locator('#guidedNextButton').click();
   await page.waitForFunction(() => /Start one authored signal/i.test(document.querySelector('#guidedTitle')?.textContent || ''));
-  assert.ok(await page.locator('[data-sequence-stage="plan"].done').isVisible());
-  assert.ok(await page.locator('[data-sequence-stage="signal"].current').isVisible());
+  assert.ok(await page.locator('[data-sequence-stage="plan"]').evaluate((element) => element.classList.contains('done')));
+  assert.ok(await page.locator('[data-sequence-stage="signal"]').evaluate((element) => element.classList.contains('current')));
 
   const expectedSteps = [
     /Inspect the affected group/i,
@@ -67,9 +77,17 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
     /Prepare the review draft/i,
     /ready for a human/i,
   ];
-  for (const expected of expectedSteps) {
+  for (const [index, expected] of expectedSteps.entries()) {
     await page.locator('#guidedNextButton').click();
     await page.waitForFunction((pattern) => new RegExp(pattern, 'i').test(document.querySelector('#guidedTitle')?.textContent || ''), expected.source);
+    if (index === 0) {
+      assert.ok(await page.locator('#buildingView').isVisible());
+      assert.equal(await page.locator('#buildingCanvas').getAttribute('data-signal'), 'active');
+      assert.ok(await page.locator('#buildingSignalMarker').isVisible());
+      assert.match(await page.locator('#buildingSignalMarker').innerText(), /authored signal.*training only/is);
+      await page.screenshot({ path: path.join(shots, 'muster-webgl-signal.png'), fullPage: false });
+    }
+    if (index === 1) assert.ok(await page.locator('#floorView').isVisible());
   }
   await page.waitForFunction(() => !document.querySelector('#reportPanel').hidden);
 
@@ -126,10 +144,19 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
   assert.ok(await mobile.locator('#floorView').isVisible());
   await mobile.screenshot({ path: path.join(shots, 'muster-mobile-spatial.png'), fullPage: false });
 
+  const fallback = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+  await fallback.addInitScript(() => {
+    Object.defineProperty(window, 'WebGLRenderingContext', { configurable: true, value: undefined });
+  });
+  await fallback.goto(url, { waitUntil: 'networkidle' });
+  assert.equal(await fallback.locator('[data-building-floor]').count(), 18);
+  assert.equal(await fallback.locator('#buildingViewport.webgl-ready').count(), 0);
+  assert.ok(await fallback.locator('#buildingOrbit').isVisible());
+
   assert.deepEqual(errors, []);
   assert.deepEqual(mobileErrors, []);
   await browser.close();
-  console.log('PASS · 3D building exposes 18 selectable floors and supports orbit interaction');
+  console.log('PASS · WebGL building exposes 18 selectable floors, raycast selection, orbit interaction, and a CSS fallback');
   console.log('PASS · Floor 07 opens, route analysis renders, and report remains human-approved');
   console.log('PASS · 390x844 mobile has no horizontal overflow or console errors');
 })().catch((error) => {

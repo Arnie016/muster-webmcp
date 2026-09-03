@@ -24,6 +24,7 @@ import {
   startDrill,
 } from './drill-core.js';
 import MusterPeopleData from './people-data.js';
+import { initBuildingScene } from './building-scene.js';
 
 const STORAGE_KEY = 'muster-demo-state-v1';
 const $ = (selector) => document.querySelector(selector);
@@ -54,6 +55,7 @@ let selectedFloor = 7;
 let guidedStep = 0;
 let selectedToolName = 'read_plan';
 let lastRouteResult = null;
+let buildingScene = null;
 let peopleState = MusterPeopleData.resetPeopleState();
 let conversation = [
   { role: 'assistant', text: 'Start with Read the plan. I will explain every change and wait for your next decision.' },
@@ -581,12 +583,14 @@ function selectSitePoint(pointId) {
   const point = SITE_POINTS[pointId];
   if (!point) return;
   document.querySelectorAll('[data-site-point]').forEach((button) => button.classList.toggle('selected', button.dataset.sitePoint === pointId));
+  buildingScene?.selectSitePoint(pointId);
   $('#buildingStatus').innerHTML = `<span>Site point selected</span><strong>${point.label}</strong><p><b>${point.meta}</b><br />${point.detail}</p>`;
 }
 
 function selectFloor(floor, openPlan = false) {
   selectedFloor = Number(floor);
   document.querySelectorAll('[data-site-point]').forEach((button) => button.classList.remove('selected'));
+  buildingScene?.selectFloor(selectedFloor);
   const preset = FLOOR_PRESETS[selectedFloor];
   document.querySelectorAll('[data-building-floor]').forEach((button) => button.classList.toggle('selected', Number(button.dataset.buildingFloor) === selectedFloor));
   document.querySelectorAll('[data-plan-floor]').forEach((button) => button.classList.toggle('active', Number(button.dataset.planFloor) === selectedFloor));
@@ -621,6 +625,7 @@ function applyOrbit() {
   $('#buildingOrbit').style.setProperty('--orbit-x', `${orbit.x}deg`);
   $('#buildingOrbit').style.setProperty('--orbit-z', `${orbit.z}deg`);
   $('#buildingOrbit').style.setProperty('--orbit-scale', String(orbit.scale));
+  buildingScene?.setView(orbit);
 }
 
 function resetOrbit() {
@@ -1120,6 +1125,7 @@ function renderMap() {
   floor.classList.toggle('story-spread', stairBlocked);
   floor.classList.toggle('story-critical', rosterGap && !assistResolved);
   $('#buildingView').classList.toggle('drill-live', hasSmoke);
+  buildingScene?.setSignal(actionableFloor && hasSmoke);
   const narrative = $('#narrativeCaption');
   narrative.innerHTML = !selectedPreset
     ? `<span>Building context</span><strong>No training plan is loaded for Floor ${String(selectedFloor).padStart(2, '0')}.</strong>`
@@ -1329,7 +1335,8 @@ async function runGuidedRehearsal() {
   if (timer) { clearInterval(timer); timer = null; }
   $('#exerciseClock').textContent = '00:00';
   $('#toolDialog').close();
-  selectFloor(7, true);
+  selectFloor(7);
+  setSpatialMode('building');
   conversation = [{ role: 'assistant', text: 'We will rehearse one decision at a time. First, let me read the visible Floor 7 plan.' }];
   render();
   $('#guidedBrief').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1375,6 +1382,11 @@ function renderToolList() {
 
 function setupSpatialInteractions() {
   renderTower();
+  buildingScene = initBuildingScene($('#buildingCanvas'), {
+    onFloorSelect: (floor) => selectFloor(floor),
+    onSiteSelect: (pointId) => selectSitePoint(pointId),
+  });
+  $('#buildingViewport').classList.toggle('webgl-ready', Boolean(buildingScene));
   selectFloor(7);
   applyOrbit();
   applyFloorView();
@@ -1412,7 +1424,13 @@ function setupSpatialInteractions() {
     orbit.x = Math.max(42, Math.min(76, orbitDrag.startX - (event.clientY - orbitDrag.y) * .12));
     applyOrbit();
   });
-  const endOrbit = () => { orbitDrag = null; building.classList.remove('dragging'); };
+  const endOrbit = (event) => {
+    if (orbitDrag && Math.hypot(event.clientX - orbitDrag.x, event.clientY - orbitDrag.y) < 5) {
+      buildingScene?.pick(event.clientX, event.clientY);
+    }
+    orbitDrag = null;
+    building.classList.remove('dragging');
+  };
   building.addEventListener('pointerup', endOrbit);
   building.addEventListener('pointercancel', endOrbit);
   building.addEventListener('wheel', (event) => {

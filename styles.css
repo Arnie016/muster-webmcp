@@ -645,6 +645,14 @@ footer { padding: 13px 28px; background: #090a08; font-size: 10px; }
 
 .building-viewport { position: relative; z-index: 4; min-height: 500px; overflow: hidden; perspective: 1100px; touch-action: none; cursor: grab; }
 .building-viewport.dragging { cursor: grabbing; }
+.building-canvas { position: absolute; z-index: 5; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .45s ease; }
+.building-viewport.webgl-ready .building-canvas { opacity: 1; }
+.building-viewport.webgl-ready .building-orbit { opacity: 0; pointer-events: none; }
+.building-signal-marker { position: absolute; z-index: 18; top: 45%; left: 67%; min-width: 132px; padding: 9px 10px 9px 29px; border: 1px solid rgba(255,107,53,.58); border-radius: 8px; color: #ffd0be; background: rgba(49,19,9,.88); box-shadow: 0 0 30px rgba(255,74,25,.2); opacity: 0; pointer-events: none; transform: translate(8px,-50%) scale(.96); transition: opacity .28s ease, transform .28s ease; }
+.building-signal-marker i { position: absolute; top: 13px; left: 11px; width: 8px; height: 8px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 5px rgba(255,107,53,.14), 0 0 20px rgba(255,74,25,.8); }
+.building-signal-marker span, .building-signal-marker small { display: block; }.building-signal-marker span { font: 800 8px var(--mono); letter-spacing: .06em; text-transform: uppercase; }.building-signal-marker small { margin-top: 4px; color: #bf8d7b; font: 7px var(--mono); }
+.building-view.drill-live .building-signal-marker { opacity: 1; transform: translate(0,-50%) scale(1); animation: signal-marker 1.8s ease-in-out infinite; }
+@keyframes signal-marker { 50% { box-shadow: 0 0 0 2px rgba(255,107,53,.1), 0 0 38px rgba(255,74,25,.34); } }
 .building-orbit { --orbit-x: 62deg; --orbit-z: -38deg; --orbit-scale: 1; position: absolute; inset: 4% 2% 12%; transform-style: preserve-3d; transform: rotateX(var(--orbit-x)) rotateZ(var(--orbit-z)) scale(var(--orbit-scale)); transition: transform .45s cubic-bezier(.22,1,.36,1); }
 .building-viewport.dragging .building-orbit { transition: none; }
 .site-plane { position: absolute; left: 50%; top: 54%; width: 520px; height: 350px; border: 1px solid rgba(132,194,184,.2); background: linear-gradient(rgba(108,183,174,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(108,183,174,.055) 1px, transparent 1px), linear-gradient(145deg, rgba(26,45,39,.88), rgba(6,12,10,.94)); background-size: 20px 20px,20px 20px,auto; box-shadow: 0 0 55px rgba(84,183,169,.08); transform: translate(-50%,-50%) translateZ(-22px); transform-style: preserve-3d; pointer-events: none; }
