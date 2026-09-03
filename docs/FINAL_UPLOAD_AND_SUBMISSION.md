@@ -24,13 +24,13 @@ Muster exposes one manager and 18 bounded page tools through WebMCP. In the test
 
 00:00 Why rehearsal matters
 00:12 One shared command room
-00:20 Live guided drill
+00:30 Scripted change
 00:47 Route evidence and ownership
-01:10 Manager and specialists
+01:05 Manager and specialists
 01:24 Inspectable tool receipts
 01:38 Human approval boundary
-01:58 Native WebMCP proof
-02:10 Final review
+01:52 Native WebMCP proof
+02:02 Training boundary
 
 All people, plans, dimensions, incidents, equipment records, and counts shown are fictional training fixtures. Muster does not monitor a real building, certify routes or equipment, contact emergency services, or provide instructions for a live emergency.
 
@@ -53,10 +53,10 @@ WebMCP, OpenAI, agentic AI, fire drill, emergency preparedness, human AI collabo
 
 **Verified master**
 
-- Duration: 135.061 seconds
+- Duration: 132.544 seconds
 - Picture: H.264, 1920 by 1080, 30 fps
 - Audio: AAC, 48 kHz stereo; measured integrated loudness -16.1 LUFS and true peak -4.5 dBTP
-- SHA-256: `7567c47f5d157dafd23e8275378908b3df10f920273d0f2440bd2684d6d849c3`
+- SHA-256: `d55de9cd9a95edc2cbe0405766bcb201b7c5b6dc4c10ca353f536f632e9f07bb`
 - Local speech-to-text check begins with the emergency problem, contains the complete product story and safety boundary, and contains no generator preamble or sign-off.
 
 ## Devpost update

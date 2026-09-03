@@ -38,7 +38,7 @@ All names, people, counts, locations, dimensions, equipment records, timestamps,
 
 The first design exposed many useful controls but left a new user unsure where to begin or what a route change meant. We rebuilt the experience around one step-at-a-time rehearsal, made the building and floor plan directly inspectable, added fictional responder profiles and assistance ownership, and made route state visible in both the 3D twin and plan. We also made each tool contract readable before use and each runtime call inspectable afterward.
 
-The product is static HTML, CSS, and JavaScript with a vendored Three.js runtime and a CSS fallback. The trailer package is driven by an editable manifest. Its local replacement master validates at 135 seconds, 1920 by 1080, 30 fps, with 17 contiguous scenes and product proof beginning at 11.5 seconds.
+The product is static HTML, CSS, and JavaScript with a vendored Three.js runtime and a CSS fallback. The trailer package is driven by an editable manifest. Its local replacement master validates at 132.544 seconds, 1920 by 1080, 30 fps, with 17 contiguous scenes and product proof beginning at 11.5 seconds.
 
 ## Accomplishments
 
@@ -46,7 +46,7 @@ The product is static HTML, CSS, and JavaScript with a vendored Three.js runtime
 - Kept 19 page-tool contracts visible and aligned with the current source.
 - Passed the current local test suite, including six people-data tests and 500 shuffled workflows covering repeat-safe actions, invalid transitions, route boundaries, and approval gates.
 - Preserved one visible trail from human request to manager, specialist, tool result, page change, and open gap.
-- Produced desktop and mobile evidence captures plus a validated 135-second replacement film master.
+- Produced desktop and mobile evidence captures plus a validated 132.544-second replacement film master.
 
 ## What we learned
 
@@ -75,13 +75,13 @@ Next, add an agent-driven end-to-end evaluation set for the manager intent route
 
 - **Current public video:** https://youtu.be/FOoBfOHPIho
 
-  Verified public. This is the earlier short cut, not the 135-second local replacement.
+  Verified public. This is the earlier short cut, not the 132.544-second local replacement.
 
 - **Devpost project:** https://devpost.com/software/muster-the-agentic-fire-drill
 
   Exact URL recorded in the accepted-submission receipt. An unauthenticated command-line audit receives HTTP 403, so the public project page is not independently proven from that route.
 
-- **Replacement 135-second video:** `[PENDING PUBLIC URL]`
+- **Replacement 132.544-second video:** `[PENDING PUBLIC URL]`
 
   Local validated master: `trailer/out/muster-demo.mp4`.
 

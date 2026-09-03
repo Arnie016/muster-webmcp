@@ -2,7 +2,7 @@
   "name": "muster-demo-video",
   "version": "1.0.0",
   "private": true,
-  "description": "Editable 135-second Remotion product film for Muster.",
+  "description": "Editable 132.5-second Remotion product film for Muster.",
   "scripts": {
     "proof:sync": "node scripts/sync-proof.mjs",
     "capture:live": "node scripts/capture-live-demo.cjs",

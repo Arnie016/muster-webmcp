@@ -145,26 +145,26 @@ transitions, repeat-safe actions,
 route boundaries, and human approval.
 
 31
-00:01:53,840 --> 00:01:57,500
+00:01:51,340 --> 00:01:55,000
 Every tool has clear limits
 and visible consequences.
 
 32
-00:01:57,500 --> 00:02:02,500
+00:01:55,000 --> 00:02:00,000
 One manager and 18 page tools expose
 purpose, example input, visible effect,
 
 33
-00:02:02,500 --> 00:02:04,900
+00:02:00,000 --> 00:02:02,400
 and safety boundary before
 the fixture can be run.
 
 34
-00:02:04,900 --> 00:02:08,860
+00:02:02,400 --> 00:02:06,360
 The result is a reviewable training record,
 not a safety certification.
 
 35
-00:02:08,860 --> 00:02:13,840
+00:02:06,360 --> 00:02:11,340
 This is fictional tabletop training
 software. Try the live drill.

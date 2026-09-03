@@ -2,7 +2,7 @@
 
 ## Production lock
 
-- **Runtime:** 02:15 exactly, within the required 02:05–02:20 window.
+- **Runtime:** 02:12.544, within the required 02:05–02:20 window. The final pacing pass removed a rejected 2.5-second silent hold without dropping product proof or safety context.
 - **Master:** 1920×1080, 16:9, 30 fps, stereo, with a clean-captioned version and a textless product-capture master.
 - **Audience:** WebMCP judges first; fire-drill facilitators second.
 - **Promise:** A person and a browser agent can rehearse a changing fictional floor scenario on the same visible plan while the human retains final authority.

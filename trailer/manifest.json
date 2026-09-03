@@ -6,7 +6,7 @@
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "durationSeconds": 135,
+    "durationSeconds": 132.5,
     "audience": "WebMCP Challenge judges and safety-training facilitators",
     "promise": "Rehearse a changing building incident on one visible, reviewable command surface."
   },
@@ -188,10 +188,10 @@
       {"sceneId": "architecture", "start": 69.5, "end": 84, "owner": "architecture-diagram", "screenShare": 0.9, "reason": "Connect the human request to specialists, tools, state, and trace."},
       {"sceneId": "trace", "start": 84, "end": 96, "owner": "trace-explainer", "screenShare": 0.92, "reason": "Make input, output, why, visible change, and guardrail readable."},
       {"sceneId": "authority", "start": 97.5, "end": 108, "owner": "review-report", "screenShare": 0.86, "reason": "Make the human-only approval boundary unmistakable."},
-      {"sceneId": "proof", "start": 108, "end": 116, "owner": "proof-ledger", "screenShare": 0.82, "reason": "Separate the working product, deterministic tests, native discovery, and native execution."},
-      {"sceneId": "contracts", "start": 117.5, "end": 126, "owner": "native-contract-proof", "screenShare": 0.9, "reason": "Show Chrome's WebMCP live receipt and the resulting read_plan trace."},
-      {"sceneId": "review-proof", "start": 126, "end": 130, "owner": "report-proof", "screenShare": 0.92, "reason": "End product proof on the reviewable report and approval control."},
-      {"sceneId": "cta", "start": 130, "end": 135, "owner": "cta", "screenShare": 0.68, "reason": "End on one action and the training boundary."}
+      {"sceneId": "proof", "start": 108, "end": 113.5, "owner": "proof-ledger", "screenShare": 0.82, "reason": "Separate the working product, deterministic tests, native discovery, and native execution."},
+      {"sceneId": "contracts", "start": 115, "end": 123.5, "owner": "native-contract-proof", "screenShare": 0.9, "reason": "Show Chrome's WebMCP live receipt and the resulting read_plan trace."},
+      {"sceneId": "review-proof", "start": 123.5, "end": 127.5, "owner": "report-proof", "screenShare": 0.92, "reason": "End product proof on the reviewable report and approval control."},
+      {"sceneId": "cta", "start": 127.5, "end": 132.5, "owner": "cta", "screenShare": 0.68, "reason": "End on one action and the training boundary."}
     ]
   },
   "interactionEvents": [
@@ -376,7 +376,7 @@
       "id": "proof",
       "type": "ledger",
       "start": 108,
-      "end": 116,
+      "end": 113.5,
       "headline": "Proof stays separate from promise.",
       "support": "Working interface. Tested workflow. Native discovery and execution.",
       "narration": "Five hundred shuffled workflows test transitions, repeat-safe actions, route boundaries, and human approval.",
@@ -386,8 +386,8 @@
     {
       "id": "card-contract",
       "type": "card",
-      "start": 116,
-      "end": 117.5,
+      "start": 113.5,
+      "end": 115,
       "headline": "Bounded tools, visible consequences.",
       "support": "No alarms, dispatch, doors, sensors, or autonomous approval.",
       "narration": "Every tool has clear limits and visible consequences.",
@@ -396,8 +396,8 @@
     {
       "id": "contracts",
       "type": "proof",
-      "start": 117.5,
-      "end": 126,
+      "start": 115,
+      "end": 123.5,
       "asset": "proof/native-webmcp.png",
       "headline": "Chrome found all nineteen tools.",
       "support": "document.modelContext · read_plan executed · visible trace updated",
@@ -408,8 +408,8 @@
     {
       "id": "review-proof",
       "type": "proof",
-      "start": 126,
-      "end": 130,
+      "start": 123.5,
+      "end": 127.5,
       "asset": "proof/after-action-report.png",
       "headline": "The result stays reviewable.",
       "support": "Training evidence only · human authority retained",
@@ -420,8 +420,8 @@
     {
       "id": "cta",
       "type": "cta",
-      "start": 130,
-      "end": 135,
+      "start": 127.5,
+      "end": 132.5,
       "headline": "Run the drill before the fire.",
       "support": "Fictional table-top training · Not for live emergencies",
       "narration": "This is fictional table-top training software. Try the live drill.",

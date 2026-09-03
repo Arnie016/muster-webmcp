@@ -1,6 +1,6 @@
 # Muster editable demo package
 
-This folder owns the 135-second judge-facing product film. It does not modify the app source.
+This folder owns the 132.544-second judge-facing product film. It does not modify the app source.
 
 ## Refresh proof
 
