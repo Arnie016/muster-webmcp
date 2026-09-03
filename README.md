@@ -4,6 +4,8 @@ Muster is a WebMCP-enabled tabletop fire-drill command room for building Fire Sa
 
 **Live demo:** https://muster-fire-drill.vercel.app
 
+![Muster command room](docs/screenshots/muster-command-room.png)
+
 The interface makes the next action explicit:
 
 1. Read the plan and roster.
@@ -81,6 +83,7 @@ This MVP is publicly deployed and proves the deterministic page workflow, manage
 ## References
 
 - [OpenAI WebMCP Challenge](https://webmcp.devpost.com/)
+- [Public source repository](https://github.com/Arnie016/muster-webmcp)
 - [Chrome WebMCP workflow guidance](https://developer.chrome.com/docs/ai/webmcp/build-tools)
 - [SCDF Emergency Response Plan guidance](https://www.scdf.gov.sg/fire-safety-services-listing/emergency-response-plan)
 
