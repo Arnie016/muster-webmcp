@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#171713" />
+    <meta name="description" content="Muster is a WebMCP tabletop fire-drill workspace for building safety teams." />
+    <title>Muster · Fire drill room</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">Skip to exercise</a>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Muster home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span><strong>Muster</strong><small>tabletop readiness</small></span>
+      </a>
+      <div class="topbar-centre" aria-label="Current exercise">
+        <strong>Meridian Exchange</strong>
+        <span>Floor 07 training scenario</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="quiet-button" id="dossierButton" type="button">Building file</button>
+        <button class="quiet-button" id="toolButton" type="button"><span id="toolCount">18</span> tools</button>
+        <span class="training-pill"><i></i> Training only</span>
+      </div>
+    </header>
+
+    <main class="workspace" id="workspace">
+      <aside class="scenario-rail" aria-label="Exercise timeline">
+        <div class="rail-head">
+          <div class="responder-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64"><path d="M19 33c0-10 5-18 13-18s13 8 13 18"/><path d="M14 36h36l-4 8H18z"/><path d="M24 17c1-6 4-9 8-9s7 3 8 9"/><path d="M29 11h6v16h-6z"/></svg>
+          </div>
+          <div><span class="eyebrow">Exercise MST-0742</span><strong>Fire drill command</strong></div>
+          <span class="status-dot" id="statusDot">Ready</span>
+        </div>
+        <div class="clock-card">
+          <strong id="exerciseClock">00:00</strong>
+          <span>simulated time</span>
+        </div>
+        <ol class="timeline" id="timeline" aria-live="polite"></ol>
+        <div class="rail-actions">
+          <button class="primary-button" id="startButton" type="button">1 · Read the plan</button>
+          <button class="secondary-button" id="nextInjectButton" type="button" disabled>Next scenario event</button>
+        </div>
+        <p class="boundary-note">Fictional exercise · no live emergency connection</p>
+      </aside>
+
+      <section class="plan-stage" aria-labelledby="planTitle">
+        <div class="stage-head">
+          <div>
+            <span class="eyebrow">Fire drill workspace</span>
+            <h1 id="planTitle">Run the drill before the fire.</h1>
+            <p class="stage-copy">One floor. One team. One safe rehearsal.</p>
+          </div>
+          <div class="plan-meta">
+            <span>Floor 07 of 18</span>
+            <span>Exercise register · 84</span>
+            <span>2 assisted</span>
+          </div>
+        </div>
+
+        <div class="assumption-strip" aria-label="Exercise data boundaries">
+          <span><i></i> Scripted conditions</span>
+          <span><i></i> Fixture occupants</span>
+          <span><i></i> Plan distances</span>
+          <strong>No sensors or emergency connection</strong>
+        </div>
+
+        <div class="floor-wrap">
+          <svg class="floor-plan" viewBox="0 0 900 610" role="img" aria-labelledby="floorTitle floorDesc">
+            <title id="floorTitle">Fictional Floor 7 fire drill plan</title>
+            <desc id="floorDesc">An office floor with east and west zones, Stair A, Stair B, lift lobby, electrical room, refuge point, and two evacuation routes.</desc>
+            <defs>
+              <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+                <path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(255,255,255,.035)" stroke-width="1" />
+              </pattern>
+              <filter id="glow"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <rect x="0" y="0" width="900" height="610" fill="url(#grid)" />
+            <g class="walls">
+              <path d="M70 72H830V535H70Z" />
+              <path d="M330 72V210H568V72M330 210V535M568 210V535" />
+              <path d="M70 350H330M568 350H830" />
+              <path d="M420 210V350M478 210V350" />
+            </g>
+            <g class="fire-compartments">
+              <path d="M330 72V535M568 72V535" />
+            </g>
+            <g class="doors">
+              <path d="M330 294h-32m32 0a32 32 0 0 0-32 32M568 294h32m-32 0a32 32 0 0 1 32 32M205 448v-28m0 28a28 28 0 0 0-28-28M742 448v-28m0 28a28 28 0 0 1 28-28" />
+            </g>
+            <g class="room-labels">
+              <text x="108" y="116">WEST WORKPLACE</text>
+              <text x="608" y="116">EAST WORKPLACE</text>
+              <text x="365" y="118">LIFT LOBBY</text>
+              <text x="96" y="388">MEETING SUITE</text>
+              <text x="610" y="388">STUDIO</text>
+              <text x="350" y="255">FIRE</text><text x="348" y="273">LIFT</text>
+              <text x="493" y="255">7-E</text><text x="491" y="273">ELEC.</text>
+              <text x="352" y="403">WC / SERVICE</text>
+            </g>
+            <g class="zone-fill">
+              <rect x="74" y="76" width="252" height="270" rx="2" />
+              <rect x="572" y="76" width="254" height="270" rx="2" />
+            </g>
+            <g class="desks">
+              <path d="M115 165h70v34h-70zM215 165h70v34h-70zM115 235h70v34h-70zM215 235h70v34h-70z" />
+              <path d="M615 165h70v34h-70zM715 165h70v34h-70zM615 235h70v34h-70zM715 235h70v34h-70z" />
+            </g>
+            <g class="route route-a" id="routeA">
+              <path d="M744 280C700 320 620 330 570 340C490 355 360 400 205 474" />
+              <circle cx="744" cy="280" r="6" /><circle cx="205" cy="474" r="7" />
+            </g>
+            <g class="route route-b" id="routeB">
+              <path d="M162 280C220 325 285 330 330 346C430 380 560 420 742 474" />
+              <circle cx="162" cy="280" r="6" /><circle cx="742" cy="474" r="7" />
+            </g>
+            <g class="stair stair-a">
+              <rect x="105" y="448" width="132" height="62" rx="5" /><text x="139" y="484">STAIR A</text>
+            </g>
+            <g class="stair stair-b" id="stairB">
+              <rect x="676" y="448" width="132" height="62" rx="5" /><text x="710" y="484">STAIR B</text>
+            </g>
+            <g class="hazard" id="hazard" filter="url(#glow)">
+              <circle cx="526" cy="296" r="19" /><circle cx="526" cy="296" r="7" />
+            </g>
+            <g class="assistance" id="assistance">
+              <circle cx="704" cy="397" r="17" /><text x="699" y="402">2</text>
+            </g>
+            <g class="plan-symbols">
+              <g transform="translate(300 386)"><rect width="18" height="18"/><text x="5" y="13">E</text></g>
+              <g transform="translate(582 324)"><rect width="18" height="18"/><text x="4" y="13">H</text></g>
+              <g transform="translate(315 218)"><circle cx="9" cy="9" r="9"/><text x="5" y="13">M</text></g>
+              <g transform="translate(647 430)" class="pwd"><rect width="21" height="21"/><text x="3" y="15">P</text></g>
+            </g>
+            <g class="dimensions">
+              <path d="M70 53V28M830 53V28M70 36H830M70 31v10M830 31v10" />
+              <text x="427" y="29">38 000</text>
+              <path d="M48 72H25M48 535H25M34 72V535M29 72h10M29 535h10" />
+              <text transform="translate(27 322) rotate(-90)">23 150</text>
+              <path d="M330 553v24M568 553v24M330 568h238M330 563v10M568 563v10" />
+              <text x="425" y="564">11 900</text>
+            </g>
+            <g class="north"><path d="M806 31l10-20 10 20h-7v20h-6V31z"/><text x="809" y="66">N</text></g>
+          </svg>
+          <div class="drawing-title-block" aria-label="Drawing title block">
+            <div><span>Project</span><strong>Meridian Exchange · fictional training fixture</strong></div>
+            <div><span>Drawing</span><strong>Level 07 fire protection &amp; egress plan</strong></div>
+            <div><span>Scale</span><strong>1:200 @ A3</strong></div>
+            <div><span>Drawing no.</span><strong>MX-FS-07-004</strong></div>
+            <div><span>Revision</span><strong>04 · training</strong></div>
+          </div>
+          <div class="map-key">
+            <span><i class="key-route"></i> Available route</span>
+            <span><i class="key-signal"></i> Exercise inject</span>
+            <span><i class="key-assist"></i> Assistance register</span>
+            <span><b>E</b> Extinguisher</span>
+            <span><b>H</b> Hose reel</span>
+            <span><b>M</b> Call point</span>
+          </div>
+          <div class="zone-picker" aria-label="Inspect floor zone">
+            <span>Inspect zone</span>
+            <button type="button" data-zone="west">West · 29</button>
+            <button type="button" data-zone="east">East · 39</button>
+            <button type="button" data-zone="meeting">Meeting · 8</button>
+            <button type="button" data-zone="studio">Studio · 6</button>
+          </div>
+          <div class="map-callout" id="mapCallout">
+            <span>Plan intelligence</span>
+            <strong>Two exits available</strong>
+            <p>The agent can read routes, roles, and plan revision. It cannot control building systems.</p>
+          </div>
+          <div class="simulation-status"><i></i><span id="simulationLabel">Simulation idle</span></div>
+          <div class="scan-beam" aria-hidden="true"></div>
+        </div>
+
+        <div class="crew-strip" aria-label="Exercise roles" id="crewStrip"></div>
+
+        <section class="conversation-dock" aria-label="Conversation with the drill manager">
+          <header class="conversation-head">
+            <div class="commander-avatar" aria-hidden="true">IC</div>
+            <div><span class="eyebrow">Incident Commander</span><strong>Choose a desk or ask plainly</strong></div>
+            <span class="conversation-state"><i></i> Ready</span>
+          </header>
+          <div class="conversation-history" id="conversationHistory" role="log" aria-live="polite">
+            <article class="conversation-turn assistant"><span>IC</span><p>I can inspect the plan, roles, equipment, routes, history, and run the complete rehearsal.</p></article>
+          </div>
+          <div class="quick-actions command-desks" aria-label="Command desks">
+            <button type="button" data-agent-prompt="plan">Plan</button>
+            <button type="button" data-agent-prompt="people">People</button>
+            <button type="button" data-agent-prompt="equipment">Equipment</button>
+            <button type="button" data-agent-prompt="roles">Roles</button>
+            <button type="button" data-agent-prompt="rehearse">Run demo</button>
+          </div>
+          <form class="agent-composer" id="agentForm">
+            <label class="sr-only" for="agentPrompt">Ask the Incident Commander</label>
+            <input id="agentPrompt" autocomplete="off" placeholder="Ask: who is on Floor 7, what is missing, or which route is open?" />
+            <button type="submit" aria-label="Send request">→</button>
+          </form>
+        </section>
+
+        <dialog class="context-dialog" id="dossierDialog">
+        <section class="dossier" aria-labelledby="dossierTitle">
+          <div class="dossier-head">
+            <div><span class="eyebrow">Building file</span><h2 id="dossierTitle">What the drill knows</h2></div>
+            <nav class="dossier-tabs" aria-label="Dossier views">
+              <button type="button" class="active" data-dossier-view="context">Site</button>
+              <button type="button" data-dossier-view="rooms">Rooms</button>
+              <button type="button" data-dossier-view="equipment">Equipment</button>
+              <button type="button" data-dossier-view="people">Roles</button>
+              <button type="button" data-dossier-view="lessons">History</button>
+            </nav>
+            <button class="icon-button" id="closeDossier" type="button" aria-label="Close building file">Close</button>
+          </div>
+          <div class="dossier-content" id="dossierContent" aria-live="polite"></div>
+        </section>
+        </dialog>
+      </section>
+
+      <aside class="decision-deck" aria-label="Team decisions and report">
+        <div class="deck-head">
+          <div><span class="eyebrow">Drill path</span><strong>What happens next</strong></div>
+          <span class="runtime-connection" id="runtimeConnection"><i></i> Manual mode</span>
+          <button class="icon-button" id="resetButton" type="button" aria-label="Reset fictional exercise">Reset</button>
+        </div>
+        <div class="specialist-rail" id="specialistRail" aria-label="Managed specialists">
+          <span data-specialist="plan">Plan</span><span data-specialist="people">People</span><span data-specialist="equipment">Equipment</span><span data-specialist="review">Review</span>
+        </div>
+        <section class="phase-guide" id="phaseGuide" aria-live="polite"></section>
+        <details class="runtime-trace" open>
+          <summary><span>WebMCP calls</span><small>visible page actions only</small></summary>
+          <div class="runtime-events" id="runtimeEvents" aria-live="polite"></div>
+          <small id="lastActivity">Waiting for plan read</small>
+        </details>
+        <section class="prompt-card" id="promptCard">
+          <span class="prompt-number">01</span>
+          <div>
+            <small>Before the clock starts</small>
+            <h2>Let the agent read this plan.</h2>
+            <p>It will return only the visible training context: floor, exits, roles, occupants, and plan version.</p>
+          </div>
+          <button class="secondary-button" id="readPlanButton" type="button">Read plan context</button>
+        </section>
+        <section class="actions-panel" id="actionsPanel" hidden>
+          <div class="panel-title"><span>Team actions</span><small>recorded by facilitator</small></div>
+          <div id="actionList" class="action-list"></div>
+        </section>
+        <section class="coverage-panel" id="coveragePanel" hidden aria-live="polite"></section>
+        <section class="report-panel" id="reportPanel" hidden aria-live="polite"></section>
+        <button class="primary-button report-button" id="reportButton" type="button" disabled>Prepare after-action report</button>
+      </aside>
+    </main>
+
+    <footer>
+      <p><strong>Not for live emergencies.</strong> If an emergency is occurring, leave this training site and use the official local emergency process.</p>
+      <a href="https://www.scdf.gov.sg/fire-safety-services-listing/emergency-response-plan" target="_blank" rel="noreferrer">SCDF planning guidance ↗</a>
+    </footer>
+
+    <dialog id="toolDialog" class="tool-dialog">
+      <div class="dialog-head">
+        <div><span class="eyebrow">Incident Commander</span><h2>One manager, four specialists.</h2></div>
+        <button class="icon-button" id="closeTools" type="button" aria-label="Close agent tools">Close</button>
+      </div>
+      <p class="dialog-intro">The manager routes work to these page tools. Each call is visible in the Runtime Bench. None contacts emergency services or controls a building.</p>
+      <div class="rehearsal-row">
+        <div><strong>See the agent loop</strong><small>Runs only this fictional page and pauses for human report approval.</small></div>
+        <button class="primary-button" id="rehearsalButton" type="button">Run guided rehearsal</button>
+      </div>
+      <div class="tool-list" id="toolList"></div>
+      <div class="tool-log">
+        <span class="eyebrow">Latest tool result</span>
+        <pre id="toolResult">No tool called yet.</pre>
+      </div>
+    </dialog>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
