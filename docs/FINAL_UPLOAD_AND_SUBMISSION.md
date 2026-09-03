@@ -45,6 +45,7 @@ Built for The WebMCP Challenge.
 - AI use / altered or synthetic content: Yes. The opening planning-room visual is photorealistic and generated, and the narration is AI-generated. It does not imitate a named person.
 - Thumbnail: `trailer/out/muster-youtube-thumbnail.jpg`
 - Video: `trailer/out/muster-demo.mp4`
+- Captions: upload `trailer/captions/muster-demo.en.srt` as English subtitles
 
 **Tags**
 

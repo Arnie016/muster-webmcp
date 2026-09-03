@@ -58,6 +58,8 @@ OPENAI_API_KEY="$(apikey get OPENAI_API_KEY)" npm run voice
 
 The video also works without narration because every claim and boundary is visible on screen.
 
+The reviewed English subtitle track is `captions/muster-demo.en.srt`. Upload it as a separate caption file so subtitles can be toggled without covering the interface proof by default.
+
 YouTube upload and Devpost publication remain separate, explicit release steps.
 
 ## Edit hierarchy
