@@ -22,6 +22,11 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
   assert.ok(await page.locator('.tower-podium').isVisible());
   assert.ok(await page.locator('.roof-plant').isVisible());
   assert.match(await page.locator('.site-plane').innerText(), /Assembly A/i);
+  await page.locator('.site-point-controls [data-site-point="assembly-a"]').click();
+  assert.match(await page.locator('#buildingStatus').innerText(), /Assembly A · West court/i);
+  assert.ok(await page.locator('.site-point-controls [data-site-point="assembly-a"]').evaluate((element) => element.classList.contains('selected')));
+  await page.screenshot({ path: path.join(shots, 'muster-site-context.png'), fullPage: false });
+  await page.locator('[data-plan-floor="7"]').click();
   await page.screenshot({ path: path.join(shots, 'muster-spatial-command.png'), fullPage: false });
 
   const viewport = page.locator('#buildingViewport');

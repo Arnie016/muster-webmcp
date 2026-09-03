@@ -686,6 +686,11 @@ footer { padding: 13px 28px; background: #090a08; font-size: 10px; }
 .roof-plant i { width: 22px; height: 22px; border: 1px solid rgba(132,202,191,.32); border-radius: 50%; background: repeating-conic-gradient(rgba(129,201,190,.3) 0 12deg, rgba(8,18,15,.8) 12deg 30deg); }
 .roof-plant span { position: absolute; top: 7px; left: 9px; color: rgba(167,213,205,.48); font: 700 6px var(--mono); text-transform: uppercase; }
 .orbit-controls { position: absolute; z-index: 20; left: 50%; bottom: 17px; display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: rgba(7,11,9,.78); transform: translateX(-50%); backdrop-filter: blur(12px); }
+.site-point-controls { position: absolute; z-index: 21; top: 18px; left: 14px; display: flex; flex-wrap: wrap; gap: 4px; max-width: 220px; padding: 5px; border: 1px solid rgba(135,201,191,.18); border-radius: 9px; background: rgba(7,11,9,.78); backdrop-filter: blur(12px); }
+.site-point-controls > span { width: 100%; padding: 2px 4px 1px; color: #79c9bc; font: 800 7px var(--mono); letter-spacing: .09em; text-transform: uppercase; }
+.site-point-controls button { min-height: 25px; padding: 0 7px; border: 1px solid rgba(135,201,191,.17); border-radius: 6px; color: #aeb7b1; background: rgba(15,24,20,.78); font: 700 7px var(--mono); cursor: pointer; transition: border-color .2s ease, color .2s ease, background .2s ease; }
+.site-point-controls button:hover, .site-point-controls button:focus-visible { border-color: rgba(160,234,222,.72); color: #eef6f2; outline: none; }
+.site-point-controls button.selected { border-color: var(--signal); color: #ffd5c5; background: rgba(255,107,53,.14); }
 .floor-beacon { position: absolute; z-index: 20; top: 18px; right: 14px; min-height: 28px; padding: 0 9px; display: flex; align-items: center; gap: 7px; border: 1px solid rgba(255,107,53,.3); border-radius: 999px; color: #ffc2aa; background: rgba(54,23,12,.62); font: 700 8px var(--mono); letter-spacing: .04em; }
 .floor-beacon i { width: 6px; height: 6px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 12px var(--signal); animation: beacon 1.8s ease-in-out infinite; }
 .building-status { position: relative; z-index: 7; margin-right: 22px; padding: 16px; border: 1px solid rgba(135,201,191,.18); border-radius: 12px; background: rgba(13,20,17,.78); backdrop-filter: blur(14px); }
@@ -693,6 +698,7 @@ footer { padding: 13px 28px; background: #090a08; font-size: 10px; }
 .building-status span { color: #79c9bc; font: 800 8px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
 .building-status strong { margin-top: 8px; font-size: 17px; }
 .building-status p { margin: 7px 0 0; color: var(--muted); font-size: 10px; line-height: 1.45; }
+.building-status p b { color: #d8d8c9; font: 700 8px var(--mono); text-transform: uppercase; letter-spacing: .035em; }
 
 .floor-wrap { border-top-left-radius: 0; border-top-right-radius: 0; }
 .plan-controls { min-height: 48px; padding: 7px 9px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--line); background: rgba(14,19,16,.94); }

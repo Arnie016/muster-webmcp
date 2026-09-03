@@ -223,6 +223,10 @@ async function main() {
     await expectText('#statusDot', /^Ready$/i, 'reset exercise status');
     await visiblePause(500, 'showing the reset state');
 
+    await clickVisible('.site-point-controls [data-site-point="assembly-a"]', 'Assembly A site point');
+    await expectText('#buildingStatus', /Assembly A · West court/, 'Assembly A site context');
+    await visiblePause(500, 'showing the site-context inspection');
+
     await clickVisible('[data-plan-floor="7"]', 'Floor 07 loaded plan');
     assert.equal(
       await guarded(locator('[data-plan-floor="7"]').getAttribute('class')).then((value) => value.includes('active')),

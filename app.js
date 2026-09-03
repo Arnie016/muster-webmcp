@@ -92,6 +92,29 @@ const FLOOR_PRESETS = {
   },
 };
 
+const SITE_POINTS = {
+  'assembly-a': {
+    label: 'Assembly A · West court',
+    meta: 'Primary accounting point · fictional site fixture',
+    detail: 'Connected to the west exit path. Use the floor register and a facilitator-confirmed headcount before closing the exercise.',
+  },
+  'assembly-b': {
+    label: 'Assembly B · East court',
+    meta: 'Alternate accounting point · fictional site fixture',
+    detail: 'Connected to the east exit path. Its availability follows the authored route condition shown in the active exercise.',
+  },
+  'appliance-bay': {
+    label: 'Fire appliance bay',
+    meta: 'South approach · training geometry only',
+    detail: 'A visible staging reference for tabletop coordination. Muster does not dispatch crews or verify real access clearance.',
+  },
+  'service-road': {
+    label: 'South service road',
+    meta: 'Appliance approach · training geometry only',
+    detail: 'Links the fictional access edge to the appliance bay and public podium. A qualified site review is still required.',
+  },
+};
+
 const GUIDED_SEQUENCE = [
   { tool: 'read_plan', title: 'Read the visible plan', description: 'Ground the agent in Floor 07, its revision, exits, and fixture register.', button: 'Read the plan', change: 'The plan, exits, roles, and fixture counts will enter the visible context.', input: {} },
   { tool: 'start_drill', title: 'Start one authored signal', description: 'Introduce the fictional detector activation beside Electrical Room 7-E.', button: 'Start the scenario', change: 'An orange signal will appear at 7-E. It is not a live alarm or spread model.', input: {} },
@@ -554,8 +577,16 @@ function renderTower() {
   }));
 }
 
+function selectSitePoint(pointId) {
+  const point = SITE_POINTS[pointId];
+  if (!point) return;
+  document.querySelectorAll('[data-site-point]').forEach((button) => button.classList.toggle('selected', button.dataset.sitePoint === pointId));
+  $('#buildingStatus').innerHTML = `<span>Site point selected</span><strong>${point.label}</strong><p><b>${point.meta}</b><br />${point.detail}</p>`;
+}
+
 function selectFloor(floor, openPlan = false) {
   selectedFloor = Number(floor);
+  document.querySelectorAll('[data-site-point]').forEach((button) => button.classList.remove('selected'));
   const preset = FLOOR_PRESETS[selectedFloor];
   document.querySelectorAll('[data-building-floor]').forEach((button) => button.classList.toggle('selected', Number(button.dataset.buildingFloor) === selectedFloor));
   document.querySelectorAll('[data-plan-floor]').forEach((button) => button.classList.toggle('active', Number(button.dataset.planFloor) === selectedFloor));
@@ -1364,6 +1395,10 @@ function setupSpatialInteractions() {
   $('#orbitReset').addEventListener('click', resetOrbit);
 
   const building = $('#buildingViewport');
+  building.addEventListener('click', (event) => {
+    const point = event.target.closest('[data-site-point]');
+    if (point) selectSitePoint(point.dataset.sitePoint);
+  });
   let orbitDrag = null;
   building.addEventListener('pointerdown', (event) => {
     if (event.target.closest('button')) return;
