@@ -69,5 +69,13 @@ The next safe step is an approved importer for real building plans and role temp
 
 - Live site: https://muster-fire-drill.vercel.app
 - Source repository: https://github.com/Arnie016/muster-webmcp
-- Demo video: pending public YouTube upload under three minutes
+- Demo video: https://youtu.be/FOoBfOHPIho (90-second narrated public demo)
 - Native WebMCP proof: pending one recorded run in a WebMCP-enabled browser
+
+## Submission receipt
+
+- Submitted: 2026-09-04 02:31 SGT
+- Public Devpost project: https://devpost.com/software/muster-the-agentic-fire-drill
+- Public YouTube demo: https://youtu.be/FOoBfOHPIho
+- Source commit at submission: `8b957f7`
+- Proof boundary: Devpost submission, public video, live deployment, source contracts, and local/browser tests are verified. Native `document.modelContext` discovery was not observed in the available test browser and remains explicitly pending.
