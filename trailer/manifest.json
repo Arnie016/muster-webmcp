@@ -28,7 +28,8 @@
     "projectTypeHypotheses": ["web-app-saas", "ai-agent-builder"],
     "read": ["README.md", "app.js", "drill-core.js", "tests.mjs", "docs/DEVPOST_SUBMISSION.md"],
     "capture": ["spatial-command", "floor-route"],
-    "missingAccess": ["Observed native WebMCP discovery in a compatible browser"]
+    "missingAccess": [],
+    "verifiedAccess": ["Chrome 152 native document.modelContext discovery and read_plan execution"]
   },
   "productAnalysis": {
     "audience": "Fire-safety drill facilitators and WebMCP judges",
@@ -117,8 +118,10 @@
     },
     {
       "id": "native-webmcp-discovery",
-      "claim": "A compatible browser discovers the page tools natively.",
-      "status": "pending compatible-browser capture"
+      "claim": "Chrome discovers all nineteen page tools through document.modelContext and executes read_plan against the visible tab.",
+      "source": "docs/screenshots/muster-native-webmcp.png",
+      "destination": "proof/native-webmcp.png",
+      "status": "captured-and-executed-in-Chrome-152"
     }
   ],
   "captureTargets": [
@@ -156,6 +159,13 @@
       "destination": "public/proof/after-action-report.png",
       "minimumWidth": 1280,
       "minimumHeight": 720
+    },
+    {
+      "id": "native-webmcp",
+      "source": "docs/screenshots/muster-native-webmcp.png",
+      "destination": "public/proof/native-webmcp.png",
+      "minimumWidth": 1280,
+      "minimumHeight": 720
     }
   ],
   "timingPlan": {
@@ -178,8 +188,8 @@
       {"sceneId": "architecture", "start": 69.5, "end": 84, "owner": "architecture-diagram", "screenShare": 0.9, "reason": "Connect the human request to specialists, tools, state, and trace."},
       {"sceneId": "trace", "start": 84, "end": 96, "owner": "trace-explainer", "screenShare": 0.92, "reason": "Make input, output, why, visible change, and guardrail readable."},
       {"sceneId": "authority", "start": 97.5, "end": 108, "owner": "review-report", "screenShare": 0.86, "reason": "Make the human-only approval boundary unmistakable."},
-      {"sceneId": "proof", "start": 108, "end": 116, "owner": "proof-ledger", "screenShare": 0.82, "reason": "Separate working and tested proof from pending native discovery."},
-      {"sceneId": "contracts", "start": 117.5, "end": 126, "owner": "contract-proof", "screenShare": 0.9, "reason": "Show the actual manager and page-tool browser."},
+      {"sceneId": "proof", "start": 108, "end": 116, "owner": "proof-ledger", "screenShare": 0.82, "reason": "Separate the working product, deterministic tests, native discovery, and native execution."},
+      {"sceneId": "contracts", "start": 117.5, "end": 126, "owner": "native-contract-proof", "screenShare": 0.9, "reason": "Show Chrome's WebMCP live receipt and the resulting read_plan trace."},
       {"sceneId": "review-proof", "start": 126, "end": 130, "owner": "report-proof", "screenShare": 0.92, "reason": "End product proof on the reviewable report and approval control."},
       {"sceneId": "cta", "start": 130, "end": 135, "owner": "cta", "screenShare": 0.68, "reason": "End on one action and the training boundary."}
     ]
@@ -368,10 +378,10 @@
       "start": 108,
       "end": 116,
       "headline": "Proof stays separate from promise.",
-      "support": "Working interface. Tested contracts. Explicit remaining gate.",
-      "narration": "Five hundred shuffled workflows test transitions, repeat-safe actions, route boundaries, and human approval. Native discovery still needs a compatible-browser recording.",
+      "support": "Working interface. Tested workflow. Native discovery and execution.",
+      "narration": "Five hundred shuffled workflows test transitions, repeat-safe actions, route boundaries, and human approval.",
       "transitionOut": "quiet fade to CTA",
-      "intelligenceRole": "The video distinguishes tested contracts from an unobserved browser capability."
+      "intelligenceRole": "The video distinguishes deterministic test coverage from observed native browser behavior."
     },
     {
       "id": "card-contract",
@@ -388,12 +398,12 @@
       "type": "proof",
       "start": 117.5,
       "end": 126,
-      "asset": "proof/tool-contracts.png",
-      "headline": "Nineteen contracts. One visible state.",
-      "support": "One manager plus eighteen bounded page tools.",
+      "asset": "proof/native-webmcp.png",
+      "headline": "Chrome found all nineteen tools.",
+      "support": "document.modelContext · read_plan executed · visible trace updated",
       "narration": "One manager and eighteen page tools expose purpose, example input, visible effect, and safety boundary before the fixture can be run.",
       "focus": {"x": 50, "y": 49, "scale": 1.13},
-      "intelligenceRole": "The real contract browser makes the WebMCP surface inspectable rather than magical."
+      "intelligenceRole": "The native receipt proves discovery and execution in the same visible Chrome tab."
     },
     {
       "id": "review-proof",
@@ -432,7 +442,7 @@
     "All people counts, locations, equipment, timestamps, and incidents are fictional training fixtures.",
     "The product does not connect to alarms, dispatch, responders, doors, sensors, or live building systems.",
     "The agent cannot infer participant intent or competence; final report approval is human-only.",
-    "Native WebMCP discovery was not observed in the available test browser; the current evidence is source contracts, local tests, and the manual product surface.",
+    "Native WebMCP discovery and execution proof is limited to Chrome 152 with testing enabled; ChatGPT-specific agent behavior was not separately recorded.",
     "The narration is AI-generated from the approved script and is not a human firefighter recording."
   ]
 }

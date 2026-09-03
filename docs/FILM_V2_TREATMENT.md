@@ -39,10 +39,10 @@ Do not record the final product takes until these items are complete. They are a
 2. **Lock and verify the fictional people surface.** The People view, plan markers, person cards, assistance pairing, and named action owners must all read from the same deterministic fictional fixture. Every record must remain visibly fictional, contain no real personal data, validate floor/room/task combinations, and fail closed on unknown IDs. The capture must have no missing module or resource request.
 3. **Finish and verify persistent trace evidence.** Each Live trace row must retain and visibly render the tool name, compact input, compact returned result, reason, visible change, and boundary. A latest-result modal by itself is not enough because it loses call-by-call causality. Human approval must remain a visibly different `human` event rather than looking like a WebMCP tool.
 4. **Pin the route-analysis receipt.** When a facilitator releases a drawn route, keep a readable receipt on the floor view with the returned measured length, nearest exit, endpoint reach, scripted availability, and qualified-human boundary. Use the actual returned value from that take; do not animate a preselected distance.
-5. **Prove native WebMCP in the capture browser.** Record one continuous take in which the page changes from **Manual mode** to **WebMCP live**, the browser discovers all 19 contracts, and an actual browser-agent invocation updates the same open page. Source registration code, a manual replay, and a reconstructed call bubble are not substitutes.
+5. **Prove native WebMCP in the capture browser.** Record one continuous take in which the page changes from **Manual mode** to **WebMCP live**, the browser discovers all 19 contracts, and an actual native invocation updates the same open page. Source registration code, a manual replay, and a reconstructed call bubble are not substitutes. **Satisfied in the current checkout:** Chrome 152 discovered all 19 tools and executed `read_plan`; `docs/screenshots/muster-native-webmcp.png` records the changed visible trace.
 6. **Extend the browser smoke gate around the finished flow.** Verify that every guided step waits, the people surface has no missing request, route drawing creates the persistent receipt, trace rows retain call-specific evidence, report approval is unavailable as a tool, approval is blocked with open gaps, and the final human click creates the distinct approval event.
 
-At capture lock, the deterministic state and stress suite must freshly pass for 19 unique contracts, 500 shuffled workflows, invalid-transition handling, route boundaries, and the human approval gate. Any dedicated fictional-people tests must pass in the same frozen checkout. Those results support the proof scene; they do not close the native-browser or real-world gates above.
+At capture lock, the deterministic state and stress suite must freshly pass for 19 unique contracts, 500 shuffled workflows, invalid-transition handling, route boundaries, and the human approval gate. Any dedicated fictional-people tests must pass in the same frozen checkout. Those results support the proof scene but remain separate from the native-browser test and real-world evidence boundaries.
 
 ## Exact interstitial cards
 
@@ -116,7 +116,7 @@ through `run_drill_manager`. Hold on the real `WebMCP live` state and the result
 
 **Narration:** “Then the condition changes. Stair B becomes unavailable. The Studio holds six fixture occupants, including two who need an assigned assistance owner.”
 
-**Visible result:** Studio · 6 people · 2 assisted; Stair B 18 m and unavailable; Stair A 42 m and available. These are fictional plan fixtures, not measured real-building guidance.
+**Visible result:** Studio · 6 people · 2 assisted; Stair B 18 m and unavailable; Stair A 30.1 m and available. These are fictional plan fixtures, not measured real-building guidance.
 
 ### 00:58.5–01:00 | Interstitial 3
 
@@ -257,7 +257,7 @@ Only the following figures may appear without a new verification pass immediatel
 | 84 | Aggregate Floor 07 fixture register | `drill-core.js`, `read_plan`, `read_floor_register` | Not live occupancy |
 | 2 | Fixture occupants marked for assistance | `drill-core.js`, current UI | No personal data; not live |
 | 6 | Studio fixture occupants | `drill-core.js` and `inspect_zone` | Fictional zone count |
-| 18 m / 42 m | Authored Studio-to-Stair B/A plan distances | `compare_routes` | Fictional plan distances; not evacuation guidance |
+| 18 m / 30.1 m | Authored Studio-to-Stair B/A plan distances | `compare_routes` | Fictional plan distances; not evacuation guidance |
 | 19 | One manager plus 18 bounded page-tool contracts | `app.js`, `tests.mjs`, passing `npm test` | Contract count, not external integrations |
 | 500 | Shuffled deterministic stress workflows | `stress-tests.mjs`, passing `npm test` | Test iterations, not drills or users |
 

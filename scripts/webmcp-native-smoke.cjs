@@ -1,0 +1,84 @@
+const { chromium } = require('playwright');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+
+const root = path.resolve(__dirname, '..');
+const target = process.env.MUSTER_URL || 'http://127.0.0.1:4179';
+const chromePath = process.env.MUSTER_CHROME_PATH
+  || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+
+(async () => {
+  const browser = await chromium.launch({
+    executablePath: chromePath,
+    headless: process.env.MUSTER_HEADLESS === '1',
+    args: [
+      '--enable-experimental-web-platform-features',
+      '--enable-features=WebMCPTesting,DevToolsWebMCPSupport',
+      '--no-first-run',
+      '--no-default-browser-check',
+    ],
+  });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+    const errors = [];
+    page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+    page.on('pageerror', (error) => errors.push(error.message));
+
+    await page.goto(target, { waitUntil: 'networkidle' });
+    await page.evaluate(() => localStorage.clear());
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForFunction(() => /WebMCP live/i.test(document.querySelector('#runtimeConnection')?.textContent || ''));
+
+    const probe = await page.evaluate(async () => {
+      const registered = await document.modelContext.getTools();
+      return {
+        documentModelContext: typeof document.modelContext,
+        registerTool: typeof document.modelContext?.registerTool,
+        getTools: typeof document.modelContext?.getTools,
+        executeTool: typeof document.modelContext?.executeTool,
+        toolNames: registered.map((tool) => tool.name),
+        tools: registered.map((tool) => ({
+          name: tool.name,
+          title: tool.title,
+          inputSchema: typeof tool.inputSchema === 'string' ? JSON.parse(tool.inputSchema) : tool.inputSchema,
+          annotations: tool.annotations,
+        })),
+      };
+    });
+
+    assert.equal(probe.documentModelContext, 'object');
+    assert.equal(probe.registerTool, 'function');
+    assert.equal(probe.getTools, 'function');
+    assert.equal(probe.executeTool, 'function');
+    assert.equal(probe.toolNames.length, 19);
+    assert.ok(probe.toolNames.includes('run_drill_manager'));
+    assert.ok(probe.toolNames.includes('read_plan'));
+    assert.ok(probe.toolNames.includes('stage_report'));
+    if (process.env.MUSTER_DEBUG_WEBMCP === '1') console.log(JSON.stringify(probe.tools, null, 2));
+    assert.ok(probe.tools.every((tool) => typeof tool.title === 'string' && tool.title.length > 0));
+    assert.ok(probe.tools.every((tool) => tool.inputSchema?.additionalProperties === false));
+    assert.ok(probe.tools.every((tool) => tool.annotations?.untrustedContentHint === false));
+
+    const rawResult = await page.evaluate(async () => {
+      const tools = await document.modelContext.getTools();
+      const readPlan = tools.find((tool) => tool.name === 'read_plan');
+      return document.modelContext.executeTool(readPlan, '{}');
+    });
+    const result = typeof rawResult === 'string' ? JSON.parse(rawResult) : rawResult;
+    const resultText = JSON.stringify(result);
+    assert.match(resultText, /Meridian Exchange/);
+    assert.match(resultText, /training_only/);
+    assert.match(await page.locator('#runtimeEvents').innerText(), /Read plan/i);
+    assert.match(await page.locator('#runtimeConnection').innerText(), /WebMCP live/i);
+    assert.deepEqual(errors, []);
+
+    await page.screenshot({ path: path.join(root, 'docs', 'screenshots', 'muster-native-webmcp.png'), fullPage: false });
+    console.log(`PASS · Native document.modelContext registered ${probe.toolNames.length} tools in Chrome`);
+    console.log('PASS · document.modelContext.executeTool ran read_plan and changed the visible trace');
+  } finally {
+    await browser.close();
+  }
+})().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

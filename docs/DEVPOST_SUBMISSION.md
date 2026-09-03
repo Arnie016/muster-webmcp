@@ -26,7 +26,7 @@ A deterministic JavaScript state machine holds the fictional drill state in the 
 
 Without WebMCP, the visible controls still run the rehearsal manually. When `document.modelContext` is available, Muster attempts to register the same 19 contracts so an agent can discover named actions, receive structured results, and make its work visible on the page. This makes the website a shared work surface rather than a chat window beside a disconnected plan.
 
-The proof has two distinct layers. The source contains the registration code, and the test suite verifies one manager plus 18 page tools. Those checks do not prove browser discovery. Separately, a current local Chrome capture using experimental WebMCP features shows all 19 tools registered through `document.modelContext`; `read_plan` was invoked through the browser testing surface and appeared in the page's Live trace. That is local compatible-browser discovery and invocation proof. It is not proof that the public deployment or every judge browser exposes the API.
+The proof has two distinct layers. The source contains the registration code, and the test suite verifies one manager plus 18 page tools. Those checks do not prove browser discovery. Separately, a current Chrome 152 capture with WebMCP testing enabled shows all 19 tools discovered through `document.modelContext`; Chrome then invoked `read_plan` with `document.modelContext.executeTool`, and the result appeared in the page's Live trace. That is native compatible-browser discovery and execution proof for the tested tab. It is not proof that every judge browser exposes the API.
 
 ## Human and agent boundary
 
@@ -54,7 +54,7 @@ WebMCP is most useful when an agent changes a visible, reviewable work surface a
 
 ## Future work
 
-First, commit and publish the local native-browser capture, then repeat it against the current public deployment. Next, publish the local UI revisions and upload the validated replacement film so the public links match the latest evidence. Any move beyond fictional training would be a separate, permissioned project requiring approved plan imports, authentication, access controls, professional review, and evidence from real users. It is not part of the current proof.
+Next, repeat the native-browser check against the public deployment and add an agent-driven end-to-end evaluation set for the manager intent router. Any move beyond fictional training would be a separate, permissioned project requiring approved plan imports, authentication, access controls, professional review, and evidence from real users. It is not part of the current proof.
 
 ## Links and proof status
 
@@ -85,7 +85,7 @@ First, commit and publish the local native-browser capture, then repeat it again
 
 - **Native WebMCP local evidence:** `[PENDING COMMIT AND PUBLIC LINK]`
 
-  Current local capture: `docs/screenshots/muster-native-webmcp.png`. It shows 19 registered tools and a browser-invoked `read_plan` result in the visible trace. The public deployment has not been rechecked with this native-browser path.
+  Current capture: `docs/screenshots/muster-native-webmcp.png`. It shows `WebMCP live`, 19 registered tools, and a native `read_plan` result in the visible trace. The public deployment still needs the same post-deploy check.
 
 ## 30-second judge path
 

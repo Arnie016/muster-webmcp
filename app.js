@@ -26,7 +26,7 @@ import {
 import MusterPeopleData from './people-data.js';
 import { initBuildingScene } from './building-scene.js';
 
-const STORAGE_KEY = 'muster-demo-state-v1';
+const STORAGE_KEY = 'muster-demo-state-v2';
 const $ = (selector) => document.querySelector(selector);
 const loadState = () => {
   try {
@@ -38,23 +38,24 @@ const loadState = () => {
 };
 
 let state = loadState();
-let planRead = false;
+const restoredUi = state.ui || {};
+let planRead = Boolean(restoredUi.planRead || state.activity.some((event) => event.title === 'read_plan'));
 let timer = null;
-let elapsed = state.status === 'ready' ? 0 : 240;
+let elapsed = Number.isFinite(restoredUi.elapsed) ? restoredUi.elapsed : state.injectIds.includes('roster') ? 240 : state.injectIds.includes('stair') ? 120 : 0;
 let dossierView = 'context';
 let managerBusy = false;
 let pendingAssistant = null;
-let spatialMode = 'building';
+let spatialMode = restoredUi.spatialMode === 'floor' ? 'floor' : 'building';
 let orbit = { x: 62, z: -38, scale: 1 };
 let floorView = { scale: 1, x: 0, y: 0, originX: 50, originY: 50 };
 let routeDrawMode = false;
 let routeDrawing = false;
-let routePoints = [];
+let routePoints = Array.isArray(restoredUi.routePoints) ? restoredUi.routePoints : [];
 let selectedTraceOffset = 0;
-let selectedFloor = 7;
-let guidedStep = 0;
+let selectedFloor = Number(restoredUi.selectedFloor) || 7;
+let guidedStep = Number(restoredUi.guidedStep) || 0;
 let selectedToolName = 'read_plan';
-let lastRouteResult = null;
+let lastRouteResult = restoredUi.lastRouteResult || null;
 let buildingScene = null;
 let peopleState = MusterPeopleData.resetPeopleState();
 let conversation = [
@@ -442,25 +443,54 @@ const toolDefinitions = [
       return { training_only: true, recorded: state.humanSignals.at(-1), inference: false, external_effects: false };
     },
   },
-];
+].map((tool) => ({
+  ...tool,
+  title: tool.name.split('_').map((word) => `${word[0].toUpperCase()}${word.slice(1)}`).join(' '),
+  inputSchema: { ...tool.inputSchema, additionalProperties: false },
+  annotations: {
+    untrustedContentHint: false,
+    ...tool.annotations,
+  },
+}));
+
+function persistedState() {
+  return {
+    ...state,
+    ui: { planRead, elapsed, spatialMode, selectedFloor, guidedStep, routePoints, lastRouteResult },
+  };
+}
+
+function persistState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(persistedState()));
+}
+
+function restoreDerivedPeopleState() {
+  const assistanceAssigned = state.decisions.some((item) => item.actionId === 'assist');
+  if (!assistanceAssigned) return;
+  try {
+    MusterPeopleData.assignResponder('responder-s-tan', 'office-studio-07', 'task-assistance-handoff');
+    MusterPeopleData.movePerson('responder-s-tan', 'office-studio-07', MusterPeopleData.PERSON_STATUSES.ASSISTING);
+    peopleState = MusterPeopleData.getPeopleState();
+  } catch { /* deterministic fixture may already be restored */ }
+}
+
+restoreDerivedPeopleState();
 
 function saveAndRender() {
   selectedTraceOffset = 0;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  persistState();
   render();
 }
 
 function logTool(name, detail) {
   state = { ...state, activity: [...state.activity, { type: 'tool', title: name, detail }] };
   selectedTraceOffset = 0;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  persistState();
 }
 
 function showToolResult(value) {
   $('#toolResult').textContent = JSON.stringify(value, null, 2);
 }
-
-const waitFor = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 function tracePayload(value) {
   if (value === undefined) return {};
@@ -490,7 +520,7 @@ function attachTraceEvidence(name, input, result, durationMs, activityStart) {
   if (target >= 0) activity[target] = { ...activity[target], ...evidence };
   else activity.push(evidence);
   state = { ...state, activity };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  persistState();
 }
 
 function maybeAdvanceGuide(name, input) {
@@ -563,6 +593,7 @@ function setSpatialMode(mode) {
     : preset ? `${preset.code} ${preset.label} plan` : `Floor ${String(selectedFloor).padStart(2, '0')} plan`;
   if (spatialMode === 'floor') requestAnimationFrame(applyFloorView);
   else requestAnimationFrame(() => buildingScene?.refresh());
+  persistState();
 }
 
 function renderTower() {
@@ -620,6 +651,7 @@ function selectFloor(floor, openPlan = false) {
     setSpatialMode('floor');
     resetFloorView();
   }
+  persistState();
 }
 
 function applyOrbit() {
@@ -732,14 +764,17 @@ async function callTool(name, input = {}) {
   document.body.classList.add('tool-working');
   renderOperation();
   try {
-    await waitFor(name === 'run_drill_manager' ? 180 : 360);
     const result = await tool.execute(input);
+    if (name === 'start_drill') elapsed = 0;
+    if (name === 'send_inject' && input.inject_id === 'stair') elapsed = Math.max(elapsed, 120);
+    if (name === 'send_inject' && input.inject_id === 'roster') elapsed = Math.max(elapsed, 240);
     const durationMs = Math.max(1, Math.round(performance.now() - startedAt));
     attachTraceEvidence(name, input, result, durationMs, activityStart);
     maybeAdvanceGuide(name, input);
+    persistState();
     if (name === 'record_action' && input.action_id === 'assist') {
       try {
-        MusterPeopleData.assignResponder('responder-s-tan', 'office-studio-07', 'task-floor-coordination');
+        MusterPeopleData.assignResponder('responder-s-tan', 'office-studio-07', 'task-assistance-handoff');
         MusterPeopleData.movePerson('responder-s-tan', 'office-studio-07', MusterPeopleData.PERSON_STATUSES.ASSISTING);
         peopleState = MusterPeopleData.getPeopleState();
       } catch { /* deterministic fixture can already be assigned */ }
@@ -1067,20 +1102,21 @@ function renderReport() {
   const decisionRows = state.decisions.length
     ? state.decisions.map((decision) => `<li><i>✓</i><div><strong>${ACTIONS[decision.actionId].label}</strong><span>${decision.owner} · ${decision.recordedAt}</span></div></li>`).join('')
     : '<li><i>!</i><div><strong>No response recorded</strong><span>Return to the exercise before approval.</span></div></li>';
-  const score = ready ? 100 : Math.max(20, 100 - state.report.unresolved.length * 35);
+  const coveredCount = Math.max(0, state.report.injects - state.report.unresolved.length);
   const routeEvidence = lastRouteResult
     ? `${lastRouteResult.estimated_plan_metres} m sketch · ${lastRouteResult.endpoint_reaches_exit ? 'reaches' : 'stops before'} ${lastRouteResult.endpoint_nearest_exit} · ${lastRouteResult.endpoint_exit_available ? 'available in scenario' : 'unavailable in scenario'}`
     : 'No facilitator sketch attached';
   panel.innerHTML = `<div class="report-sheet ${state.approved ? 'approved' : ''}">
     <header class="report-head"><div><span class="eyebrow">${state.report.id}</span><h3>${state.report.title}</h3></div><span class="report-status">${state.approved ? 'Human approved' : ready ? 'Ready for human review' : 'Action required'}</span></header>
-    <div class="report-hero"><div class="readiness-dial" style="--score:${score * 3.6}deg"><strong>${score}</strong><span>coverage</span></div><div><strong>${ready ? 'Every active problem has an owner.' : `${state.report.unresolved.length} responsibility gap remains.`}</strong><p>${ready ? 'The agent prepared this draft from visible exercise evidence. A Fire Safety Manager still decides whether to accept it.' : 'The unresolved item is preserved instead of being hidden or auto-completed.'}</p></div></div>
-    <div class="report-context"><div><span>Exercise</span><strong>Table-top · MST-0742</strong></div><div><span>Objective</span><strong>Route and role ownership</strong></div><div><span>Plan basis</span><strong>F07 · revision 04</strong></div><div><span>Route evidence</span><strong>${escapeHtml(routeEvidence)}</strong></div></div>
+    <div class="report-hero"><div class="readiness-dial" style="--score:${Math.round((coveredCount / Math.max(1, state.report.injects)) * 360)}deg"><strong>${coveredCount}/${state.report.injects}</strong><span>owned</span></div><div><strong>${ready ? 'Every active exercise problem has an owner.' : `${state.report.unresolved.length} responsibility gap remains.`}</strong><p>${ready ? 'This is ownership coverage, not a safety or readiness score. A Fire Safety Manager still evaluates the evidence.' : 'The unresolved item is preserved instead of being hidden or auto-completed.'}</p></div></div>
+    <div class="report-context"><div><span>Evaluator</span><strong>${escapeHtml(state.report.evaluator)}</strong></div><div><span>Objective</span><strong>${escapeHtml(state.report.objective)}</strong></div><div><span>Plan basis</span><strong>F07 · revision 04</strong></div><div><span>Route evidence</span><strong>${escapeHtml(routeEvidence)}</strong></div></div>
+    <div class="report-comparison"><section><span>Expected</span>${state.report.expected.map((item) => `<p>${escapeHtml(item)}</p>`).join('')}</section><section><span>Observed</span>${state.report.observed.length ? state.report.observed.map((item) => `<p><b>${escapeHtml(item.recordedAt)}</b> ${escapeHtml(ACTIONS[item.actionId].label)} · ${escapeHtml(item.owner)}</p>`).join('') : '<p>No facilitator-confirmed actions recorded.</p>'}</section></div>
     <ul class="report-decisions">${decisionRows}</ul>
     <div class="report-stats"><div><strong>${state.report.injects}</strong><span>events</span></div><div><strong>${state.report.decisions}</strong><span>responses</span></div><div><strong>${state.report.observedParticipantSignals}</strong><span>observations</span></div><div><strong>${state.report.unresolved.length}</strong><span>open gaps</span></div></div>
     <div class="approval-row">
       <button class="secondary-button" id="returnButton" type="button">Return to exercise</button>
       <button class="primary-button" id="approveButton" type="button" ${ready && !state.approved ? '' : 'disabled'}>${state.approved ? 'Approved by FSM' : 'Approve report'}</button>
-    </div>${state.approved ? '<div class="approval-seal"><span>Accepted by</span><strong>Fire Safety Manager</strong><small>human page action · training record</small></div>' : ''}</div>`;
+    </div><div class="improvement-plan"><span>Improvement plan</span>${state.report.improvements.map((item) => `<article><strong>${escapeHtml(item.finding)}</strong><p>${escapeHtml(item.owner)} · ${escapeHtml(item.due)} · ${escapeHtml(item.status)}</p><small>Closure evidence: ${escapeHtml(item.closureEvidence)}</small></article>`).join('')}</div>${state.approved ? '<div class="approval-seal"><span>Accepted by</span><strong>Fire Safety Manager</strong><small>human page action · training record</small></div>' : ''}</div>`;
   $('#returnButton').addEventListener('click', () => { state = returnToDrill(state); saveAndRender(); });
   $('#approveButton').addEventListener('click', () => {
     try { state = approveReport(state); saveAndRender(); }
@@ -1309,11 +1345,13 @@ function render() {
 
 function startClock() {
   if (timer || state.status === 'ready') return;
+  $('#exerciseClock').textContent = `${String(Math.floor(elapsed / 60)).padStart(2, '0')}:${String(elapsed % 60).padStart(2, '0')}`;
   timer = setInterval(() => {
     elapsed += 1;
     const minutes = Math.floor(elapsed / 60);
     const seconds = elapsed % 60;
     $('#exerciseClock').textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    if (elapsed % 5 === 0) persistState();
     if (state.status === 'complete') { clearInterval(timer); timer = null; }
   }, 1000);
 }
@@ -1355,7 +1393,7 @@ function toolPreset(toolName) {
     : state.injectIds.includes('stair') && !state.decisions.some((item) => item.actionId === 'reroute') ? 'reroute' : 'account';
   return {
     run_drill_manager: { intent: 'orient' }, read_plan: {}, start_drill: {}, send_inject: { inject_id: nextInject }, record_action: { action_id: nextAction }, check_coverage: {}, stage_report: {},
-    inspect_zone: { zone_id: 'studio' }, compare_routes: { zone_id: 'studio' }, analyze_route_sketch: { zone_id: 'studio', points: [{ x: 704, y: 397 }, { x: 520, y: 420 }, { x: 205, y: 479 }] },
+    inspect_zone: { zone_id: 'studio' }, compare_routes: { zone_id: 'studio' }, analyze_route_sketch: { zone_id: 'studio', points: [{ x: 704, y: 397 }, { x: 704, y: 330 }, { x: 637, y: 330 }, { x: 520, y: 420 }, { x: 205, y: 479 }] },
     read_drill_guide: { phase: 'before' }, read_hazard: {}, read_floor_register: {}, read_status_board: {}, read_site_context: {}, read_room_profile: { room_id: 'studio' }, read_equipment: {}, read_lessons: {}, record_human_signal: { role_id: 'security', signal: 'uncertain' },
   }[toolName] || {};
 }
@@ -1373,13 +1411,19 @@ function renderToolList() {
     const mode = tool.annotations?.readOnlyHint ? 'read only' : 'changes page fixture';
     return `<article class="tool-item ${tool.name === selectedToolName ? 'selected' : ''}" data-tool-card="${tool.name}" tabindex="0"><code>${tool.name}</code><p>${tool.description}</p><div class="tool-meta"><span>${specialist} · ${mode}</span><button type="button" data-tool-run="${tool.name}" ${toolCanRun(tool.name) ? '' : 'disabled'}>Run on fixture</button></div></article>`;
   }).join('');
-  $('#toolList').querySelectorAll('[data-tool-card]').forEach((card) => card.addEventListener('click', (event) => {
-    if (event.target.closest('[data-tool-run]')) return;
-    selectedToolName = card.dataset.toolCard;
-    const tool = toolDefinitions.find((candidate) => candidate.name === selectedToolName);
-    showToolResult({ tool: tool.name, purpose: tool.description, example_input: toolPreset(tool.name), visible_effect: traceMeta[tool.name]?.change || 'Returns visible page context.', boundary: traceMeta[tool.name]?.boundary || 'Training fixture only.' });
-    renderToolList();
-  }));
+  $('#toolList').querySelectorAll('[data-tool-card]').forEach((card) => {
+    const inspect = (event) => {
+      if (event.target.closest('[data-tool-run]')) return;
+      selectedToolName = card.dataset.toolCard;
+      const tool = toolDefinitions.find((candidate) => candidate.name === selectedToolName);
+      showToolResult({ tool: tool.name, purpose: tool.description, example_input: toolPreset(tool.name), visible_effect: traceMeta[tool.name]?.change || 'Returns visible page context.', boundary: traceMeta[tool.name]?.boundary || 'Training fixture only.' });
+      renderToolList();
+    };
+    card.addEventListener('click', inspect);
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); inspect(event); }
+    });
+  });
   $('#toolList').querySelectorAll('[data-tool-run]').forEach((button) => button.addEventListener('click', () => {
     selectedToolName = button.dataset.toolRun;
     beginConversation(`Run ${friendlyToolNames[selectedToolName] || selectedToolName}`);
@@ -1496,6 +1540,7 @@ function setupSpatialInteractions() {
       }
     }
     panDrag = null;
+    window.getSelection()?.removeAllRanges();
     floor.classList.remove('dragging');
     if (event?.pointerId && floor.hasPointerCapture(event.pointerId)) floor.releasePointerCapture(event.pointerId);
   };
@@ -1552,6 +1597,12 @@ $('#closeTools').addEventListener('click', () => $('#toolDialog').close());
 $('#dossierButton').addEventListener('click', () => $('#dossierDialog').showModal());
 $('#closeDossier').addEventListener('click', () => $('#dossierDialog').close());
 $('#closePerson').addEventListener('click', () => $('#personDialog').close());
+$('#conversationToggle').addEventListener('click', () => {
+  const dock = document.querySelector('.conversation-dock');
+  const collapsed = dock.classList.toggle('collapsed');
+  $('#conversationToggle').textContent = collapsed ? 'Open chat' : 'Collapse';
+  $('#conversationToggle').setAttribute('aria-expanded', String(!collapsed));
+});
 $('#personDialog').addEventListener('click', (event) => { if (event.target === $('#personDialog')) $('#personDialog').close(); });
 $('#rehearsalButton').addEventListener('click', runGuidedRehearsal);
 $('#guidedNextButton').addEventListener('click', () => runGuidedStep().catch(() => {}));

@@ -97,17 +97,17 @@
             <div class="building-copy">
               <span class="building-kicker">Meridian Exchange · training twin</span>
               <h2>Select the floor.<br />Then read the plan.</h2>
-              <p>Drag to orbit, scroll to zoom, or choose one of three loaded training plans.</p>
+              <p>Drag to orbit, inspect the complete Floor 07 drill, or open two clearly labelled reference plans.</p>
               <div class="building-metrics">
                 <div><strong>18</strong><span>floors</span></div>
                 <div><strong>84</strong><span>people · L07</span></div>
                 <div><strong>2</strong><span>need assistance</span></div>
               </div>
               <div class="floor-library" aria-label="Loaded training plans">
-                <span>Loaded plans</span>
-                <button type="button" data-plan-floor="3">F03 <small>Retail</small></button>
-                <button type="button" class="active" data-plan-floor="7">F07 <small>Office</small></button>
-                <button type="button" data-plan-floor="12">F12 <small>Care</small></button>
+                <span>One live drill · two references</span>
+                <button type="button" data-plan-floor="3">F03 <small>Reference</small></button>
+                <button type="button" class="active" data-plan-floor="7">F07 <small>Live drill</small></button>
+                <button type="button" data-plan-floor="12">F12 <small>Reference</small></button>
               </div>
               <button class="primary-button" id="enterFloorButton" type="button">Inspect Floor 07 →</button>
             </div>
@@ -291,22 +291,25 @@
             <div class="commander-avatar" aria-hidden="true">IC</div>
             <div><span class="eyebrow">Incident Commander</span><strong>Ask the plan, people, equipment, or review desk</strong></div>
             <span class="conversation-state"><i></i> Ready</span>
+            <button class="conversation-toggle" id="conversationToggle" type="button" aria-expanded="true">Collapse</button>
           </header>
-          <div class="conversation-history" id="conversationHistory" role="log" aria-live="polite">
-            <article class="conversation-turn assistant"><span>IC</span><p>Start with the plan. I will open one decision at a time, show every tool call, and wait for you before anything changes.</p></article>
+          <div class="conversation-body">
+            <div class="conversation-history" id="conversationHistory" role="log" aria-live="polite">
+              <article class="conversation-turn assistant"><span>IC</span><p>Start with the plan. I will open one decision at a time, show every tool call, and wait for you before anything changes.</p></article>
+            </div>
+            <div class="quick-actions command-desks" aria-label="Command desks">
+              <button type="button" data-agent-prompt="plan">Plan</button>
+              <button type="button" data-agent-prompt="people">People</button>
+              <button type="button" data-agent-prompt="equipment">Equipment</button>
+              <button type="button" data-agent-prompt="roles">Roles</button>
+              <button type="button" data-agent-prompt="rehearse">Guide me</button>
+            </div>
+            <form class="agent-composer" id="agentForm">
+              <label class="sr-only" for="agentPrompt">Ask the Incident Commander</label>
+              <input id="agentPrompt" autocomplete="off" placeholder="Ask: who is on Floor 7, what is missing, or which route is open?" />
+              <button type="submit" aria-label="Send request">→</button>
+            </form>
           </div>
-          <div class="quick-actions command-desks" aria-label="Command desks">
-            <button type="button" data-agent-prompt="plan">Plan</button>
-            <button type="button" data-agent-prompt="people">People</button>
-            <button type="button" data-agent-prompt="equipment">Equipment</button>
-            <button type="button" data-agent-prompt="roles">Roles</button>
-            <button type="button" data-agent-prompt="rehearse">Guide me</button>
-          </div>
-          <form class="agent-composer" id="agentForm">
-            <label class="sr-only" for="agentPrompt">Ask the Incident Commander</label>
-            <input id="agentPrompt" autocomplete="off" placeholder="Ask: who is on Floor 7, what is missing, or which route is open?" />
-            <button type="submit" aria-label="Send request">→</button>
-          </form>
         </section>
 
         <dialog class="context-dialog" id="dossierDialog">

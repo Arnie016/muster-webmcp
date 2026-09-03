@@ -7,6 +7,7 @@
     "test": "node tests.mjs && node --test tests/people-data.test.js && node stress-tests.mjs",
     "stress": "node stress-tests.mjs",
     "test:browser": "node scripts/browser-smoke.cjs",
+    "test:webmcp": "node scripts/webmcp-native-smoke.cjs",
     "serve": "python3 -m http.server 4179"
   }
 }

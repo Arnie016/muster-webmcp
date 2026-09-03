@@ -69,7 +69,7 @@ npm run serve
 
 Open `http://localhost:4179` in ChatGPT's in-app browser or a WebMCP-enabled Chrome build. The visible controls also provide a manual rehearsal when WebMCP is unavailable.
 
-`npm test` includes 500 shuffled workflows that check idempotency, route-sketch boundaries, invalid transitions, human approval gates, fictional-person referential integrity, and the no-external-effects boundary. `npm run test:browser` exercises the 18-floor model, all three loaded plan types, guided rehearsal, persistent route receipt, inspectable tool and person details, report approval, and 390×844 mobile layout when Playwright is available.
+`npm test` includes 500 shuffled workflows that check idempotency, route-sketch boundaries, invalid transitions, human approval gates, fictional-person referential integrity, and the no-external-effects boundary. `npm run test:browser` exercises the 18-floor model, the complete Floor 07 drill plus two reference-plan views, guided rehearsal, persistent route receipt, inspectable tool and person details, report approval, and 390×844 mobile layout when Playwright is available. `npm run test:webmcp` launches Chrome with WebMCP testing enabled, discovers all 19 native `document.modelContext` tools, executes `read_plan`, and verifies the visible trace changed.
 
 ## What existed before
 
@@ -81,7 +81,7 @@ Without WebMCP, a facilitator clicks through the exercise manually. With WebMCP,
 
 ## Evidence boundary
 
-This MVP is publicly deployed and the local verification proves the deterministic page workflow, interactive building and floor-plan controls, manager routing, visible call inspector, and WebMCP registration code. The displayed count of 84 is a fictional exercise register, not live occupancy. A standard browser does not expose `document.modelContext`, so native agent discovery still needs one recorded run in a WebMCP-enabled browser. It does not prove real fire-team adoption, regulatory compliance, multiplayer collaboration, or integration with emergency services.
+This MVP is publicly deployed. Local verification proves the deterministic page workflow, interactive building and floor-plan controls, manager routing, visible call inspector, and native WebMCP registration and execution in Chrome 152 with testing enabled. The displayed count of 84 is a fictional exercise register, not live occupancy. The native test proves only that this page registered 19 tools and that Chrome executed `read_plan` against the same visible tab. It does not prove ChatGPT-specific behavior, real fire-team adoption, regulatory compliance, multiplayer collaboration, or integration with emergency services.
 
 ## References
 

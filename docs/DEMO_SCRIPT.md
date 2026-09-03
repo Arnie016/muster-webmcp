@@ -19,7 +19,7 @@ Muster is a shared command surface for rehearsing a fictional building incident.
 | 00:35–00:43 | Animate the causal architecture: facilitator request → manager → named tools → changed shared state → human decision. | **A request becomes a visible plan.** | An incident commander routes work to bounded plan, people, equipment, and review tools, all sharing the visible drill state. |
 | 00:43–00:49 | Show a large, reconstructed trace table. Select each call to reveal its reason, visible change, and guardrail. | **Every call explains itself.** | Each call explains what happened, why it was allowed, and what visibly changed. |
 | 00:49–01:00 | Show the designed after-action report and the deliberately absent agent approval tool. | **Agent prepares. Human approves.** | The agent compares routes, records confirmed actions, and stages the report. It cannot infer intent, contact responders, or approve the outcome. |
-| 01:00–01:09 | Proof ledger: working public interface, 500 workflows, 19 contracts, and pending native discovery. | **Proof, with boundaries.** | Five hundred shuffled workflows test the state transitions and human approval gate. Native WebMCP capture remains pending. |
+| 01:00–01:09 | Proof ledger: working public interface, 500 workflows, 19 contracts, and native Chrome execution. | **Proof, with boundaries.** | Five hundred shuffled workflows test the state transitions and human approval gate. Chrome separately discovers and executes the page tools. |
 | 01:09–01:15 | Final frame with the live URL and one action. | **Try the live drill.** | Muster is fictional training software. Try the live drill. |
 
 ## Architecture shown in the film
@@ -31,7 +31,7 @@ Human facilitator: “Stair B is blocked. Check the Studio route.”
 Incident Commander
        ├── inspect_zone → Studio · 6 people · 2 assisted
        ├── compare_routes → Stair B unavailable
-       ├── analyze_route_sketch → 18 m · endpoint Stair A
+       ├── analyze_route_sketch → 30.1 m · endpoint Stair A
        └── check_coverage → 1 assistance owner missing
                          │
                          ▼
@@ -65,4 +65,4 @@ Replace either source image, then run `npm run proof:sync` inside `trailer/`. Th
 - Human-only final approval.
 - No emergency calls, dispatch, alarms, door control, or live evacuation guidance.
 - Tool contracts and local tests are current proof.
-- Native WebMCP discovery has not been observed in the available test browser; a compatible-browser capture remains pending.
+- Native WebMCP discovery and `read_plan` execution were observed in Chrome 152 with WebMCP testing enabled; this does not prove support in every browser.

@@ -4,7 +4,7 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const shots = path.join(root, 'docs', 'screenshots');
-const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
+const url = process.env.MUSTER_URL || 'http://127.0.0.1:4179';
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -50,7 +50,10 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
   await page.waitForFunction(() => document.querySelector('#floorView') && !document.querySelector('#floorView').classList.contains('view-hidden'));
   assert.match(await page.locator('#floorZoomLabel').innerText(), /100%/);
   assert.match(await page.locator('#scenarioSequence').innerText(), /Plan read/);
-  assert.ok(await page.locator('[data-sequence-stage="plan"].current').isVisible());
+  await page.waitForFunction(() => document.querySelector('[data-sequence-stage="plan"]')?.classList.contains('done'));
+  assert.ok(await page.locator('[data-sequence-stage="signal"].current').isVisible());
+  assert.ok(await page.locator('.drawing-title-block').isVisible());
+  assert.ok(await page.locator('.map-key').isVisible());
 
   await page.locator('#toolButton').click();
   await page.locator('[data-tool-card="inspect_zone"]').click();
@@ -132,6 +135,12 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
   assert.ok(await page.locator('#userRoute.active').isVisible());
   assert.ok(await page.locator('#routeReceipt').isVisible());
   assert.match(await page.locator('#routeReceipt').innerText(), /Route analysis receipt/i);
+  await page.locator('#toolButton').click();
+  await page.locator('[data-tool-run="analyze_route_sketch"]').click();
+  await page.waitForFunction(() => /30\.1 m/i.test(document.querySelector('#routeReceipt')?.textContent || ''));
+  await page.locator('#closeTools').click();
+  await page.evaluate(() => window.getSelection()?.removeAllRanges());
+  assert.match(await page.locator('#routeReceipt').innerText(), /30\.1 m.*Stair A.*Reaches exit/is);
   assert.match(await page.locator('#traceInspector').innerText(), /why this call/i);
   assert.match(await page.locator('#traceInspector').innerText(), /Input/i);
   assert.match(await page.locator('#traceInspector').innerText(), /Output/i);

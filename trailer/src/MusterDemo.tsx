@@ -226,7 +226,7 @@ const ArchitectureScene: React.FC<{scene: Scene; authorityBoundary: string}> = (
           <Kicker>SAME VISIBLE FLOOR</Kicker><Mono style={{fontSize: 13, color: palette.green}}>UPDATED</Mono>
         </div>
         <div style={{padding: 24, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13}}>
-          {[['ZONE', 'Studio · 6'], ['EXIT', 'Stair B blocked'], ['ROUTE', '18 m to Stair A'], ['OWNER', 'Needs assignment']].map(([label, value], index) => (
+          {[['ZONE', 'Studio · 6'], ['EXIT', 'Stair B blocked'], ['ROUTE', '30.1 m to Stair A'], ['OWNER', 'Needs assignment']].map(([label, value], index) => (
             <div key={label} style={{padding: '18px 17px', borderRadius: 14, border: `1px solid ${palette.line}`, background: palette.panel, opacity: show(28 + index * 4)}}>
               <Mono style={{fontSize: 12, color: palette.faint}}>{label}</Mono><strong style={{display: 'block', marginTop: 7, fontSize: 20}}>{value}</strong>
             </div>
@@ -282,7 +282,7 @@ const RuntimeScene: React.FC<{scene: Scene}> = ({scene}) => {
   const tools = [
     ['inspect_zone', 'Studio · 6 people · 2 assisted', 70],
     ['compare_routes', 'Stair B unavailable', 116],
-    ['analyze_route_sketch', '18 m · endpoint Stair A', 184],
+    ['analyze_route_sketch', '30.1 m · endpoint Stair A', 184],
   ] as const;
   return (
     <AbsoluteFill style={{...base, background: palette.ink}}>
@@ -333,9 +333,9 @@ const TraceScene: React.FC<{scene: Scene}> = ({scene}) => {
   const {fps} = useVideoConfig();
   const rows = [
     {time: '00:01', phase: 'OBSERVE', tool: 'inspect_zone', result: 'Studio · 6 people · 2 assisted', color: palette.cyan, why: 'Read the room selected on the plan.', change: 'Studio becomes the active zone.', guard: 'Training fixture counts only.'},
-    {time: '00:03', phase: 'THINK', tool: 'compare_routes', result: 'Stair B unavailable', color: palette.red, why: 'Compare exits after the drill change.', change: 'Blocked route turns red.', guard: 'No live evacuation direction.'},
-    {time: '00:05', phase: 'THINK', tool: 'analyze_route_sketch', result: '18 m · endpoint Stair A', color: palette.green, why: 'Measure the facilitator-drawn line.', change: 'Safe alternative appears in green.', guard: 'Qualified human reviews any real route.'},
-    {time: '00:07', phase: 'VERIFY', tool: 'check_coverage', result: '1 assistance owner missing', color: palette.amber, why: 'Find active tasks without an owner.', change: 'The roster gap remains visible.', guard: 'The tool cannot invent completion.'},
+    {time: '02:30', phase: 'THINK', tool: 'compare_routes', result: 'Stair B unavailable', color: palette.red, why: 'Compare exits after the drill change.', change: 'Unavailable route turns red.', guard: 'No live evacuation direction.'},
+    {time: '02:31', phase: 'THINK', tool: 'analyze_route_sketch', result: '30.1 m · endpoint Stair A', color: palette.green, why: 'Measure the facilitator-drawn line.', change: 'Available exercise alternative appears in green.', guard: 'Qualified human reviews any real route.'},
+    {time: '04:31', phase: 'VERIFY', tool: 'check_coverage', result: '1 assistance owner missing', color: palette.amber, why: 'Find active tasks without an owner.', change: 'The roster gap remains visible.', guard: 'The tool cannot invent completion.'},
   ];
   const active = Math.min(rows.length - 1, Math.max(0, Math.floor(frame / 85)));
   const detail = rows[active];
@@ -405,8 +405,8 @@ const LedgerScene: React.FC<{scene: Scene; totalToolContracts: number}> = ({scen
   const rows = [
     ['WORKING', 'Live public rehearsal interface', palette.green],
     ['TESTED', '500 shuffled workflows · human approval gate', palette.green],
-    ['SOURCE', `${totalToolContracts} declared WebMCP tool contracts`, palette.cyan],
-    ['PENDING', 'Native discovery capture in a compatible browser', palette.amber],
+    ['NATIVE', `Chrome discovered ${totalToolContracts} WebMCP tools`, palette.cyan],
+    ['EXECUTED', 'read_plan changed the visible trace', palette.green],
   ] as const;
   return <AbsoluteFill style={{...base, background: palette.ink}}><BrandBar sceneId={scene.id} /><div style={{position: 'absolute', left: 180, right: 180, top: 150}}><h1 style={{fontSize: 70, margin: 0, letterSpacing: '-0.05em'}}>{scene.headline}</h1><p style={{fontSize: 23, color: palette.muted, margin: '14px 0 30px'}}>{scene.support}</p><div style={{borderTop: `1px solid ${palette.line}`}}>{rows.map(([status, label, color], index) => {const enter = revealAt(frame, fps, index * 8, 110); return <div key={status} style={{display: 'grid', gridTemplateColumns: '180px 1fr 28px', alignItems: 'center', minHeight: 116, borderBottom: `1px solid ${palette.line}`, opacity: enter}}><Mono style={{fontSize: 15, color}}>{status}</Mono><strong style={{fontSize: 28}}>{label}</strong><span style={{width: 14, height: 14, borderRadius: 99, background: color}} /></div>;})}</div></div></AbsoluteFill>;
 };

@@ -115,7 +115,7 @@ Use `run_drill_manager({"intent":"rehearse"})` only when the human explicitly as
 - If `check_coverage` returns unresolved items, do not bypass them or stage a “complete” claim.
 - If an input is outside the declared enum, show the allowed options and ask for a valid choice.
 - If a route sketch has fewer than 2 or more than 80 points, leaves the 900×610 fictional plan, stops before an exit, or reaches a scripted unavailable exit, report that result for facilitator review; do not reinterpret it as an approved route.
-- If native WebMCP tools are not discoverable, use the visible manual interface or stop. The repository contains registration code, but that alone is not proof of successful discovery in the current browser.
+- If native WebMCP tools are not discoverable, use the visible manual interface or stop. The repository includes a passing Chrome 152 verifier, but each new browser session must still report `WebMCP live` before claiming native execution in that tab.
 - If the situation is real rather than a tabletop exercise, stop operating Muster and direct the user to the official local emergency process.
 
 ## Truthful output pattern
@@ -134,4 +134,4 @@ Human next step: [one decision or approval]
 
 For a local Codex installation, place this repository folder—or a copy containing `SKILL.md` and `docs/OPERATOR_GUIDE.md`—in the configured skills directory. Loading this skill teaches the operator the contract; it does not itself connect the browser or register tools.
 
-Muster's source attempts registration through `document.modelContext.registerTool` only when that API exists. Confirm the compatible browser reports successful registration before claiming live native WebMCP use. Otherwise, describe the code contract and manual page behavior separately.
+Muster registers through `document.modelContext.registerTool` only when that API exists. `npm run test:webmcp` now verifies discovery of all 19 tools and executes `read_plan` in Chrome 152 with WebMCP testing enabled. This is native browser proof for that test run, not evidence of ChatGPT-specific behavior or real-building integration.

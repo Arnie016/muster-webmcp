@@ -66,4 +66,4 @@ YouTube upload and Devpost publication remain separate, explicit release steps.
 2. Replace screenshots with `proof:sync`.
 3. Change React components only when the layout or motion system itself must change.
 
-The current cut opens with the operational reason for rehearsal, reaches real product proof at 11.5 seconds, and includes a 25-second browser-recorded interaction. The architecture and trace scenes explain the source-defined WebMCP contracts at a readable scale; they are not a native-browser discovery capture. The proof ledger states that remaining gate explicitly.
+The current cut opens with the operational reason for rehearsal, reaches real product proof at 11.5 seconds, and includes a 25-second browser-recorded interaction. The architecture and trace scenes explain the page contracts at a readable scale. A separate native Chrome capture shows `WebMCP live`, all 19 discovered tools, and `read_plan` executed against the same visible tab.

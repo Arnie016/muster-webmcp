@@ -65,12 +65,12 @@ export const ACTIONS = {
 };
 
 export const ZONES = {
-  west: { id: 'west', label: 'West workplace', occupants: 29, assisted: 0, nearestExit: 'Stair A', distanceM: 24 },
-  east: { id: 'east', label: 'East workplace', occupants: 39, assisted: 0, nearestExit: 'Stair B', distanceM: 21 },
-  meeting: { id: 'meeting', label: 'Meeting suite', occupants: 8, assisted: 0, nearestExit: 'Stair A', distanceM: 14 },
-  studio: { id: 'studio', label: 'Studio', occupants: 6, assisted: 2, nearestExit: 'Stair B', distanceM: 18 },
-  lobby: { id: 'lobby', label: 'Lift lobby', occupants: 2, assisted: 0, nearestExit: 'Stair A', distanceM: 31 },
-  electrical: { id: 'electrical', label: 'Electrical room 7-E', occupants: 0, assisted: 0, nearestExit: 'Stair A', distanceM: 37 },
+  west: { id: 'west', label: 'West workplace', occupants: 29, assisted: 0, nearestExit: 'Stair A', distanceM: 24, alternateExit: 'Stair B', alternateDistanceM: 62 },
+  east: { id: 'east', label: 'East workplace', occupants: 39, assisted: 0, nearestExit: 'Stair B', distanceM: 21, alternateExit: 'Stair A', alternateDistanceM: 45 },
+  meeting: { id: 'meeting', label: 'Meeting suite', occupants: 8, assisted: 0, nearestExit: 'Stair A', distanceM: 14, alternateExit: 'Stair B', alternateDistanceM: 52 },
+  studio: { id: 'studio', label: 'Studio', occupants: 6, assisted: 2, nearestExit: 'Stair B', distanceM: 18, alternateExit: 'Stair A', alternateDistanceM: 30.1 },
+  lobby: { id: 'lobby', label: 'Lift lobby', occupants: 2, assisted: 0, nearestExit: 'Stair A', distanceM: 31, alternateExit: 'Stair B', alternateDistanceM: 55 },
+  electrical: { id: 'electrical', label: 'Electrical room 7-E', occupants: 0, assisted: 0, nearestExit: 'Stair A', distanceM: 37, alternateExit: 'Stair B', alternateDistanceM: 61 },
 };
 
 export const SITE_CONTEXT = {
@@ -188,15 +188,11 @@ export function compareRoutes(state, zoneId) {
   const zone = ZONES[zoneId];
   if (!zone) throw new Error('Unknown floor zone.');
   const stairBBlocked = state.injectIds.includes('stair');
-  const alternatives = zoneId === 'west' || zoneId === 'meeting'
-    ? [
-        { exit: 'Stair A', distance_m: zone.distanceM, scenario_status: 'available' },
-        { exit: 'Stair B', distance_m: zone.distanceM + 38, scenario_status: stairBBlocked ? 'unavailable' : 'available' },
-      ]
-    : [
-        { exit: 'Stair B', distance_m: zone.distanceM, scenario_status: stairBBlocked ? 'unavailable' : 'available' },
-        { exit: 'Stair A', distance_m: zone.distanceM + 24, scenario_status: 'available' },
-      ];
+  const routeStatus = (exit) => exit === 'Stair B' && stairBBlocked ? 'unavailable' : 'available';
+  const alternatives = [
+    { exit: zone.nearestExit, distance_m: zone.distanceM, scenario_status: routeStatus(zone.nearestExit) },
+    { exit: zone.alternateExit, distance_m: zone.alternateDistanceM, scenario_status: routeStatus(zone.alternateExit) },
+  ];
   return {
     training_only: true,
     zone: zone.label,
@@ -300,7 +296,7 @@ export function recordAction(state, actionId) {
     ...state,
     decisions: [
       ...state.decisions,
-      { actionId, owner: action.owner, recordedAt: `T+${String(state.decisions.length * 2 + 1).padStart(2, '0')}:00` },
+      { actionId, owner: action.owner, recordedAt: ({ reroute: 'T+02:30', assist: 'T+04:30', account: 'T+05:00' })[actionId] },
     ],
     report: null,
     approved: false,
@@ -313,6 +309,9 @@ export function recordAction(state, actionId) {
 
 export function checkCoverage(state) {
   const unresolved = [];
+  if (state.injectIds.includes('smoke') && !state.decisions.some((item) => item.actionId === 'account')) {
+    unresolved.push({ id: 'smoke', label: 'Floor 7 accounting has no recorded owner.' });
+  }
   if (state.injectIds.includes('stair') && !state.decisions.some((item) => item.actionId === 'reroute')) {
     unresolved.push({ id: 'stair', label: 'No alternate route recorded for Stair B.' });
   }
@@ -338,6 +337,24 @@ export function stageReport(state) {
     injects: state.injectIds.length,
     unresolved: coverage.unresolved,
     status: coverage.unresolved.length ? 'needs-action' : 'ready-for-review',
+    evaluator: 'Fire Safety Manager · human review required',
+    objective: 'Rehearse a blocked-route decision, assisted-occupant ownership, and floor accounting.',
+    expected: [
+      'Wardens record an available alternate route after the Stair B inject.',
+      'A named responder owns the two-person assistance rehearsal.',
+      'Chief Security records the Floor 07 assembly-area reconciliation.',
+    ],
+    observed: state.decisions.map((decision) => ({
+      actionId: decision.actionId,
+      owner: decision.owner,
+      recordedAt: decision.recordedAt,
+    })),
+    uncertainties: state.humanSignals.length
+      ? state.humanSignals.filter((signal) => signal.signal !== 'confirms')
+      : [{ role: 'Exercise team', signal: 'No participant observation recorded' }],
+    improvements: coverage.unresolved.length
+      ? coverage.unresolved.map((gap) => ({ finding: gap.label, owner: 'Unassigned', due: 'Set during human review', status: 'open', closureEvidence: 'Not supplied' }))
+      : [{ finding: 'Repeat the route-change and assistance handoff on the next scheduled drill.', owner: 'Fire Safety Manager', due: 'Next exercise cycle', status: 'proposed', closureEvidence: 'Future rehearsal record' }],
   };
   return {
     ...state,
