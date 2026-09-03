@@ -83,6 +83,13 @@ Current native proof uses Chrome 152 with WebMCP testing enabled. `document.mode
 - Browser checks cover desktop, 390 by 844 mobile, the WebGL twin, route analysis, the complete rehearsal, and human report approval.
 - Deterministic tests include six people-data tests and 500 shuffled workflows for repeat-safe actions, invalid transitions, route boundaries, and approval gates.
 
+## WebMCP Challenge fit
+
+- **WebMCP leverage:** the agent discovers structured tools and operates the same live page as the facilitator. Calls produce visible plan, people, route, scenario, trace, and review changes rather than disconnected chat text.
+- **Execution:** the public product supports a complete guided rehearsal on desktop and mobile, an interactive WebGL/CSS spatial view, inspectable tool contracts and receipts, deterministic tests, and native discovery and execution evidence.
+- **Potential impact:** Muster targets the real coordination shape of tabletop building drills: changing conditions, named responsibilities, route evidence, and after-action review. No field adoption, safety outcome, or professional validation is claimed yet.
+- **Creativity and ambition:** one manager coordinates four bounded specialist desks and 18 page tools over a spatial command room while preserving an explicit human approval boundary.
+
 ## Safety and truth boundaries
 
 Muster does not monitor a real building, read sensors, infer live occupancy, certify equipment, calculate physical fire spread, approve an evacuation route, raise alarms, control doors, contact emergency services, dispatch responders, or provide instructions during a live emergency.
