@@ -208,6 +208,44 @@ export function compareRoutes(state, zoneId) {
   };
 }
 
+export function analyzeRouteSketch(state, zoneId, points) {
+  const zone = ZONES[zoneId];
+  if (!zone) throw new Error('Unknown floor zone.');
+  if (!Array.isArray(points) || points.length < 2 || points.length > 80) {
+    throw new Error('A route sketch needs between 2 and 80 points.');
+  }
+  const cleanPoints = points.map((point) => ({ x: Number(point.x), y: Number(point.y) }));
+  if (cleanPoints.some((point) => !Number.isFinite(point.x) || !Number.isFinite(point.y) || point.x < 0 || point.x > 900 || point.y < 0 || point.y > 610)) {
+    throw new Error('Route sketch points must stay inside the fictional floor plan.');
+  }
+  const planUnits = cleanPoints.slice(1).reduce((total, point, index) => {
+    const previous = cleanPoints[index];
+    return total + Math.hypot(point.x - previous.x, point.y - previous.y);
+  }, 0);
+  const end = cleanPoints.at(-1);
+  const exits = [
+    { id: 'stair-a', label: 'Stair A', x: 205, y: 479, available: true },
+    { id: 'stair-b', label: 'Stair B', x: 742, y: 479, available: !state.injectIds.includes('stair') },
+  ].map((exit) => ({ ...exit, endpointDistance: Math.hypot(end.x - exit.x, end.y - exit.y) }));
+  const nearest = [...exits].sort((a, b) => a.endpointDistance - b.endpointDistance)[0];
+  return {
+    training_only: true,
+    zone: zone.label,
+    waypoint_count: cleanPoints.length,
+    estimated_plan_metres: Math.round(planUnits * (38 / 760) * 10) / 10,
+    endpoint_nearest_exit: nearest.label,
+    endpoint_reaches_exit: nearest.endpointDistance <= 80,
+    endpoint_exit_available: nearest.available,
+    review: nearest.endpointDistance > 80
+      ? 'The sketch stops before an exit and needs facilitator review.'
+      : nearest.available
+        ? `The sketch reaches ${nearest.label}, which is available in this exercise.`
+        : `The sketch reaches ${nearest.label}, which is unavailable in this exercise. Compare an alternate route.`,
+    decision_boundary: 'Geometry is measured against a fictional plan. A qualified human must approve any real evacuation route.',
+    external_effects: false,
+  };
+}
+
 export function hazardSnapshot(state) {
   const phase = state.injectIds.includes('roster') ? 'T+04:00' : state.injectIds.includes('stair') ? 'T+02:00' : state.injectIds.includes('smoke') ? 'T+00:00' : 'READY';
   return {

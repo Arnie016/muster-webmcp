@@ -21,8 +21,9 @@
         <span>Floor 07 training scenario</span>
       </div>
       <div class="topbar-actions">
+        <a class="quiet-button skill-download" href="SKILL.md" download>Skill.md ↓</a>
         <button class="quiet-button" id="dossierButton" type="button">Building file</button>
-        <button class="quiet-button" id="toolButton" type="button"><span id="toolCount">18</span> tools</button>
+        <button class="quiet-button" id="toolButton" type="button"><span id="toolCount">19</span> tools</button>
         <span class="training-pill"><i></i> Training only</span>
       </div>
     </header>
@@ -69,8 +70,52 @@
           <strong>No sensors or emergency connection</strong>
         </div>
 
-        <div class="floor-wrap">
-          <svg class="floor-plan" viewBox="0 0 900 610" role="img" aria-labelledby="floorTitle floorDesc">
+        <section class="spatial-console" aria-label="Interactive building model">
+          <header class="spatial-toolbar">
+            <div>
+              <span class="eyebrow">Spatial command</span>
+              <strong id="spatialTitle">18-floor building model</strong>
+            </div>
+            <div class="view-switch" role="group" aria-label="Spatial view">
+              <button class="active" id="buildingMode" type="button">3D building</button>
+              <button id="floorMode" type="button">Floor 07 plan</button>
+            </div>
+          </header>
+
+          <div class="building-view" id="buildingView">
+            <div class="building-copy">
+              <span class="building-kicker">Meridian Exchange · training twin</span>
+              <h2>Select the floor.<br />Then read the plan.</h2>
+              <p>Drag to orbit. Scroll to zoom. Floor 07 is the loaded exercise file.</p>
+              <div class="building-metrics">
+                <div><strong>18</strong><span>floors</span></div>
+                <div><strong>84</strong><span>people · L07</span></div>
+                <div><strong>2</strong><span>need assistance</span></div>
+              </div>
+              <button class="primary-button" id="enterFloorButton" type="button">Inspect Floor 07 →</button>
+            </div>
+            <div class="building-viewport" id="buildingViewport" aria-label="Draggable three-dimensional building model">
+              <div class="building-orbit" id="buildingOrbit">
+                <div class="tower-core" id="towerCore" aria-label="Building floors"></div>
+              </div>
+              <div class="orbit-controls">
+                <button type="button" id="orbitLeft" aria-label="Rotate building left">↶</button>
+                <button type="button" id="orbitReset">Reset view</button>
+                <button type="button" id="orbitRight" aria-label="Rotate building right">↷</button>
+              </div>
+              <div class="floor-beacon"><i></i><span>F07 · exercise loaded</span></div>
+            </div>
+            <div class="building-status" id="buildingStatus"><span>Selected</span><strong>Floor 07</strong><p>Fire protection and egress plan · revision 04</p></div>
+          </div>
+        </section>
+
+        <div class="floor-wrap view-hidden" id="floorView">
+          <div class="plan-controls">
+            <div><button id="backToBuilding" type="button">← Building</button><strong>Floor 07 · 1:200</strong></div>
+            <div><button id="drawRouteButton" type="button">Draw a route</button><button id="resetPlanView" type="button">Reset view</button><span id="floorZoomLabel">100%</span></div>
+          </div>
+          <div class="floor-viewport" id="floorViewport">
+          <svg class="floor-plan" id="floorPlan" viewBox="0 0 900 610" role="img" aria-labelledby="floorTitle floorDesc">
             <title id="floorTitle">Fictional Floor 7 fire drill plan</title>
             <desc id="floorDesc">An office floor with east and west zones, Stair A, Stair B, lift lobby, electrical room, refuge point, and two evacuation routes.</desc>
             <defs>
@@ -145,7 +190,17 @@
               <text x="425" y="564">11 900</text>
             </g>
             <g class="north"><path d="M806 31l10-20 10 20h-7v20h-6V31z"/><text x="809" y="66">N</text></g>
+            <g class="inspection-hotspots" aria-label="Inspectable rooms">
+              <rect data-floor-zone="west" x="70" y="72" width="260" height="278" rx="4"><title>Inspect West workplace</title></rect>
+              <rect data-floor-zone="east" x="568" y="72" width="262" height="278" rx="4"><title>Inspect East workplace</title></rect>
+              <rect data-floor-zone="meeting" x="70" y="350" width="260" height="185" rx="4"><title>Inspect Meeting suite</title></rect>
+              <rect data-floor-zone="studio" x="568" y="350" width="262" height="185" rx="4"><title>Inspect Studio</title></rect>
+              <rect data-floor-zone="lobby" x="330" y="72" width="238" height="138" rx="4"><title>Inspect Lift lobby</title></rect>
+              <rect data-floor-zone="electrical" x="478" y="210" width="90" height="140" rx="4"><title>Inspect Electrical room</title></rect>
+            </g>
+            <polyline class="user-route" id="userRoute" points="" />
           </svg>
+          </div>
           <div class="drawing-title-block" aria-label="Drawing title block">
             <div><span>Project</span><strong>Meridian Exchange · fictional training fixture</strong></div>
             <div><span>Drawing</span><strong>Level 07 fire protection &amp; egress plan</strong></div>
@@ -174,6 +229,7 @@
             <p>The agent can read routes, roles, and plan revision. It cannot control building systems.</p>
           </div>
           <div class="simulation-status"><i></i><span id="simulationLabel">Simulation idle</span></div>
+          <div class="plan-gesture" id="planGesture">Click a room · drag to pan · scroll to zoom</div>
           <div class="scan-beam" aria-hidden="true"></div>
         </div>
 
@@ -230,11 +286,7 @@
           <span data-specialist="plan">Plan</span><span data-specialist="people">People</span><span data-specialist="equipment">Equipment</span><span data-specialist="review">Review</span>
         </div>
         <section class="phase-guide" id="phaseGuide" aria-live="polite"></section>
-        <details class="runtime-trace" open>
-          <summary><span>WebMCP calls</span><small>visible page actions only</small></summary>
-          <div class="runtime-events" id="runtimeEvents" aria-live="polite"></div>
-          <small id="lastActivity">Waiting for plan read</small>
-        </details>
+        <section class="operation-card" id="operationCard" aria-live="polite"></section>
         <section class="prompt-card" id="promptCard">
           <span class="prompt-number">01</span>
           <div>
@@ -251,6 +303,12 @@
         <section class="coverage-panel" id="coveragePanel" hidden aria-live="polite"></section>
         <section class="report-panel" id="reportPanel" hidden aria-live="polite"></section>
         <button class="primary-button report-button" id="reportButton" type="button" disabled>Prepare after-action report</button>
+        <details class="runtime-trace" open>
+          <summary><span>Live trace</span><small>select a call to inspect it</small></summary>
+          <div class="runtime-events" id="runtimeEvents" aria-live="polite"></div>
+          <div class="trace-inspector" id="traceInspector"></div>
+          <small id="lastActivity">Waiting for plan read</small>
+        </details>
       </aside>
     </main>
 
@@ -264,7 +322,7 @@
         <div><span class="eyebrow">Incident Commander</span><h2>One manager, four specialists.</h2></div>
         <button class="icon-button" id="closeTools" type="button" aria-label="Close agent tools">Close</button>
       </div>
-      <p class="dialog-intro">The manager routes work to these page tools. Each call is visible in the Runtime Bench. None contacts emergency services or controls a building.</p>
+      <p class="dialog-intro">The manager routes work to these page tools. Each call is visible in the Live trace. None contacts emergency services or controls a building.</p>
       <div class="rehearsal-row">
         <div><strong>See the agent loop</strong><small>Runs only this fictional page and pauses for human report approval.</small></div>
         <button class="primary-button" id="rehearsalButton" type="button">Run guided rehearsal</button>

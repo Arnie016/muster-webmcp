@@ -26,19 +26,19 @@ Muster gives the team one five-step drill:
 4. The facilitator records the route, accounting action, and assistance owner that the team actually chose.
 5. The agent checks responsibility coverage and stages an after-action report for human approval.
 
-The page includes Plan, People, Equipment, and Roles desks, a conversational Incident Commander, a changing SVG blueprint, and a visible WebMCP call trace. The displayed 84-person count is clearly labeled as fictional exercise data, not a live sensor feed.
+The page includes an orbitable 18-floor building, a pan-and-zoom Floor 07 blueprint, directly inspectable rooms, a route-drawing tool, Plan, People, Equipment, and Roles desks, a conversational Incident Commander, and an explainable WebMCP call trace. The displayed 84-person count is clearly labeled as fictional exercise data, not a live sensor feed.
 
 ## How WebMCP is used
 
-Muster registers one manager tool and seventeen bounded page tools through `document.modelContext.registerTool`. An agent can inspect the same plan the person sees, focus rooms, compare scripted route availability, read the exercise register, inspect planned equipment, record facilitator-confirmed actions, find missing owners, and prepare a review. Tool results update the live interface, so the human can see and correct the agent's work.
+Muster registers one manager tool and eighteen bounded page tools through `document.modelContext.registerTool`. An agent can inspect the same plan the person sees, focus rooms, measure a facilitator-drawn path, compare scripted route availability, read the exercise register, inspect planned equipment, record facilitator-confirmed actions, find missing owners, and prepare a review. Tool results update the live interface, so the human can see and correct the agent's work.
 
 Human approval is deliberately not a tool. The agent cannot approve the report, infer a person's competence or intent, claim real building clearance, trigger alarms, call responders, control doors, or provide live emergency directions.
 
 ## How we built it
 
 - A deterministic JavaScript state machine models the fictional drill, injects, actions, review, and approval boundary.
-- Eighteen WebMCP tool contracts expose only bounded page actions.
-- An SVG blueprint visualizes rooms, two exits, planned safety equipment, route changes, and the current exercise signal.
+- Nineteen WebMCP tool contracts expose only bounded page actions.
+- A CSS 3D building and interactive SVG blueprint visualize floors, rooms, dimensions, two exits, planned safety equipment, route changes, and facilitator-drawn paths.
 - A command desk routes plain-language requests to Plan, People, Equipment, or Review specialists.
 - Local storage preserves the current fictional exercise without sending personal data to a server.
 - The interface is responsive and deployed on Vercel.
@@ -51,7 +51,7 @@ The central design challenge was making the agent useful without making it look 
 ## Accomplishments
 
 - The person and agent operate the same visual plan.
-- Every agent call is visible in the page.
+- Every agent call is visible and inspectable in the page, including why it ran, what changed, and what remains outside its authority.
 - The workflow fails closed on invalid state changes.
 - The final approval remains human-only.
 - Desktop and 390×844 mobile walkthroughs complete without overflow or console errors.

@@ -14,7 +14,7 @@ The interface makes the next action explicit:
 4. Record facilitator-confirmed team actions and owners.
 5. Check the exercise and stage an after-action report for human approval.
 
-The bottom command desk gives the person four plain entry points—Plan, People, Equipment, and Roles—plus a full demonstration. The right rail explains the current step and shows every WebMCP call. Raw tool names are evidence, not the primary interface.
+The spatial command starts with an orbitable 18-floor building, then opens Floor 07 as a pan-and-zoom response plan. Rooms are directly inspectable, and a facilitator can draw a route for the agent to measure against the scripted exit state. The bottom command desk gives the person four plain entry points—Plan, People, Equipment, and Roles—plus a full demonstration. The right rail explains the current step and lets a reviewer open every WebMCP call to see its purpose, visible effect, and safety boundary.
 
 ## Safety boundary
 
@@ -31,6 +31,7 @@ Muster is training software. It does not monitor a real building, place calls, r
 - `stage_report` — prepare the reviewable after-action draft.
 - `inspect_zone` — highlight a fictional zone and read fixture occupancy, assistance, and plan-distance context.
 - `compare_routes` — compare fictional route distances and scripted availability without directing a real evacuation.
+- `analyze_route_sketch` — measure a facilitator-drawn path and flag whether it ends at an available exercise exit.
 - `read_drill_guide` — return the before, during, or after exercise checklist.
 - `read_hazard` — return the authored scenario phase while explicitly refusing a physical fire-spread claim.
 - `read_floor_register` — expose aggregate fictional zone counts and assistance ownership without personal data.
@@ -66,7 +67,7 @@ npm run serve
 
 Open `http://localhost:4179` in ChatGPT's in-app browser or a WebMCP-enabled Chrome build. The visible controls also provide a manual rehearsal when WebMCP is unavailable.
 
-`npm test` includes 500 shuffled workflows that check idempotency, invalid transitions, human approval gates, and the no-external-effects boundary.
+`npm test` includes 500 shuffled workflows that check idempotency, route-sketch boundaries, invalid transitions, human approval gates, and the no-external-effects boundary. `npm run test:browser` exercises the 3D building, Floor 07 transition, guided rehearsal, report approval, and 390×844 mobile layout when Playwright is available.
 
 ## What existed before
 
@@ -78,7 +79,7 @@ Without WebMCP, a facilitator clicks through the exercise manually. With WebMCP,
 
 ## Evidence boundary
 
-This MVP is publicly deployed and proves the deterministic page workflow, manager routing, visible runtime trace, and WebMCP registration code. The displayed count of 84 is a fictional exercise register, not live occupancy. A standard browser does not expose `document.modelContext`, so native agent discovery still needs one recorded run in a WebMCP-enabled browser. It does not prove real fire-team adoption, regulatory compliance, multiplayer collaboration, or integration with emergency services.
+This MVP is publicly deployed and the local verification proves the deterministic page workflow, interactive building and floor-plan controls, manager routing, visible call inspector, and WebMCP registration code. The displayed count of 84 is a fictional exercise register, not live occupancy. A standard browser does not expose `document.modelContext`, so native agent discovery still needs one recorded run in a WebMCP-enabled browser. It does not prove real fire-team adoption, regulatory compliance, multiplayer collaboration, or integration with emergency services.
 
 ## References
 

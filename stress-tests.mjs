@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   addInject,
+  analyzeRouteSketch,
   approveReport,
   checkCoverage,
   createInitialState,
@@ -46,6 +47,9 @@ for (let run = 0; run < 500; run += 1) {
   assert.equal(inspection.result.training_only, true);
   assert.equal(inspection.result.external_effects, false);
   assert.equal(checkCoverage(state).unresolved.length, 0);
+  const route = analyzeRouteSketch(state, zone, [{ x: 420, y: 310 }, { x: 205, y: 479 }]);
+  assert.equal(route.training_only, true);
+  assert.equal(route.external_effects, false);
 
   state = stageReport(state);
   assert.equal(state.report.status, 'ready-for-review');

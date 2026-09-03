@@ -9,6 +9,7 @@ import {
   SITE_CONTEXT,
   ZONES,
   addInject,
+  analyzeRouteSketch,
   approveReport,
   checkCoverage,
   compareRoutes,
@@ -41,6 +42,13 @@ let elapsed = state.status === 'ready' ? 0 : 240;
 let dossierView = 'context';
 let managerBusy = false;
 let pendingAssistant = null;
+let spatialMode = 'building';
+let orbit = { x: 62, z: -38, scale: 1 };
+let floorView = { scale: 1, x: 0, y: 0, originX: 50, originY: 50 };
+let routeDrawMode = false;
+let routeDrawing = false;
+let routePoints = [];
+let selectedTraceOffset = 0;
 let conversation = [
   { role: 'assistant', text: 'I can inspect the plan, roles, equipment, routes, history, and run the complete rehearsal.' },
 ];
@@ -159,6 +167,8 @@ const toolDefinitions = [
     execute: async ({ zone_id }) => {
       const inspection = inspectZone(state, zone_id);
       state = inspection.state;
+      setSpatialMode('floor');
+      focusFloorZone(zone_id);
       saveAndRender();
       return inspection.result;
     },
@@ -175,6 +185,29 @@ const toolDefinitions = [
     execute: async ({ zone_id }) => {
       const result = compareRoutes(state, zone_id);
       logTool('compare_routes', `${result.zone} · ${result.alternatives.length} plan routes`);
+      render();
+      return result;
+    },
+  },
+  {
+    name: 'analyze_route_sketch',
+    description: 'Measure a facilitator-drawn path against this fictional plan and flag whether its endpoint reaches an available exit.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        zone_id: { type: 'string', enum: ['west', 'east', 'meeting', 'studio', 'lobby', 'electrical'] },
+        points: {
+          type: 'array', minItems: 2, maxItems: 80,
+          items: { type: 'object', properties: { x: { type: 'number' }, y: { type: 'number' } }, required: ['x', 'y'] },
+        },
+      },
+      required: ['zone_id', 'points'],
+    },
+    annotations: { readOnlyHint: true },
+    execute: async ({ zone_id, points }) => {
+      const result = analyzeRouteSketch(state, zone_id, points);
+      routePoints = points;
+      logTool('analyze_route_sketch', `${result.estimated_plan_metres} m sketch · ${result.endpoint_nearest_exit}`);
       render();
       return result;
     },
@@ -279,6 +312,8 @@ const toolDefinitions = [
       const inspection = inspectZone(state, room_id);
       state = inspection.state;
       dossierView = 'rooms';
+      setSpatialMode('floor');
+      focusFloorZone(room_id);
       saveAndRender();
       return { ...inspection.result, profile: ROOM_PROFILES[room_id], cause_inferred: false };
     },
@@ -331,12 +366,14 @@ const toolDefinitions = [
 ];
 
 function saveAndRender() {
+  selectedTraceOffset = 0;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   render();
 }
 
 function logTool(name, detail) {
   state = { ...state, activity: [...state.activity, { type: 'tool', title: name, detail }] };
+  selectedTraceOffset = 0;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
@@ -345,7 +382,7 @@ function showToolResult(value) {
 }
 
 const specialistForTool = {
-  read_plan: 'plan', start_drill: 'plan', inspect_zone: 'plan', compare_routes: 'plan', read_hazard: 'plan', read_site_context: 'plan',
+  read_plan: 'plan', start_drill: 'plan', inspect_zone: 'plan', compare_routes: 'plan', analyze_route_sketch: 'plan', read_hazard: 'plan', read_site_context: 'plan',
   send_inject: 'people', read_floor_register: 'people', read_status_board: 'people', record_human_signal: 'people', record_action: 'people',
   read_equipment: 'equipment', read_room_profile: 'equipment', read_drill_guide: 'equipment',
   check_coverage: 'review', stage_report: 'review', read_lessons: 'review',
@@ -360,6 +397,7 @@ const friendlyToolNames = {
   stage_report: 'Prepare review',
   inspect_zone: 'Inspect floor zone',
   compare_routes: 'Compare exit routes',
+  analyze_route_sketch: 'Analyze drawn route',
   read_drill_guide: 'Read drill checklist',
   read_hazard: 'Read scripted hazard',
   read_floor_register: 'Read people register',
@@ -371,8 +409,121 @@ const friendlyToolNames = {
   record_human_signal: 'Record observation',
 };
 
+const traceMeta = {
+  'Exercise loaded': { phase: 'Observe', owner: 'System', why: 'Load a clean fictional exercise state.', change: 'No building state changed.', boundary: 'No network or emergency connection.' },
+  'WebMCP ready': { phase: 'Ready', owner: 'Manager', why: 'Expose the visible page actions to an enabled browser agent.', change: 'Tools became discoverable in this tab.', boundary: 'Registration does not grant hidden data or external control.' },
+  read_plan: { phase: 'Think', owner: 'Plan specialist', why: 'Ground the exercise in the visible plan revision, exits, roles, and fixture counts.', change: 'Plan context is available to the drill manager.', boundary: 'Reads only this fictional page.' },
+  start_drill: { phase: 'Act', owner: 'Plan specialist', why: 'Begin the authored tabletop sequence.', change: 'The smoke inject appears beside room 7-E.', boundary: 'No alarm, dispatch, door, or building system is activated.' },
+  send_inject: { phase: 'Act', owner: 'People specialist', why: 'Introduce one controlled complication for the team to respond to.', change: 'The timeline, map, and responsibility checks update together.', boundary: 'The facilitator chooses when an inject is delivered.' },
+  inspect_zone: { phase: 'Observe', owner: 'Plan specialist', why: 'Focus the plan on one room and its fixture occupancy, assistance, and exit distance.', change: 'The floor view zooms to the selected zone.', boundary: 'Counts and dimensions are training fixtures.' },
+  compare_routes: { phase: 'Think', owner: 'Plan specialist', why: 'Compare the two authored exit paths after conditions change.', change: 'Available and unavailable alternatives are surfaced.', boundary: 'It does not direct a live evacuation.' },
+  analyze_route_sketch: { phase: 'Think', owner: 'Plan specialist', why: 'Measure the route the facilitator drew and inspect its endpoint.', change: 'The custom path and review verdict appear on the same plan.', boundary: 'A qualified human must approve any real route.' },
+  read_floor_register: { phase: 'Observe', owner: 'People specialist', why: 'Read aggregate fixture counts and assistance ownership.', change: 'The current people context is returned.', boundary: 'No personal data or live sensor count.' },
+  record_action: { phase: 'Record', owner: 'People specialist', why: 'Preserve a facilitator-confirmed team action and named owner.', change: 'Responsibility coverage updates.', boundary: 'The agent cannot invent that an action occurred.' },
+  record_human_signal: { phase: 'Record', owner: 'People specialist', why: 'Capture an observed confirmation, delay, uncertainty, or disagreement.', change: 'The observation is added to the review record.', boundary: 'No personality, intent, emotion, or competence inference.' },
+  check_coverage: { phase: 'Verify', owner: 'Review specialist', why: 'Check that every active exercise problem has a recorded owner.', change: 'Open gaps are listed without being auto-resolved.', boundary: 'Passing the check is not proof of real-world readiness.' },
+  stage_report: { phase: 'Prepare', owner: 'Review specialist', why: 'Turn the visible exercise log into an after-action draft.', change: 'A review artifact is staged.', boundary: 'Human Fire Safety Manager approval remains mandatory.' },
+  'Human approval': { phase: 'Approve', owner: 'Fire Safety Manager', why: 'Accept the complete training record after review.', change: 'The draft becomes an approved exercise record.', boundary: 'This is a human page action, not an agent tool call.' },
+};
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
+}
+
+function setSpatialMode(mode) {
+  spatialMode = mode === 'floor' ? 'floor' : 'building';
+  $('#buildingView').classList.toggle('view-hidden', spatialMode !== 'building');
+  $('#floorView').classList.toggle('view-hidden', spatialMode !== 'floor');
+  $('#buildingMode').classList.toggle('active', spatialMode === 'building');
+  $('#floorMode').classList.toggle('active', spatialMode === 'floor');
+  $('#spatialTitle').textContent = spatialMode === 'building' ? '18-floor building model' : 'Floor 07 response plan';
+  if (spatialMode === 'floor') requestAnimationFrame(applyFloorView);
+}
+
+function renderTower() {
+  const tower = $('#towerCore');
+  if (!tower || tower.childElementCount) return;
+  tower.innerHTML = Array.from({ length: 18 }, (_, index) => {
+    const floor = 18 - index;
+    return `<button class="tower-floor ${floor === 7 ? 'selected loaded' : ''}" style="--level:${floor}" data-building-floor="${floor}" type="button" aria-label="Select floor ${String(floor).padStart(2, '0')}"><span>F${String(floor).padStart(2, '0')}</span><i></i><b></b></button>`;
+  }).join('');
+  tower.querySelectorAll('[data-building-floor]').forEach((button) => button.addEventListener('click', () => {
+    const floor = Number(button.dataset.buildingFloor);
+    tower.querySelectorAll('[data-building-floor]').forEach((candidate) => candidate.classList.toggle('selected', candidate === button));
+    const loaded = floor === 7;
+    $('#buildingStatus').innerHTML = loaded
+      ? '<span>Exercise file loaded</span><strong>Floor 07</strong><p>84 fixture occupants · 2 assisted · plan revision 04</p>'
+      : `<span>Building context</span><strong>Floor ${String(floor).padStart(2, '0')}</strong><p>No exercise plan is loaded for this floor.</p>`;
+    $('#enterFloorButton').disabled = !loaded;
+    $('#enterFloorButton').textContent = loaded ? 'Inspect Floor 07 →' : 'Floor file unavailable';
+  }));
+}
+
+function applyOrbit() {
+  $('#buildingOrbit').style.setProperty('--orbit-x', `${orbit.x}deg`);
+  $('#buildingOrbit').style.setProperty('--orbit-z', `${orbit.z}deg`);
+  $('#buildingOrbit').style.setProperty('--orbit-scale', String(orbit.scale));
+}
+
+function resetOrbit() {
+  orbit = { x: 62, z: -38, scale: 1 };
+  applyOrbit();
+}
+
+function applyFloorView() {
+  const plan = $('#floorPlan');
+  if (!plan) return;
+  plan.style.setProperty('--floor-scale', String(floorView.scale));
+  plan.style.setProperty('--floor-x', `${floorView.x}px`);
+  plan.style.setProperty('--floor-y', `${floorView.y}px`);
+  plan.style.setProperty('--origin-x', `${floorView.originX}%`);
+  plan.style.setProperty('--origin-y', `${floorView.originY}%`);
+  $('#floorZoomLabel').textContent = `${Math.round(floorView.scale * 100)}%`;
+}
+
+const floorFocus = {
+  west: [22, 34], east: [78, 34], meeting: [22, 72], studio: [78, 72], lobby: [50, 24], electrical: [59, 47],
+};
+
+function focusFloorZone(zoneId) {
+  const point = floorFocus[zoneId] || [50, 50];
+  floorView = { scale: 1.42, x: 0, y: 0, originX: point[0], originY: point[1] };
+  applyFloorView();
+}
+
+function resetFloorView() {
+  floorView = { scale: 1, x: 0, y: 0, originX: 50, originY: 50 };
+  routeDrawMode = false;
+  routeDrawing = false;
+  $('#drawRouteButton').classList.remove('active');
+  $('#drawRouteButton').textContent = 'Draw a route';
+  $('#planGesture').textContent = 'Click a room · drag to pan · scroll to zoom';
+  applyFloorView();
+}
+
+function svgPoint(event) {
+  const svg = $('#floorPlan');
+  const point = svg.createSVGPoint();
+  point.x = event.clientX;
+  point.y = event.clientY;
+  const transformed = point.matrixTransform(svg.getScreenCTM().inverse());
+  return { x: Math.max(0, Math.min(900, Math.round(transformed.x))), y: Math.max(0, Math.min(610, Math.round(transformed.y))) };
+}
+
+function renderRouteSketch() {
+  $('#userRoute').setAttribute('points', routePoints.map((point) => `${point.x},${point.y}`).join(' '));
+  $('#userRoute').classList.toggle('active', routePoints.length > 1);
+}
+
+function traceDetails(event) {
+  const meta = traceMeta[event?.title] || {
+    phase: event?.type === 'human' ? 'Human' : 'Observe',
+    owner: event?.type === 'human' ? 'Facilitator' : 'Page tool',
+    why: 'Make the exercise state visible and reviewable.',
+    change: 'The visible exercise state was read.',
+    boundary: 'Training data only. No hidden side effect.',
+  };
+  return { ...meta, outcome: event?.detail || 'Waiting for the first page action.' };
 }
 
 function renderConversation() {
@@ -434,6 +585,7 @@ function summariseToolResult(name, result) {
   if (name === 'check_coverage') return result.unresolved.length ? `${result.unresolved.length} active responsibility gap${result.unresolved.length === 1 ? '' : 's'} still need an owner.` : 'Every active exercise problem has a recorded owner.';
   if (name === 'stage_report') return 'The after-action draft is ready. A human Fire Safety Manager must approve it.';
   if (name === 'inspect_zone') return `${result.zone}: ${result.fixture_occupants} fixture occupants, ${result.plan_distance_metres} m to ${result.nearest_plan_exit}.`;
+  if (name === 'analyze_route_sketch') return `${result.estimated_plan_metres} m drawn route. ${result.review}`;
   if (name === 'read_floor_register') return `${BUILDING.occupants} people are listed in this fictional exercise register. It is not a live sensor count.`;
   if (name === 'read_equipment') return `${result.equipment.length} planned items are listed. Open the Equipment desk to see locations and inspection fixtures.`;
   if (name === 'read_status_board') return 'The exercise status is based only on facilitator-recorded actions; Muster does not infer real clearance.';
@@ -608,14 +760,19 @@ function renderReport() {
   panel.hidden = !state.report;
   if (!state.report) return;
   const ready = state.report.unresolved.length === 0;
-  panel.innerHTML = `<span class="eyebrow">${state.report.id}</span>
-    <h3>${state.report.title}</h3>
-    <p>${ready ? 'The draft is complete enough for Fire Safety Manager review.' : 'The draft preserves the unresolved responsibility. Return to the exercise to assign it.'}</p>
-    <div class="report-stats"><div><strong>${state.report.injects}</strong><span>injects</span></div><div><strong>${state.report.decisions}</strong><span>actions</span></div><div><strong>${state.report.observedParticipantSignals}</strong><span>observations</span></div><div><strong>${state.report.unresolved.length}</strong><span>gaps</span></div></div>
+  const decisionRows = state.decisions.length
+    ? state.decisions.map((decision) => `<li><i>✓</i><div><strong>${ACTIONS[decision.actionId].label}</strong><span>${decision.owner} · ${decision.recordedAt}</span></div></li>`).join('')
+    : '<li><i>!</i><div><strong>No response recorded</strong><span>Return to the exercise before approval.</span></div></li>';
+  const score = ready ? 100 : Math.max(20, 100 - state.report.unresolved.length * 35);
+  panel.innerHTML = `<div class="report-sheet ${state.approved ? 'approved' : ''}">
+    <header class="report-head"><div><span class="eyebrow">${state.report.id}</span><h3>${state.report.title}</h3></div><span class="report-status">${state.approved ? 'Human approved' : ready ? 'Ready for human review' : 'Action required'}</span></header>
+    <div class="report-hero"><div class="readiness-dial" style="--score:${score * 3.6}deg"><strong>${score}</strong><span>coverage</span></div><div><strong>${ready ? 'Every active problem has an owner.' : `${state.report.unresolved.length} responsibility gap remains.`}</strong><p>${ready ? 'The agent prepared this draft from visible exercise evidence. A Fire Safety Manager still decides whether to accept it.' : 'The unresolved item is preserved instead of being hidden or auto-completed.'}</p></div></div>
+    <ul class="report-decisions">${decisionRows}</ul>
+    <div class="report-stats"><div><strong>${state.report.injects}</strong><span>events</span></div><div><strong>${state.report.decisions}</strong><span>responses</span></div><div><strong>${state.report.observedParticipantSignals}</strong><span>observations</span></div><div><strong>${state.report.unresolved.length}</strong><span>open gaps</span></div></div>
     <div class="approval-row">
       <button class="secondary-button" id="returnButton" type="button">Return to exercise</button>
       <button class="primary-button" id="approveButton" type="button" ${ready && !state.approved ? '' : 'disabled'}>${state.approved ? 'Approved by FSM' : 'Approve report'}</button>
-    </div>`;
+    </div>${state.approved ? '<div class="approval-seal"><span>Accepted by</span><strong>Fire Safety Manager</strong><small>human page action · training record</small></div>' : ''}</div>`;
   $('#returnButton').addEventListener('click', () => { state = returnToDrill(state); saveAndRender(); });
   $('#approveButton').addEventListener('click', () => {
     try { state = approveReport(state); saveAndRender(); }
@@ -665,6 +822,7 @@ function renderMap() {
   else if (stairBlocked) callout.innerHTML = '<span>Route change</span><strong>Stair B is unavailable</strong><p>Record the team’s alternate route. The exercise does not control doors or alarms.</p>';
   else if (hasSmoke) callout.innerHTML = '<span>Exercise signal</span><strong>Detector at room 7-E</strong><p>This is a fictional inject. The site has not received a live alarm.</p>';
   else callout.innerHTML = '<span>Plan intelligence</span><strong>Two exits available</strong><p>The agent can read routes, roles, and plan revision. It cannot control building systems.</p>';
+  renderRouteSketch();
 }
 
 function renderControls() {
@@ -719,12 +877,28 @@ function renderStatus() {
       : state.status === 'review' ? 'Simulation paused for review' : 'Exercise complete';
 }
 
+function renderOperation() {
+  const latest = state.activity.at(-1);
+  const details = traceDetails(latest);
+  const activePhase = managerBusy ? 'Thinking' : details.phase;
+  $('#operationCard').innerHTML = `<div class="operation-signal ${managerBusy ? 'working' : ''}"><i></i><span>${activePhase}</span></div><div><strong>${details.owner}</strong><p>${details.outcome}</p></div><small>${details.boundary}</small>`;
+}
+
 function renderRuntime() {
   const panel = $('#runtimeEvents');
   if (!panel) return;
-  panel.innerHTML = state.activity.slice(-7).reverse().map((event) => `<article class="runtime-event ${event.type === 'human' ? 'human' : ''}">
-    <i></i><div><strong>${friendlyToolNames[event.title] || event.title.replaceAll('_', ' ')}</strong><span>${event.detail}</span></div><time>${event.title}</time>
-  </article>`).join('');
+  const visible = state.activity.slice(-6).reverse();
+  if (selectedTraceOffset >= visible.length) selectedTraceOffset = 0;
+  panel.innerHTML = visible.map((event, index) => `<button type="button" class="runtime-event ${event.type === 'human' ? 'human' : ''} ${index === selectedTraceOffset ? 'selected' : ''}" data-trace-offset="${index}">
+    <i></i><div><strong>${friendlyToolNames[event.title] || event.title.replaceAll('_', ' ')}</strong><span>${event.detail}</span></div><time>${traceDetails(event).phase}</time>
+  </button>`).join('');
+  panel.querySelectorAll('[data-trace-offset]').forEach((button) => button.addEventListener('click', () => {
+    selectedTraceOffset = Number(button.dataset.traceOffset);
+    renderRuntime();
+  }));
+  const selected = visible[selectedTraceOffset] || state.activity.at(-1);
+  const details = traceDetails(selected);
+  $('#traceInspector').innerHTML = `<div><span>Why this call</span><strong>${details.why}</strong></div><div><span>Visible change</span><strong>${details.change}</strong></div><p>${details.boundary}</p>`;
 }
 
 function render() {
@@ -739,6 +913,7 @@ function render() {
   renderControls();
   renderPhaseGuide();
   renderStatus();
+  renderOperation();
   renderRuntime();
   renderConversation();
 }
@@ -785,6 +960,7 @@ async function runGuidedRehearsal() {
     await callTool('inspect_zone', { zone_id: 'studio' });
     await callTool('send_inject', { inject_id: 'stair' });
     await callTool('compare_routes', { zone_id: 'studio' });
+    await callTool('analyze_route_sketch', { zone_id: 'studio', points: [{ x: 704, y: 397 }, { x: 630, y: 410 }, { x: 520, y: 420 }, { x: 390, y: 447 }, { x: 205, y: 479 }] });
     await callTool('record_action', { action_id: 'reroute' });
     await callTool('send_inject', { inject_id: 'roster' });
     await callTool('record_human_signal', { role_id: 'security', signal: 'uncertain' });
@@ -801,6 +977,129 @@ function renderToolList() {
   $('#toolList').innerHTML = toolDefinitions.map((tool) => `<article class="tool-item"><code>${tool.name}</code><p>${tool.description}</p></article>`).join('');
 }
 
+function setupSpatialInteractions() {
+  renderTower();
+  applyOrbit();
+  applyFloorView();
+
+  const openFloor = () => {
+    setSpatialMode('floor');
+    if (!planRead) {
+      beginConversation('Read the Floor 7 plan');
+      callTool('read_plan').catch(() => {});
+    }
+  };
+  $('#enterFloorButton').addEventListener('click', openFloor);
+  $('#floorMode').addEventListener('click', openFloor);
+  $('#buildingMode').addEventListener('click', () => setSpatialMode('building'));
+  $('#backToBuilding').addEventListener('click', () => setSpatialMode('building'));
+  $('#orbitLeft').addEventListener('click', () => { orbit.z -= 12; applyOrbit(); });
+  $('#orbitRight').addEventListener('click', () => { orbit.z += 12; applyOrbit(); });
+  $('#orbitReset').addEventListener('click', resetOrbit);
+
+  const building = $('#buildingViewport');
+  let orbitDrag = null;
+  building.addEventListener('pointerdown', (event) => {
+    if (event.target.closest('button')) return;
+    orbitDrag = { x: event.clientX, y: event.clientY, startX: orbit.x, startZ: orbit.z };
+    building.setPointerCapture(event.pointerId);
+    building.classList.add('dragging');
+  });
+  building.addEventListener('pointermove', (event) => {
+    if (!orbitDrag) return;
+    orbit.z = orbitDrag.startZ + (event.clientX - orbitDrag.x) * .22;
+    orbit.x = Math.max(42, Math.min(76, orbitDrag.startX - (event.clientY - orbitDrag.y) * .12));
+    applyOrbit();
+  });
+  const endOrbit = () => { orbitDrag = null; building.classList.remove('dragging'); };
+  building.addEventListener('pointerup', endOrbit);
+  building.addEventListener('pointercancel', endOrbit);
+  building.addEventListener('wheel', (event) => {
+    event.preventDefault();
+    orbit.scale = Math.max(.72, Math.min(1.32, orbit.scale - Math.sign(event.deltaY) * .08));
+    applyOrbit();
+  }, { passive: false });
+
+  const floor = $('#floorViewport');
+  let panDrag = null;
+  floor.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+    if (routeDrawMode) {
+      routeDrawing = true;
+      routePoints = [svgPoint(event)];
+      floor.setPointerCapture(event.pointerId);
+      floor.classList.add('drawing');
+      renderRouteSketch();
+      return;
+    }
+    if (event.target.closest('[data-floor-zone]')) return;
+    panDrag = { x: event.clientX, y: event.clientY, startX: floorView.x, startY: floorView.y };
+    floor.setPointerCapture(event.pointerId);
+    floor.classList.add('dragging');
+  });
+  floor.addEventListener('pointermove', (event) => {
+    if (routeDrawing) {
+      const point = svgPoint(event);
+      const previous = routePoints.at(-1);
+      if (!previous || Math.hypot(point.x - previous.x, point.y - previous.y) > 8) {
+        routePoints.push(point);
+        renderRouteSketch();
+      }
+      return;
+    }
+    if (!panDrag) return;
+    floorView.x = panDrag.startX + event.clientX - panDrag.x;
+    floorView.y = panDrag.startY + event.clientY - panDrag.y;
+    applyFloorView();
+  });
+  const endFloorGesture = (event) => {
+    if (routeDrawing) {
+      routeDrawing = false;
+      floor.classList.remove('drawing');
+      if (routePoints.length > 1) {
+        const first = routePoints[0];
+        const zone = first.x > 568 ? (first.y > 350 ? 'studio' : 'east') : first.x < 330 ? (first.y > 350 ? 'meeting' : 'west') : 'lobby';
+        routeDrawMode = false;
+        $('#drawRouteButton').classList.remove('active');
+        $('#drawRouteButton').textContent = 'Draw another route';
+        $('#planGesture').textContent = 'Analyzing the drawn route against the exercise plan…';
+        beginConversation(`Analyze my ${zone} route sketch`);
+        callTool('analyze_route_sketch', { zone_id: zone, points: routePoints }).then((result) => {
+          $('#planGesture').textContent = result.review;
+        }).catch(() => { $('#planGesture').textContent = 'The route could not be analyzed.'; });
+      }
+    }
+    panDrag = null;
+    floor.classList.remove('dragging');
+    if (event?.pointerId && floor.hasPointerCapture(event.pointerId)) floor.releasePointerCapture(event.pointerId);
+  };
+  floor.addEventListener('pointerup', endFloorGesture);
+  floor.addEventListener('pointercancel', endFloorGesture);
+  floor.addEventListener('wheel', (event) => {
+    event.preventDefault();
+    floorView.scale = Math.max(1, Math.min(2.2, floorView.scale - Math.sign(event.deltaY) * .12));
+    applyFloorView();
+  }, { passive: false });
+
+  $('#resetPlanView').addEventListener('click', resetFloorView);
+  $('#drawRouteButton').addEventListener('click', () => {
+    routeDrawMode = !routeDrawMode;
+    routePoints = [];
+    renderRouteSketch();
+    floor.classList.toggle('drawing', routeDrawMode);
+    $('#drawRouteButton').classList.toggle('active', routeDrawMode);
+    $('#drawRouteButton').textContent = routeDrawMode ? 'Drawing… release to analyze' : 'Draw a route';
+    $('#planGesture').textContent = routeDrawMode ? 'Draw from a room to an exit. Release to run the route tool.' : 'Click a room · drag to pan · scroll to zoom';
+  });
+
+  document.querySelectorAll('[data-floor-zone]').forEach((hotspot) => hotspot.addEventListener('click', () => {
+    if (routeDrawMode) return;
+    const zone = hotspot.dataset.floorZone;
+    beginConversation(`Inspect ${zone}`);
+    callTool('inspect_zone', { zone_id: zone }).catch(() => {});
+  }));
+}
+
 $('#reportButton').addEventListener('click', () => callTool('stage_report'));
 $('#resetButton').addEventListener('click', () => {
   localStorage.removeItem(STORAGE_KEY);
@@ -809,6 +1108,10 @@ $('#resetButton').addEventListener('click', () => {
   $('#exerciseClock').textContent = '00:00';
   conversation = [{ role: 'assistant', text: 'The exercise is reset. Ask me to read the floor or run the rehearsal.' }];
   pendingAssistant = null;
+  routePoints = [];
+  resetFloorView();
+  resetOrbit();
+  setSpatialMode('building');
   showToolResult('No tool called yet.');
   render();
 });
@@ -846,6 +1149,7 @@ $('#agentForm').addEventListener('submit', (event) => {
 });
 
 renderToolList();
+setupSpatialInteractions();
 render();
 startClock();
 registerWebMCP().catch((error) => showToolResult({ registration_error: error.message }));
