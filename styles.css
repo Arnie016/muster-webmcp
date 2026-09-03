@@ -647,16 +647,44 @@ footer { padding: 13px 28px; background: #090a08; font-size: 10px; }
 .building-viewport.dragging { cursor: grabbing; }
 .building-orbit { --orbit-x: 62deg; --orbit-z: -38deg; --orbit-scale: 1; position: absolute; inset: 4% 2% 12%; transform-style: preserve-3d; transform: rotateX(var(--orbit-x)) rotateZ(var(--orbit-z)) scale(var(--orbit-scale)); transition: transform .45s cubic-bezier(.22,1,.36,1); }
 .building-viewport.dragging .building-orbit { transition: none; }
+.site-plane { position: absolute; left: 50%; top: 54%; width: 520px; height: 350px; border: 1px solid rgba(132,194,184,.2); background: linear-gradient(rgba(108,183,174,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(108,183,174,.055) 1px, transparent 1px), linear-gradient(145deg, rgba(26,45,39,.88), rgba(6,12,10,.94)); background-size: 20px 20px,20px 20px,auto; box-shadow: 0 0 55px rgba(84,183,169,.08); transform: translate(-50%,-50%) translateZ(-22px); transform-style: preserve-3d; pointer-events: none; }
+.site-plane::before { content: "Meridian Exchange · fictional training site"; position: absolute; top: 9px; left: 11px; color: rgba(150,205,196,.42); font: 700 7px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.site-road { position: absolute; border: 1px solid rgba(217,207,173,.18); color: rgba(221,211,176,.56); background: repeating-linear-gradient(90deg, rgba(188,174,130,.13) 0 40px, transparent 40px 72px), rgba(12,16,13,.8); font: 700 6px var(--mono); letter-spacing: .07em; text-transform: uppercase; }
+.site-road span { position: absolute; white-space: nowrap; }
+.road-south { right: 18px; bottom: 17px; left: 18px; height: 54px; }
+.road-south span { left: 16px; bottom: 8px; }
+.road-south i, .road-south b { position: absolute; top: 11px; width: 64px; height: 1px; background: rgba(235,220,166,.44); }
+.road-south i { left: 120px; }.road-south b { right: 120px; }
+.road-east { top: 45px; right: 18px; width: 58px; height: 218px; background: repeating-linear-gradient(0deg, rgba(188,174,130,.12) 0 32px, transparent 32px 58px), rgba(12,16,13,.8); }
+.road-east span { top: 14px; left: 34px; transform: rotate(90deg); transform-origin: left top; }
+.assembly-zone { position: absolute; width: 90px; height: 56px; padding: 8px; display: grid; align-content: end; border: 1px dashed rgba(114,202,188,.42); color: #8fcfc5; background: rgba(64,132,122,.08); }
+.assembly-zone span, .assembly-zone small { display: block; }.assembly-zone span { font: 800 7px var(--mono); text-transform: uppercase; }.assembly-zone small { margin-top: 3px; color: rgba(143,207,197,.55); font: 6px var(--mono); }
+.assembly-west { bottom: 91px; left: 25px; }.assembly-east { top: 50px; right: 91px; }
+.appliance-bay { position: absolute; right: 95px; bottom: 22px; width: 118px; height: 43px; border: 1px solid rgba(255,107,53,.46); background: linear-gradient(90deg, rgba(255,107,53,.14), transparent); }
+.appliance-bay span { position: absolute; right: 8px; bottom: 7px; color: #e78d6b; font: 700 6px var(--mono); text-transform: uppercase; }
+.access-path { position: absolute; height: 2px; border-top: 2px dashed rgba(114,202,188,.42); transform-origin: left center; }
+.path-west { left: 116px; bottom: 122px; width: 105px; transform: rotate(-22deg); }.path-east { right: 110px; top: 127px; width: 100px; transform: rotate(21deg); }
+.tower-podium { position: absolute; z-index: 1; left: 50%; top: 54%; width: 330px; height: 224px; border: 1px solid rgba(188,219,213,.28); border-radius: 5px; background: linear-gradient(135deg, rgba(86,154,144,.2), rgba(8,15,12,.9)); box-shadow: 0 0 45px rgba(57,132,121,.12); transform: translate(-50%,-50%) translateZ(-6px); transform-style: preserve-3d; pointer-events: none; }
+.tower-podium::before, .tower-podium::after { content: ""; position: absolute; background: repeating-linear-gradient(90deg, rgba(124,199,187,.18) 0 22px, rgba(16,32,27,.8) 22px 26px); border: 1px solid rgba(151,214,204,.16); }
+.tower-podium::before { top: 100%; left: -1px; width: 100%; height: 18px; transform-origin: top; transform: rotateX(-90deg); }.tower-podium::after { top: -1px; left: 100%; width: 18px; height: 100%; transform-origin: left; transform: rotateY(90deg); }
+.tower-podium span { position: absolute; bottom: 9px; left: 13px; color: rgba(194,226,220,.48); font: 700 7px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.tower-podium i, .tower-podium b { position: absolute; bottom: 28px; width: 70px; height: 28px; border: 1px solid rgba(143,210,199,.18); background: rgba(98,178,165,.06); }.tower-podium i { left: 31px; }.tower-podium b { right: 31px; }
 .tower-core { position: absolute; left: 50%; top: 54%; width: 270px; height: 178px; transform: translate(-50%,-50%); transform-style: preserve-3d; }
 .tower-floor { --lift: calc(var(--level) * 14px); position: absolute; inset: 0; display: block; border: 1px solid rgba(151,214,204,.25); border-radius: 3px; color: rgba(194,226,220,.6); background: linear-gradient(135deg, rgba(95,182,169,.12), rgba(9,17,14,.78)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.015); transform: translateZ(var(--lift)); transform-style: preserve-3d; cursor: pointer; }
-.tower-floor::before, .tower-floor::after { content: ""; position: absolute; pointer-events: none; background: rgba(25,62,55,.72); border: 1px solid rgba(151,214,204,.16); }
+.tower-floor::before, .tower-floor::after { content: ""; position: absolute; pointer-events: none; border: 1px solid rgba(151,214,204,.16); }
 .tower-floor::before { top: 100%; left: -1px; width: 100%; height: 12px; transform-origin: top; transform: rotateX(-90deg); }
 .tower-floor::after { top: -1px; left: 100%; width: 12px; height: 100%; transform-origin: left; transform: rotateY(90deg); }
+.tower-floor::before { background: repeating-linear-gradient(90deg, rgba(134,209,198,.25) 0 20px, rgba(16,35,30,.92) 20px 24px); }
+.tower-floor::after { background: repeating-linear-gradient(0deg, rgba(134,209,198,.22) 0 17px, rgba(16,35,30,.92) 17px 21px); }
 .tower-floor span { position: absolute; top: 9px; left: 10px; font: 800 8px var(--mono); letter-spacing: .08em; }
 .tower-floor i, .tower-floor b { position: absolute; top: 36%; width: 23%; height: 28%; border: 1px solid rgba(160,220,211,.13); background: rgba(96,176,164,.05); }
 .tower-floor i { left: 15%; }.tower-floor b { right: 15%; }
 .tower-floor:hover { border-color: rgba(193,238,231,.72); background: linear-gradient(135deg, rgba(102,210,193,.23), rgba(9,17,14,.78)); }
 .tower-floor.selected { border-color: var(--signal); color: #ffd5c5; background: linear-gradient(135deg, rgba(255,107,53,.44), rgba(64,25,12,.76)); box-shadow: 0 0 0 2px rgba(255,107,53,.18), 0 0 34px rgba(255,107,53,.28); }
+.roof-plant { position: absolute; z-index: 4; left: 50%; top: 54%; width: 150px; height: 82px; display: flex; align-items: center; justify-content: center; gap: 12px; border: 1px solid rgba(169,215,207,.3); background: rgba(16,29,25,.94); transform: translate(-50%,-50%) translateZ(272px); transform-style: preserve-3d; pointer-events: none; }
+.roof-plant::before { content: ""; position: absolute; top: 100%; left: -1px; width: 100%; height: 16px; border: 1px solid rgba(151,214,204,.17); background: rgba(22,48,41,.9); transform-origin: top; transform: rotateX(-90deg); }
+.roof-plant i { width: 22px; height: 22px; border: 1px solid rgba(132,202,191,.32); border-radius: 50%; background: repeating-conic-gradient(rgba(129,201,190,.3) 0 12deg, rgba(8,18,15,.8) 12deg 30deg); }
+.roof-plant span { position: absolute; top: 7px; left: 9px; color: rgba(167,213,205,.48); font: 700 6px var(--mono); text-transform: uppercase; }
 .orbit-controls { position: absolute; z-index: 20; left: 50%; bottom: 17px; display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: rgba(7,11,9,.78); transform: translateX(-50%); backdrop-filter: blur(12px); }
 .floor-beacon { position: absolute; z-index: 20; top: 18px; right: 14px; min-height: 28px; padding: 0 9px; display: flex; align-items: center; gap: 7px; border: 1px solid rgba(255,107,53,.3); border-radius: 999px; color: #ffc2aa; background: rgba(54,23,12,.62); font: 700 8px var(--mono); letter-spacing: .04em; }
 .floor-beacon i { width: 6px; height: 6px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 12px var(--signal); animation: beacon 1.8s ease-in-out infinite; }

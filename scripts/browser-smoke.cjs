@@ -18,6 +18,10 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
 
   assert.equal(await page.locator('[data-building-floor]').count(), 18);
   assert.ok(await page.locator('#buildingView').isVisible());
+  assert.ok(await page.locator('.site-plane').isVisible());
+  assert.ok(await page.locator('.tower-podium').isVisible());
+  assert.ok(await page.locator('.roof-plant').isVisible());
+  assert.match(await page.locator('.site-plane').innerText(), /Assembly A/i);
   await page.screenshot({ path: path.join(shots, 'muster-spatial-command.png'), fullPage: false });
 
   const viewport = page.locator('#buildingViewport');
