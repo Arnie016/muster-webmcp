@@ -54,20 +54,21 @@ WebMCP is most useful when an agent changes a visible, reviewable work surface a
 
 ## Future work
 
-Next, repeat the native-browser check against the public deployment and add an agent-driven end-to-end evaluation set for the manager intent router. Any move beyond fictional training would be a separate, permissioned project requiring approved plan imports, authentication, access controls, professional review, and evidence from real users. It is not part of the current proof.
+Next, add an agent-driven end-to-end evaluation set for the manager intent router and test the rehearsal with Fire Safety Managers. Any move beyond fictional training would be a separate, permissioned project requiring approved plan imports, authentication, access controls, professional review, and evidence from real users. It is not part of the current proof.
 
 ## Links and proof status
 
 - **Live demo:** https://muster-fire-drill.vercel.app/
 
-  Verified reachable on 4 September 2026. Its `index.html` and `app.js` match public `main` at commit `1113b882cb967bd9679c4109a08a67cf1649d85a`, not the newer local UI revisions.
+  Verified in production on 4 September 2026. The public `index.html`, `app.js`, and `styles.css` byte-match source commit `cd1367b702fc7c268b7f0220914042afe59dac9b`. The desktop, 390 by 844 mobile, 18-floor WebGL, Floor 07 route, and human-approved report browser checks pass against this URL.
 
 - **Public source:** https://github.com/Arnie016/muster-webmcp
 
-  Verified public. Exact published commit: https://github.com/Arnie016/muster-webmcp/commit/1113b882cb967bd9679c4109a08a67cf1649d85a
+  Verified public. Exact product source commit: https://github.com/Arnie016/muster-webmcp/commit/cd1367b702fc7c268b7f0220914042afe59dac9b
 
-- **WebMCP registration source:** https://github.com/Arnie016/muster-webmcp/blob/1113b882cb967bd9679c4109a08a67cf1649d85a/app.js#L946-L951
-- **Tool-count test:** https://github.com/Arnie016/muster-webmcp/blob/1113b882cb967bd9679c4109a08a67cf1649d85a/tests.mjs#L57-L60
+- **WebMCP registration source:** https://github.com/Arnie016/muster-webmcp/blob/cd1367b702fc7c268b7f0220914042afe59dac9b/app.js#L1360-L1369
+- **Tool-count test:** https://github.com/Arnie016/muster-webmcp/blob/cd1367b702fc7c268b7f0220914042afe59dac9b/tests.mjs#L60-L66
+- **Native WebMCP test harness:** https://github.com/Arnie016/muster-webmcp/blob/cd1367b702fc7c268b7f0220914042afe59dac9b/scripts/webmcp-native-smoke.cjs
 
 - **Current public video:** https://youtu.be/FOoBfOHPIho
 
@@ -75,17 +76,15 @@ Next, repeat the native-browser check against the public deployment and add an a
 
 - **Devpost project:** https://devpost.com/software/muster-the-agentic-fire-drill
 
-  Exact URL recorded in the submission receipt. **RECHECK REQUIRED:** the unauthenticated audit received HTTP 403, so public page access was not independently confirmed.
+  Exact URL recorded in the accepted-submission receipt. An unauthenticated command-line audit receives HTTP 403, so the public project page is not independently proven from that route.
 
 - **Replacement 135-second video:** `[PENDING PUBLIC URL]`
 
   Local validated master: `trailer/out/muster-demo.mp4`.
 
-- **Latest local UI and source:** `[PENDING PUSH AND REDEPLOY]`
+- **Native WebMCP production evidence:** https://github.com/Arnie016/muster-webmcp/blob/main/docs/screenshots/muster-native-webmcp.png
 
-- **Native WebMCP local evidence:** `[PENDING COMMIT AND PUBLIC LINK]`
-
-  Current capture: `docs/screenshots/muster-native-webmcp.png`. It shows `WebMCP live`, 19 registered tools, and a native `read_plan` result in the visible trace. The public deployment still needs the same post-deploy check.
+  The production test launches Chrome 152 with WebMCP testing enabled, discovers 19 tools through `document.modelContext.getTools()`, invokes `read_plan` through `document.modelContext.executeTool`, and verifies that the same visible page trace changed. This proves the tested Chrome tab, not every browser or ChatGPT surface.
 
 ## 30-second judge path
 
