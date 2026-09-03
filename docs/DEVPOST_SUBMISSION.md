@@ -69,6 +69,9 @@ Next, add an agent-driven end-to-end evaluation set for the manager intent route
 - **WebMCP registration source:** https://github.com/Arnie016/muster-webmcp/blob/cd1367b702fc7c268b7f0220914042afe59dac9b/app.js#L1360-L1369
 - **Tool-count test:** https://github.com/Arnie016/muster-webmcp/blob/cd1367b702fc7c268b7f0220914042afe59dac9b/tests.mjs#L60-L66
 - **Native WebMCP test harness:** https://github.com/Arnie016/muster-webmcp/blob/cd1367b702fc7c268b7f0220914042afe59dac9b/scripts/webmcp-native-smoke.cjs
+- **Agent-readable project index:** https://muster-fire-drill.vercel.app/llms.txt
+- **Full agent context and boundaries:** https://muster-fire-drill.vercel.app/llms-full.txt
+- **Downloadable operator skill:** https://muster-fire-drill.vercel.app/SKILL.md
 
 - **Current public video:** https://youtu.be/FOoBfOHPIho
 
