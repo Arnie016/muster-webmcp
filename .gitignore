@@ -1,2 +1,5 @@
 .vercel
 /*.png
+trailer/node_modules/
+trailer/out/
+trailer/public/audio/narration-raw.wav

@@ -1,0 +1,26 @@
+{
+  "name": "muster-demo-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Editable 90-second Remotion demo package for Muster.",
+  "scripts": {
+    "proof:sync": "node scripts/sync-proof.mjs",
+    "voice": "node scripts/generate-realtime-voice.mjs",
+    "validate": "node scripts/validate-package.mjs",
+    "typecheck": "tsc --noEmit",
+    "still": "remotion still src/index.tsx MusterDemo out/muster-poster.png --frame=240 --image-format=png",
+    "render": "remotion render src/index.tsx MusterDemo out/muster-demo.mp4 --codec=h264 --crf=18 --pixel-format=yuv420p",
+    "package": "npm run proof:sync && npm run validate && npm run typecheck && npm run still && npm run render"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.520",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "remotion": "4.0.520",
+    "ws": "8.18.3"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.12",
+    "typescript": "7.0.2"
+  }
+}

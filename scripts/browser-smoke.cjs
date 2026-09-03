@@ -9,7 +9,7 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4173';
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const errors = [];
-  const page = await browser.newPage({ viewport: { width: 1512, height: 982 }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto(url, { waitUntil: 'networkidle' });

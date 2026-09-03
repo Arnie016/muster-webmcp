@@ -1,0 +1,304 @@
+{
+  "project": {
+    "title": "Muster — The Agentic Fire Drill",
+    "version": "1.0.0",
+    "aspectRatio": "16:9",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationSeconds": 90,
+    "audience": "WebMCP Challenge judges and safety-training facilitators",
+    "promise": "Rehearse a changing building incident on one visible, reviewable command surface."
+  },
+  "promptEditableManifest": {
+    "stableFields": [
+      "project.promise",
+      "scenes[].headline",
+      "scenes[].support",
+      "scenes[].narration",
+      "scenes[].asset",
+      "architecture.nodes",
+      "cta.label",
+      "cta.url",
+      "audio"
+    ],
+    "editPolicy": "Change manifest fields before changing component timing or layout code."
+  },
+  "sourceIntake": {
+    "projectTypeHypotheses": ["web-app-saas", "ai-agent-builder"],
+    "read": ["README.md", "app.js", "drill-core.js", "tests.mjs", "docs/DEVPOST_SUBMISSION.md"],
+    "capture": ["spatial-command", "floor-route"],
+    "missingAccess": ["Observed native WebMCP discovery in a compatible browser"]
+  },
+  "productAnalysis": {
+    "audience": "Fire-safety drill facilitators and WebMCP judges",
+    "problem": "Plans, occupants, roles, injects, decisions, and review evidence become fragmented during a rehearsal.",
+    "solution": "A visible fictional drill state shared by a human facilitator and bounded page tools.",
+    "technicalSignals": [
+      "Deterministic JavaScript state machine",
+      "One manager and eighteen bounded page tools",
+      "Five hundred shuffled workflow tests",
+      "Human-only final approval"
+    ]
+  },
+  "toolContractProof": {
+    "managerCount": 1,
+    "boundedPageTools": 18,
+    "totalToolContracts": 19,
+    "source": "app.js",
+    "managerTool": "run_drill_manager"
+  },
+  "viewerContext": {
+    "assumedKnowledge": "The viewer has not seen Muster and may not know WebMCP.",
+    "productNouns": {
+      "inject": "a controlled change introduced during a drill",
+      "fixture register": "fictional aggregate occupant counts used for training",
+      "runtime trace": "a visible receipt of what each page tool did",
+      "Incident Commander": "the manager that routes a request to bounded specialists"
+    }
+  },
+  "templateStrategy": {
+    "selectionMode": "Ranked by immediate proof, safety-boundary clarity, and judge readability.",
+    "selectedTemplate": "real-product-proof",
+    "selectedReason": "The strongest story is the visible workflow and its human authority boundary, not a generated metaphor.",
+    "candidateTemplates": [
+      {"id": "real-product-proof", "bestFor": ["technical products", "WebMCP", "auditable workflows"]},
+      {"id": "control-room-incident", "bestFor": ["operations", "scenario rehearsal", "decision support"]},
+      {"id": "white-space-output-machine", "bestFor": ["agent tools", "clear input-to-output demos"]}
+    ]
+  },
+  "proofInventory": [
+    {
+      "id": "command-room",
+      "claim": "The app presents an orbitable 18-floor building, guided workflow, trace, and conversation surface together.",
+      "source": "docs/screenshots/muster-spatial-command.png",
+      "destination": "proof/command-room.png",
+      "status": "captured"
+    },
+    {
+      "id": "review",
+      "claim": "The inspectable Floor 07 plan, drawn route, changed exit, and staged review are visible in the same interface.",
+      "source": "docs/screenshots/muster-floor-route.png",
+      "destination": "proof/review.png",
+      "status": "captured"
+    },
+    {
+      "id": "workflow-tests",
+      "claim": "Five hundred shuffled workflows preserve state and approval boundaries.",
+      "source": "tests.mjs and stress-tests.mjs",
+      "status": "source-and-test proof"
+    },
+    {
+      "id": "native-webmcp-discovery",
+      "claim": "A compatible browser discovers the page tools natively.",
+      "status": "pending compatible-browser capture"
+    }
+  ],
+  "captureTargets": [
+    {
+      "id": "command-room",
+      "source": "docs/screenshots/muster-spatial-command.png",
+      "destination": "public/proof/command-room.png",
+      "minimumWidth": 1280,
+      "minimumHeight": 720
+    },
+    {
+      "id": "review",
+      "source": "docs/screenshots/muster-floor-route.png",
+      "destination": "public/proof/review.png",
+      "minimumWidth": 1280,
+      "minimumHeight": 720
+    }
+  ],
+  "timingPlan": {
+    "rhythm": "rupture hook → orientation → controlled change → mechanism → trace → authority boundary → proof ledger → CTA",
+    "microBeatPolicy": "No sub-0.35-second flashes; motion follows one readable cause-and-effect path.",
+    "proofHoldPolicy": "Real product proof appears at frame zero and receives holds of at least five seconds.",
+    "captionPolicy": "Primary overlays stay below eight words and outside the product-reading region."
+  },
+  "visualChoreography": {
+    "safeZones": [
+      {"id": "title-upper", "x": 0.06, "y": 0.07, "w": 0.70, "h": 0.18},
+      {"id": "caption-lower", "x": 0.06, "y": 0.78, "w": 0.82, "h": 0.15}
+    ],
+    "screenPlan": [
+      {"sceneId": "rupture", "start": 0, "end": 5, "owner": "product-blueprint", "screenShare": 0.78, "reason": "Show the changed route immediately."},
+      {"sceneId": "orientation", "start": 5, "end": 15, "owner": "product-ui", "screenShare": 0.86, "reason": "Establish the complete real workflow."},
+      {"sceneId": "plan", "start": 15, "end": 27, "owner": "product-blueprint", "screenShare": 0.72, "reason": "Make the fictional floor facts readable."},
+      {"sceneId": "condition", "start": 27, "end": 39, "owner": "product-blueprint", "screenShare": 0.72, "reason": "Show the scenario change and affected zone."},
+      {"sceneId": "architecture", "start": 39, "end": 52, "owner": "architecture-diagram", "screenShare": 0.80, "reason": "Explain coordination and tool boundaries."},
+      {"sceneId": "trace", "start": 52, "end": 64, "owner": "product-trace", "screenShare": 0.72, "reason": "Show visible receipts from real page actions."},
+      {"sceneId": "authority", "start": 64, "end": 75, "owner": "review-report", "screenShare": 0.72, "reason": "Make the human approval boundary unmistakable."},
+      {"sceneId": "proof", "start": 75, "end": 83, "owner": "proof-ledger", "screenShare": 0.76, "reason": "Separate current proof from the pending native capture."},
+      {"sceneId": "cta", "start": 83, "end": 90, "owner": "cta", "screenShare": 0.62, "reason": "End on one action."}
+    ]
+  },
+  "interactionEvents": [
+    {
+      "id": "event-read-plan",
+      "atSeconds": 17.5,
+      "label": "Read plan",
+      "visibleResponse": "The floor, occupants, exits, assistance count, roles, and plan revision become context.",
+      "tool": "read_plan"
+    },
+    {
+      "id": "event-change-condition",
+      "atSeconds": 29.5,
+      "label": "Stair B unavailable",
+      "visibleResponse": "The route changes from available to blocked and the Studio becomes the focus.",
+      "tool": "send_inject"
+    },
+    {
+      "id": "event-stage-review",
+      "atSeconds": 66.5,
+      "label": "Prepare review",
+      "visibleResponse": "The after-action draft appears while approval stays human-only.",
+      "tool": "stage_report"
+    }
+  ],
+  "architecture": {
+    "title": "One manager coordinates bounded specialists",
+    "nodes": [
+      {"id": "human", "label": "Human facilitator", "kind": "human"},
+      {"id": "manager", "label": "Incident Commander", "kind": "manager"},
+      {"id": "plan", "label": "Plan", "kind": "specialist"},
+      {"id": "people", "label": "People", "kind": "specialist"},
+      {"id": "equipment", "label": "Equipment", "kind": "specialist"},
+      {"id": "review", "label": "Review", "kind": "specialist"},
+      {"id": "tools", "label": "18 bounded page tools", "kind": "tools"},
+      {"id": "state", "label": "Same visible drill state", "kind": "state"}
+    ],
+    "authorityBoundary": "The agent prepares; the human confirms observations and approves."
+  },
+  "threePlan": {
+    "decision": "implemented-as-command-surface",
+    "reason": "The native CSS 3D building selects the loaded floor, then hands off to a pan-and-zoom plan where room inspection and route drawing change the agent workflow."
+  },
+  "scenes": [
+    {
+      "id": "rupture",
+      "type": "proof",
+      "start": 0,
+      "end": 5,
+      "asset": "proof/review.png",
+      "headline": "A blocked exit changes everything.",
+      "support": "A controlled drill condition. Not a live alarm.",
+      "narration": "A fire drill changes when an exit fails and two people need help.",
+      "focus": {"x": 45, "y": 55, "scale": 1.34},
+      "transitionOut": "route-line match cut",
+      "intelligenceRole": "The changed condition creates a coordination problem the agent must help the facilitator resolve."
+    },
+    {
+      "id": "orientation",
+      "type": "proof",
+      "start": 5,
+      "end": 15,
+      "asset": "proof/command-room.png",
+      "headline": "One shared rehearsal surface.",
+      "support": "Plan · people · equipment · review",
+      "narration": "Muster brings the building, people, equipment, and decisions onto one visible command surface.",
+      "focus": {"x": 50, "y": 50, "scale": 1.02},
+      "transitionOut": "measured push into plan",
+      "intelligenceRole": "The whole product is visible before any architecture explanation."
+    },
+    {
+      "id": "plan",
+      "type": "proof",
+      "start": 15,
+      "end": 27,
+      "asset": "proof/command-room.png",
+      "headline": "Read the plan first.",
+      "support": "84 occupants · 2 exits · 2 need assistance",
+      "narration": "Open Floor Seven, inspect a room, and draw a route. The agent reads the fictional occupants, exits, assistance needs, and assigned roles.",
+      "focus": {"x": 38, "y": 53, "scale": 1.28},
+      "transitionOut": "fixture chips become scenario facts",
+      "intelligenceRole": "The agent begins from the same visible and revisioned context as the facilitator."
+    },
+    {
+      "id": "condition",
+      "type": "proof",
+      "start": 27,
+      "end": 39,
+      "asset": "proof/review.png",
+      "headline": "Stair B is unavailable.",
+      "support": "Studio · 6 people · 2 assisted · 18 m",
+      "narration": "The facilitator introduces a controlled change: six people are in the studio, two need assistance, and Stair B is blocked. The drawn path is checked against that state.",
+      "focus": {"x": 40, "y": 56, "scale": 1.34},
+      "transitionOut": "route lines fan into specialist connections",
+      "intelligenceRole": "A visible scenario change requires route comparison and named responsibility, not generic chat."
+    },
+    {
+      "id": "architecture",
+      "type": "architecture",
+      "start": 39,
+      "end": 52,
+      "headline": "One manager. Bounded specialists.",
+      "support": "The human keeps authority.",
+      "narration": "An incident commander routes work to bounded plan, people, equipment, and review tools, all sharing the visible drill state.",
+      "transitionOut": "tool nodes collapse into visible receipts",
+      "intelligenceRole": "This makes the manager-specialist-tool hierarchy legible without overstating autonomy."
+    },
+    {
+      "id": "trace",
+      "type": "trace",
+      "start": 52,
+      "end": 64,
+      "asset": "proof/review.png",
+      "headline": "Every call leaves a trace.",
+      "support": "Action · reason · visible change",
+      "narration": "Each call explains what happened, why it was allowed, and what visibly changed.",
+      "focus": {"x": 76, "y": 54, "scale": 1.22},
+      "transitionOut": "last receipt expands into review",
+      "intelligenceRole": "The agent's activity is inspectable in the same product surface."
+    },
+    {
+      "id": "authority",
+      "type": "report",
+      "start": 64,
+      "end": 75,
+      "headline": "Agent prepares. Human approves.",
+      "support": "No inferred intent. No emergency control.",
+      "narration": "The agent compares routes, records confirmed actions, and stages the report. It cannot infer intent, contact responders, or approve the outcome.",
+      "transitionOut": "approval boundary becomes proof ledger",
+      "intelligenceRole": "The system is useful because it coordinates evidence while preserving human accountability."
+    },
+    {
+      "id": "proof",
+      "type": "ledger",
+      "start": 75,
+      "end": 83,
+      "headline": "Proof, with boundaries.",
+      "support": "Native discovery capture remains pending.",
+      "narration": "Five hundred shuffled workflows test the state transitions and human approval gate. Native WebMCP capture remains pending.",
+      "transitionOut": "quiet fade to CTA",
+      "intelligenceRole": "The video distinguishes tested contracts from an unobserved browser capability."
+    },
+    {
+      "id": "cta",
+      "type": "cta",
+      "start": 83,
+      "end": 90,
+      "headline": "Try the live drill.",
+      "support": "Fictional training software · Not for live emergencies",
+      "narration": "Muster is fictional training software. Try the live drill.",
+      "transitionOut": "none",
+      "intelligenceRole": "One clear next action follows an honest proof boundary."
+    }
+  ],
+  "audio": {
+    "enabled": true,
+    "source": "audio/narration.wav",
+    "policy": "AI narration generated from the approved script with GPT Realtime 2.1 using the Marin voice. It is not a human firefighter recording."
+  },
+  "cta": {
+    "label": "Try the live drill",
+    "url": "https://muster-fire-drill.vercel.app/"
+  },
+  "knownLimitations": [
+    "All people counts, locations, equipment, timestamps, and incidents are fictional training fixtures.",
+    "The product does not connect to alarms, dispatch, responders, doors, sensors, or live building systems.",
+    "The agent cannot infer participant intent or competence; final report approval is human-only.",
+    "Native WebMCP discovery was not observed in the available test browser; the current evidence is source contracts, local tests, and the manual product surface.",
+    "The narration is AI-generated from the approved script and is not a human firefighter recording."
+  ]
+}
