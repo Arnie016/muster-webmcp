@@ -1,0 +1,22 @@
+# Muster: The Agentic Fire Drill
+
+> A WebMCP tabletop fire-drill command room where a Fire Safety Manager and an agent rehearse a changing fictional building incident on the same visible plan.
+
+Muster is training software, not a live emergency, alarm, dispatch, compliance, route-certification, or building-control system. All people, plans, dimensions, equipment records, incidents, and counts are fictional fixtures. The agent prepares evidence; a human approves the report.
+
+## Primary
+
+- [Live product](https://muster-fire-drill.vercel.app/): Run the guided Floor 07 rehearsal and inspect the visible agent trace.
+- [Full agent context](https://muster-fire-drill.vercel.app/llms-full.txt): Product model, judge path, WebMCP proof, tool surface, and boundaries.
+- [Agent operator skill](https://muster-fire-drill.vercel.app/SKILL.md): Safe orchestration guidance for the 19 page tools.
+- [Homepage in Markdown](https://muster-fire-drill.vercel.app/index.md): Clean product summary.
+
+## Evidence
+
+- [Public source](https://github.com/Arnie016/muster-webmcp): MIT-licensed implementation, tests, and setup.
+- [Native WebMCP receipt](https://github.com/Arnie016/muster-webmcp/blob/main/docs/screenshots/muster-native-webmcp.png): Chrome discovered 19 tools, executed `read_plan`, and changed the visible page trace.
+- [Devpost project](https://devpost.com/software/muster-the-agentic-fire-drill): WebMCP Challenge submission.
+
+## Support
+
+- [GitHub issues](https://github.com/Arnie016/muster-webmcp/issues): Public technical questions and reproducible issues.

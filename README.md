@@ -4,6 +4,8 @@ Muster is a WebMCP-enabled tabletop fire-drill command room for building Fire Sa
 
 **Live demo:** https://muster-fire-drill.vercel.app
 
+**Agent context:** [llms.txt](https://muster-fire-drill.vercel.app/llms.txt) · [llms-full.txt](https://muster-fire-drill.vercel.app/llms-full.txt) · [operator skill](https://muster-fire-drill.vercel.app/SKILL.md)
+
 ![Muster spatial command room](docs/screenshots/muster-spatial-command.png)
 
 The interface makes the next action explicit:

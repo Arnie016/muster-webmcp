@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Curated agent context:
+# https://muster-fire-drill.vercel.app/llms.txt
+# https://muster-fire-drill.vercel.app/llms-full.txt
+
+Sitemap: https://muster-fire-drill.vercel.app/sitemap.xml

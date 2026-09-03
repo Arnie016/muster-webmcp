@@ -1,0 +1,111 @@
+# Muster: The Agentic Fire Drill
+
+Canonical product: https://muster-fire-drill.vercel.app/
+
+Source: https://github.com/Arnie016/muster-webmcp
+
+Devpost: https://devpost.com/software/muster-the-agentic-fire-drill
+
+License: MIT
+
+## What Muster is
+
+Muster is a browser-based tabletop fire-drill command room for a building Fire Safety Manager and an exercise team. A human facilitator and an agent work on the same visible training plan. They can read the fictional building file, introduce scripted conditions, inspect occupants and roles, compare the exercise's route options, record facilitator-confirmed actions, find responsibilities without owners, and prepare an after-action draft.
+
+The product is deliberately not a generic chat assistant. Tool calls read or update one deterministic in-page state and leave visible receipts. The human can inspect the request, delegation path, structured input, structured result, purpose, screen change, duration, and safety boundary. Human report approval is a separate control and is not exposed as a tool.
+
+## Intended audience and task
+
+The primary user is a Fire Safety Manager or exercise facilitator preparing a controlled tabletop rehearsal. The primary task is to keep the plan, fictional occupant register, roles, scripted conditions, team decisions, route evidence, and after-action review in one inspectable sequence.
+
+The current submission demonstrates one complete Floor 07 office rehearsal. Floor 03 and Floor 12 are labelled reference plans, not executable scenarios.
+
+## Thirty-second judge path
+
+1. Open https://muster-fire-drill.vercel.app/.
+2. Select **Inspect Floor 07**.
+3. In the Incident Commander desk, select **Run demo**.
+4. Watch the authored detector signal appear and Stair B become unavailable in the fictional scenario.
+5. Inspect the 30.1 metre drawn route receipt to Stair A and the named assistance owner.
+6. Open a Live trace row to inspect why the tool ran, its input and result, what changed on screen, and its boundary.
+7. Review the staged after-action draft and the separate human approval control.
+
+The displayed distances are fictional plan fixtures. A drawn route is not an approved evacuation route.
+
+## WebMCP model
+
+Muster registers one manager and 18 bounded page tools through `document.modelContext.registerTool` when the API is available. `run_drill_manager` accepts a high-level exercise intent and delegates to plan, people, equipment, or review specialists. The remaining tools expose narrowly scoped operations over the same visible page.
+
+Current native proof uses Chrome 152 with WebMCP testing enabled. `document.modelContext.getTools()` discovered all 19 tools. `document.modelContext.executeTool()` then invoked `read_plan`, and the visible Live trace changed. This proves discovery and execution in that tested production tab. It does not prove support in every browser or every ChatGPT surface.
+
+## Tool groups
+
+### Manager
+
+- `run_drill_manager`: route a high-level request to a bounded specialist and named page tool.
+
+### Plan
+
+- `read_plan`: read the selected building, floor, exits, roles, revision, and visible fixture counts.
+- `start_drill`: start the fictional tabletop scenario.
+- `inspect_zone`: focus one plan zone and return its fictional people, assistance need, and nearest-exit context.
+- `compare_routes`: compare scripted distance and availability without directing a real evacuation.
+- `analyze_route_sketch`: measure a facilitator-drawn path and check its endpoint against the scenario's exit state.
+- `read_site_context`: read fictional setting, assembly areas, service access, and mapping boundaries.
+- `read_room_profile`: inspect one room's use, protection fixtures, and exercise context.
+
+### People and scenario
+
+- `send_inject`: add an authored complication to the exercise.
+- `record_action`: preserve a facilitator-confirmed team action and owner.
+- `read_floor_register`: read aggregate fictional zone counts and assistance ownership.
+- `read_status_board`: show which exercise records exist without inferring floor clearance.
+- `record_human_signal`: record an observed confirmation, uncertainty, disagreement, or delay without inferring intent or competence.
+
+### Equipment and guidance
+
+- `read_drill_guide`: read the before, during, or after tabletop checklist.
+- `read_hazard`: read the authored scenario phase without claiming a physical fire-spread model.
+- `read_equipment`: read planned fixture and inspection records without certifying adequacy.
+- `read_lessons`: read dated fictional exercise findings and the changes they motivated.
+
+### Review
+
+- `check_coverage`: find active exercise problems without a recorded owner.
+- `stage_report`: prepare a reviewable after-action draft. It cannot approve the draft.
+
+## Product evidence
+
+- The 18-floor building is an orbitable WebGL training twin with direct floor selection and a CSS fallback.
+- Floor 07 is a pan-and-zoom response plan with dimensions, rooms, route state, equipment, fictional occupant groups, responder markers, and inspectable profiles.
+- An animated orange authored-signal trail shows the scripted scenario changing. It is explicitly not a sensor event or physical spread prediction.
+- The guided flow advances one declared change at a time and explains what changed and what the facilitator should inspect next.
+- Browser checks cover desktop, 390 by 844 mobile, the WebGL twin, route analysis, the complete rehearsal, and human report approval.
+- Deterministic tests include six people-data tests and 500 shuffled workflows for repeat-safe actions, invalid transitions, route boundaries, and approval gates.
+
+## Safety and truth boundaries
+
+Muster does not monitor a real building, read sensors, infer live occupancy, certify equipment, calculate physical fire spread, approve an evacuation route, raise alarms, control doors, contact emergency services, dispatch responders, or provide instructions during a live emergency.
+
+Every person, role, address, building, count, room, dimension, distance, equipment record, inspection, timestamp, and incident in the current product is a fictional training fixture. A displayed ownership ratio is exercise-action coverage, not a safety or readiness score.
+
+Suggested agent behavior:
+
+- Read the selected plan before changing the scenario.
+- State which fictional fixture or facilitator observation supports each conclusion.
+- Use route tools only for the scripted exercise and preserve the qualified-human review boundary.
+- Record human signals only when the facilitator reports what was observed.
+- Stage the report only after checking active-problem ownership.
+- Never claim that silence proves agreement, a record proves clearance, or a plan symbol proves equipment adequacy.
+- Stop using Muster during a real emergency and follow the official local emergency process.
+
+## Authoritative public pages
+
+- Product: https://muster-fire-drill.vercel.app/
+- Markdown product summary: https://muster-fire-drill.vercel.app/index.md
+- Short agent index: https://muster-fire-drill.vercel.app/llms.txt
+- Operator skill: https://muster-fire-drill.vercel.app/SKILL.md
+- Operator guide: https://muster-fire-drill.vercel.app/docs/OPERATOR_GUIDE.md
+- Source and tests: https://github.com/Arnie016/muster-webmcp
+- Native receipt: https://github.com/Arnie016/muster-webmcp/blob/main/docs/screenshots/muster-native-webmcp.png
+- Public support: https://github.com/Arnie016/muster-webmcp/issues
