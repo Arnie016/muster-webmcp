@@ -1,6 +1,6 @@
 # Muster editable demo package
 
-This folder owns the 90-second judge-facing video. It does not modify or depend on changes to the app source.
+This folder owns the 75-second judge-facing video. It does not modify the app source.
 
 ## Refresh proof
 
@@ -37,7 +37,13 @@ Outputs:
 
 ## Narration
 
-The approved narration is generated from `manifest.json` with GPT Realtime 2.1 and saved as `public/audio/narration.wav`:
+The approved narration was generated from `manifest.json` with GPT Realtime 2.1 and saved as `public/audio/narration.wav`. The original take included an unwanted spoken preamble. Rebuild the corrected, scene-aligned track from the retained raw take with:
+
+```bash
+npm run voice:repair
+```
+
+Only generate a completely new take when explicitly authorized:
 
 ```bash
 OPENAI_API_KEY="$(apikey get OPENAI_API_KEY)" npm run voice
@@ -53,4 +59,4 @@ YouTube upload and Devpost publication remain separate, explicit release steps.
 2. Replace screenshots with `proof:sync`.
 3. Change React components only when the layout or motion system itself must change.
 
-The current cut uses the real orbitable 3D building and inspectable 2D floor-plan proof. The architecture scene explains the manager, specialists, bounded tools, shared state, and human approval boundary.
+The current cut opens with two generated documentary-style context images, then moves to real app captures. Runtime and trace motion graphics reconstruct the actual source-defined tool calls at a readable scale; they are not a native-browser WebMCP capture. The architecture scene connects a human request to concrete tool results, one visible state, and the human approval boundary.

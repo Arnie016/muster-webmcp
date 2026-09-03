@@ -1,6 +1,6 @@
 # Muster demo video
 
-Target: 90 seconds, 1920×1080, 30 fps. The cut remains understandable without audio; the approved AI narration reinforces the visible proof.
+Target: 75 seconds, 1920×1080, 30 fps. The cut remains understandable without audio; the approved AI narration reinforces the visible proof.
 
 ## Narrative promise
 
@@ -10,33 +10,33 @@ Muster is a shared command surface for rehearsing a fictional building incident.
 
 | Time | Picture | On-screen copy | Optional narration |
 | --- | --- | --- | --- |
-| 00:00–00:05 | Start on the real blueprint in its changed-condition state. A restrained red route resolves into view. | **A blocked exit changes everything.** | A fire drill changes when an exit fails and two people need help. |
-| 00:05–00:15 | Pull back to the real orbitable building and command-room capture. Hold long enough to read the floor selector, workflow, live trace, and conversation bar. | **One shared rehearsal surface.** | Muster brings the building, people, equipment, and decisions onto one visible command surface. |
-| 00:15–00:27 | Open Floor 07, inspect a room, and reveal the fixture facts. | **Read the plan first.** | Open Floor Seven, inspect a room, and draw a route. The agent reads the fictional occupants, exits, assistance needs, and assigned roles. |
-| 00:27–00:39 | Focus the Studio, authored fire trail, drawn path, and blocked Stair B route. | **Stair B is unavailable.** | The facilitator introduces a controlled change: six people are in the studio, two need assistance, and Stair B is blocked. The drawn path is checked against that state. |
-| 00:39–00:52 | Replace the screenshot with the editable architecture scene. The Incident Commander fans out to four specialists, which call bounded page tools against one shared state. | **One manager. Bounded specialists.** | An incident commander routes work to bounded plan, people, equipment, and review tools, all sharing the visible drill state. |
-| 00:52–01:04 | Return to the review capture and isolate the visible WebMCP call trace. Tool receipts enter one at a time. | **Every call leaves a trace.** | Each call explains what happened, why it was allowed, and what visibly changed. |
-| 01:04–01:15 | Show the designed after-action report: scenario changes, recorded actions, observations, open gaps, and the approval boundary. | **Agent prepares. Human approves.** | The agent compares routes, records confirmed actions, and stages the report. It cannot infer intent, contact responders, or approve the outcome. |
-| 01:15–01:23 | Proof ledger. Separate what is observed from what remains to be captured. | **Proof, with boundaries.** | Five hundred shuffled workflows test the state transitions and human approval gate. Native WebMCP capture remains pending. |
-| 01:23–01:30 | Quiet final frame with the live URL and one button-shaped lockup. | **Try the live drill.** | Muster is fictional training software. Try the live drill. |
+| 00:00–00:06 | Generated documentary context: a commander and workplace wardens prepare around a real-looking floor plan. | **The fire is not rehearsal time.** | A fire drill changes when an exit fails and two people need help. |
+| 00:06–00:13 | Show the real command-room capture at a readable scale. | **A plan is more than a map.** | Muster brings the building, people, equipment, and decisions onto one visible command surface. |
+| 00:13–00:24 | Reconstruct the real runtime contract: type “Stair B is blocked. Check the Studio route.” Then reveal `inspect_zone`, `compare_routes`, and `analyze_route_sketch` as the floor changes. | **Ask once. Watch the plan change.** | Open Floor Seven, inspect a room, and draw a route. The agent reads the fictional occupants, exits, assistance needs, and assigned roles. |
+| 00:24–00:35 | Hold on the real Floor 07 capture with the Studio, authored fire trail, drawn path, and blocked Stair B route. | **Stair B is unavailable.** | The facilitator introduces a controlled change: six people are in the studio, two need assistance, and Stair B is blocked. The drawn path is checked against that state. |
+| 00:35–00:43 | Animate the causal architecture: facilitator request → manager → named tools → changed shared state → human decision. | **A request becomes a visible plan.** | An incident commander routes work to bounded plan, people, equipment, and review tools, all sharing the visible drill state. |
+| 00:43–00:49 | Show a large, reconstructed trace table. Select each call to reveal its reason, visible change, and guardrail. | **Every call explains itself.** | Each call explains what happened, why it was allowed, and what visibly changed. |
+| 00:49–01:00 | Show the designed after-action report and the deliberately absent agent approval tool. | **Agent prepares. Human approves.** | The agent compares routes, records confirmed actions, and stages the report. It cannot infer intent, contact responders, or approve the outcome. |
+| 01:00–01:09 | Proof ledger: working public interface, 500 workflows, 19 contracts, and pending native discovery. | **Proof, with boundaries.** | Five hundred shuffled workflows test the state transitions and human approval gate. Native WebMCP capture remains pending. |
+| 01:09–01:15 | Final frame with the live URL and one action. | **Try the live drill.** | Muster is fictional training software. Try the live drill. |
 
 ## Architecture shown in the film
 
 ```text
-Human facilitator
-       │ confirms observations and final approval
+Human facilitator: “Stair B is blocked. Check the Studio route.”
+       │
        ▼
 Incident Commander
-       ├── Plan specialist
-       ├── People specialist
-       ├── Equipment specialist
-       └── Review specialist
-                  │
-                  ▼
-       18 bounded page tools
-                  │
-                  ▼
-       Same visible drill state
+       ├── inspect_zone → Studio · 6 people · 2 assisted
+       ├── compare_routes → Stair B unavailable
+       ├── analyze_route_sketch → 18 m · endpoint Stair A
+       └── check_coverage → 1 assistance owner missing
+                         │
+                         ▼
+Same visible floor: zone · exit · route · owner
+                         │
+                         ▼
+Human assigns responsibility and approves
 ```
 
 The architecture scene must not imply autonomous emergency control. Page tools inspect or update a fictional rehearsal; they do not call responders, trigger alarms, control doors, infer intent, certify equipment, or approve the report.
@@ -52,10 +52,10 @@ Replace either source image, then run `npm run proof:sync` inside `trailer/`. Th
 
 ## Audio production
 
-- Keep narration at a calm incident-brief pace, approximately 125–135 words per minute.
-- Leave short pauses after “Stair B is unavailable” and “Human approves.”
+- Keep narration at a calm incident-brief pace. Use only natural sentence and scene-transition pauses.
+- Never include task instructions, rehearsal chatter, or a spoken preamble in the final audio.
 - Captions carry the full story; narration should never be required to understand a safety boundary.
-- The final narration is generated from this approved script with GPT Realtime 2.1. It is an AI voice, not a human firefighter recording.
+- The final narration is generated from this approved script with GPT Realtime 2.1. It is an AI voice, not a human firefighter recording. The repair script removes the unwanted 0–5.65 second preamble from the retained raw take.
 
 ## Required honesty
 

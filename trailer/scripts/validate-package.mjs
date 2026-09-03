@@ -29,7 +29,7 @@ for (let index = 0; index < scenes.length; index += 1) {
   if (!scene.intelligenceRole) fail(`${scene.id} is missing an intelligenceRole`);
 }
 
-const firstProof = scenes.find((scene) => ['proof', 'trace'].includes(scene.type) && scene.asset);
+const firstProof = scenes.find((scene) => scene.type === 'proof' && String(scene.asset ?? '').startsWith('proof/'));
 if (!firstProof || firstProof.start >= 20) fail('real product proof must appear before 20 seconds');
 const ctaScenes = scenes.filter((scene) => scene.type === 'cta');
 if (ctaScenes.length !== 1) fail(`exactly one CTA scene is required; received ${ctaScenes.length}`);
