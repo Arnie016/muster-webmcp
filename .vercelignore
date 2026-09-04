@@ -5,3 +5,5 @@ tests.mjs
 stress-tests.mjs
 package-lock.json
 node_modules
+tests
+.agent-runs

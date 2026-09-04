@@ -25,6 +25,7 @@ import {
 } from './drill-core.js';
 import MusterPeopleData from './people-data.js';
 import { initBuildingScene } from './building-scene.js';
+import { routeQuestion, answerQuestion } from './commander-chat.js';
 
 const STORAGE_KEY = 'muster-demo-state-v2';
 const $ = (selector) => document.querySelector(selector);
@@ -44,6 +45,9 @@ let timer = null;
 let elapsed = Number.isFinite(restoredUi.elapsed) ? restoredUi.elapsed : state.injectIds.includes('roster') ? 240 : state.injectIds.includes('stair') ? 120 : 0;
 let dossierView = 'context';
 let managerBusy = false;
+let chatBusy = false;
+let guideBusy = false;
+let toolDepth = 0;
 let pendingAssistant = null;
 let spatialMode = restoredUi.spatialMode === 'floor' ? 'floor' : 'building';
 let orbit = { x: 62, z: -38, scale: 1 };
@@ -59,8 +63,14 @@ let lastRouteResult = restoredUi.lastRouteResult || null;
 let buildingScene = null;
 let peopleState = MusterPeopleData.resetPeopleState();
 let conversation = [
-  { role: 'assistant', text: 'Start with Read the plan. I will explain every change and wait for your next decision.' },
+  { role: 'assistant', text: 'Ask about the floor, people, exits, or equipment. Or use Next action to advance the drill. I read the page tools; you confirm changes.' },
 ];
+try {
+  const savedChat = JSON.parse(sessionStorage.getItem('muster-chat-v3') || 'null');
+  if (Array.isArray(savedChat) && savedChat.every((t) => ['user', 'assistant'].includes(t.role) && typeof t.text === 'string')) {
+    conversation = savedChat.map((t) => ({ ...t, status: t.status === 'running' ? 'interrupted' : t.status }));
+  }
+} catch { /* Chat persistence is optional. */ }
 
 const FLOOR_PRESETS = {
   3: {
@@ -165,6 +175,9 @@ const toolDefinitions = [
         assisted_occupants: BUILDING.assistedOccupants,
         exits: BUILDING.exits,
         missing_role: BUILDING.roles.find((role) => role.status === 'missing')?.label,
+        roles: BUILDING.roles.map((role) => ({ ...role, ...(role.id === 'mobility' && state.decisions.some((d) => d.actionId === 'assist') ? { person: ACTIONS.assist.owner, status: 'present' } : {}) })),
+        selected_floor: selectedFloor,
+        floor_catalog: Object.entries(FLOOR_PRESETS).map(([floor, preset]) => ({ ...preset, floor: Number(floor), width_m: 38, depth_m: 23.15, perimeter: undefined, core: undefined, rooms: undefined, service: undefined, labels: undefined, fixtures: undefined })),
         external_effects: false,
       };
     },
@@ -714,7 +727,7 @@ function resetFloorView() {
   routeDrawing = false;
   $('#drawRouteButton').classList.remove('active');
   $('#drawRouteButton').textContent = 'Draw a route';
-  $('#planGesture').textContent = 'Click a room · drag to pan · scroll to zoom';
+  $('#planGesture').textContent = 'Click a room · drag to pan · + / − to zoom';
   applyFloorView();
 }
 
@@ -746,18 +759,27 @@ function traceDetails(event) {
 function renderConversation() {
   const target = $('#conversationHistory');
   if (!target) return;
-  target.innerHTML = conversation.slice(-6).map((turn) => `<article class="conversation-turn ${turn.role}">
-    <span>${turn.role === 'assistant' ? 'IC' : 'You'}</span><p>${escapeHtml(turn.text)}</p>
+  const stickToBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 70;
+  const opened = new Set([...target.querySelectorAll('details[open]')].map((d) => d.dataset.receipt));
+  target.innerHTML = conversation.map((turn, index) => `<article class="conversation-turn ${turn.role}" data-turn="${index}">
+    <span class="turn-speaker">${turn.role === 'assistant' ? 'IC' : 'You'}</span><div class="turn-content">
+    ${turn.intent ? `<div class="turn-intent"><i></i><span>${escapeHtml(turn.intent)}</span><small>${turn.status === 'running' ? 'Running' : turn.status === 'error' ? 'Needs attention' : turn.status === 'interrupted' ? 'Interrupted' : 'Complete'}</small></div>` : ''}
+    <p>${escapeHtml(turn.text)}</p>
+    ${turn.calls?.length ? `<div class="turn-calls">${turn.calls.map((c, ci) => `<details data-receipt="${index}-${ci}" ${opened.has(`${index}-${ci}`) ? 'open' : ''}><summary><b>${c.status === 'running' ? '◌' : c.status === 'error' ? '!' : '✓'}</b><code>${escapeHtml(c.name)}</code><small>${c.status === 'running' ? 'Calling…' : `${c.durationMs} ms`}</small></summary><p>${escapeHtml(c.purpose)}</p><div class="receipt-data"><div><strong>Input</strong><pre>${escapeHtml(JSON.stringify(c.input, null, 2))}</pre></div><div><strong>${c.status === 'error' ? 'Error' : 'Output'}</strong><pre>${escapeHtml(JSON.stringify(c.output ?? 'Waiting for result', null, 2))}</pre></div></div></details>`).join('')}</div>` : ''}
+    </div>
   </article>`).join('');
-  target.scrollTop = target.scrollHeight;
+  if (stickToBottom) target.scrollTop = target.scrollHeight;
+  $('#conversationCount').textContent = `${conversation.filter((t) => t.role === 'user').length} requests · saved in this tab`;
+  try { sessionStorage.setItem('muster-chat-v3', JSON.stringify(conversation)); } catch { /* Storage may be unavailable. */ }
 }
 
-function beginConversation(message) {
-  conversation.push({ role: 'user', text: message }, { role: 'assistant', text: 'Checking the building file…' });
+function beginConversation(message, intent = 'Read the request and call the page tools') {
+  conversation.push({ role: 'user', text: message }, { role: 'assistant', text: 'Reading the page…', intent, status: 'running', calls: [] });
   pendingAssistant = conversation.length - 1;
   const stateLabel = document.querySelector('.conversation-state');
   if (stateLabel) stateLabel.innerHTML = '<i></i> Working';
   renderConversation();
+  $('#conversationHistory').scrollTop = $('#conversationHistory').scrollHeight;
 }
 
 function setAgentMessage(message, specialist = '', targetIndex = pendingAssistant) {
@@ -766,7 +788,7 @@ function setAgentMessage(message, specialist = '', targetIndex = pendingAssistan
     targetIndex = conversation.length - 1;
     pendingAssistant = targetIndex;
   } else {
-    conversation[targetIndex] = { role: 'assistant', text: message };
+    conversation[targetIndex] = { ...conversation[targetIndex], role: 'assistant', text: message };
   }
   renderConversation();
   document.querySelectorAll('[data-specialist]').forEach((item) => item.classList.toggle('active', item.dataset.specialist === specialist));
@@ -780,16 +802,30 @@ async function callTool(name, input = {}) {
   const ownsConversationTurn = Boolean(specialist && !managerBusy);
   let targetIndex = pendingAssistant;
   if (specialist && !managerBusy) targetIndex = setAgentMessage(`Routing to ${specialist}. Running ${name.replaceAll('_', ' ')}…`, specialist, targetIndex);
+  if (targetIndex === null) {
+    targetIndex = setAgentMessage('Calling the page tool…', specialist);
+  }
+  const turn = conversation[targetIndex];
+  turn.intent ||= friendlyToolNames[name] || name;
+  turn.status = 'running';
+  turn.calls ||= [];
+  const receipt = { name, input: tracePayload(input), purpose: tool.description, status: 'running' };
+  turn.calls.push(receipt);
+  toolDepth += 1;
+  renderConversation();
   const activityStart = state.activity.length;
   const startedAt = performance.now();
   document.body.classList.add('tool-working');
   renderOperation();
   try {
+    // Allow the real pending tool state to paint; no theatrical delay or fake reasoning.
+    await new Promise((resolve) => requestAnimationFrame(resolve));
     const result = await tool.execute(input);
     if (name === 'start_drill') elapsed = 0;
     if (name === 'send_inject' && input.inject_id === 'stair') elapsed = Math.max(elapsed, 120);
     if (name === 'send_inject' && input.inject_id === 'roster') elapsed = Math.max(elapsed, 240);
     const durationMs = Math.max(1, Math.round(performance.now() - startedAt));
+    Object.assign(receipt, { output: tracePayload(result), durationMs, status: 'done' });
     attachTraceEvidence(name, input, result, durationMs, activityStart);
     maybeAdvanceGuide(name, input);
     persistState();
@@ -805,11 +841,18 @@ async function callTool(name, input = {}) {
     render();
     return result;
   } catch (error) {
+    Object.assign(receipt, { output: { error: error instanceof Error ? error.message : 'Tool failed' }, durationMs: Math.max(1, Math.round(performance.now() - startedAt)), status: 'error' });
+    conversation[targetIndex].status = 'error';
     showToolResult({ error: error instanceof Error ? error.message : 'Unknown tool error' });
-    setAgentMessage('That request could not be completed. The page state was left unchanged.', specialist, targetIndex);
+    setAgentMessage(`Could not complete ${friendlyToolNames[name] || name}: ${error.message || 'tool failed'}. Earlier completed calls remain in the log.`, specialist, targetIndex);
     throw error;
   } finally {
-    document.body.classList.remove('tool-working');
+    toolDepth -= 1;
+    if (!toolDepth) {
+      document.body.classList.remove('tool-working');
+      if (conversation[targetIndex].status !== 'error') conversation[targetIndex].status = 'done';
+      renderConversation();
+    }
     if (ownsConversationTurn && pendingAssistant === targetIndex) pendingAssistant = null;
   }
 }
@@ -838,14 +881,14 @@ async function runManagerIntent(intent, zoneId = 'studio') {
       setAgentMessage('Plan specialist is reading the floor and occupancy register…', 'plan');
       const plan = await callTool('read_plan');
       const register = await callTool('read_floor_register');
-      setAgentMessage(`${plan.occupants} people are on the fixture. Two exits are shown; ${register.assistance_owner ? 'assistance has an owner' : 'the assistance role is still unassigned'}.`, 'plan');
+      setAgentMessage(`Floor ${plan.floor} · ${plan.building}, ${plan.plan_version}. ${plan.occupants} people are listed. ${register.assistance_owner ? `Assistance owner: ${register.assistance_owner}.` : 'Two people need assistance; no owner is recorded yet.'}`, 'plan');
       return { intent, plan, register, manager: 'incident_commander', training_only: true, external_effects: false };
     }
     if (intent === 'find_gaps') {
       setAgentMessage('People specialist is checking roles against the active exercise…', 'people');
       const register = await callTool('read_floor_register');
       const coverage = await callTool('check_coverage');
-      const gapCount = coverage.unresolved.length + (register.assistance_owner ? 0 : 1);
+      const gapCount = coverage.unresolved.length + (!register.assistance_owner && !coverage.unresolved.some((g) => g.id === 'roster') ? 1 : 0);
       setAgentMessage(gapCount ? `${gapCount} visible coverage gap${gapCount === 1 ? ' needs' : 's need'} a named owner. I will not infer intent or competence.` : 'No visible ownership gaps remain in this exercise.', 'people');
       return { intent, visible_gap_count: gapCount, register, coverage, manager: 'incident_commander', training_only: true, external_effects: false };
     }
@@ -853,14 +896,12 @@ async function runManagerIntent(intent, zoneId = 'studio') {
       setAgentMessage('Equipment specialist is checking the plan inventory…', 'equipment');
       const result = await callTool('read_equipment');
       setAgentMessage(`${result.equipment.length} items are shown on the fictional plan. Their presence does not certify serviceability or adequacy.`, 'equipment');
-      if (!$('#dossierDialog').open) $('#dossierDialog').showModal();
       return { intent, result, manager: 'incident_commander', training_only: true, external_effects: false };
     }
     if (intent === 'read_history') {
       setAgentMessage('Review specialist is reading the dated exercise lessons…', 'review');
       const result = await callTool('read_lessons');
       setAgentMessage(`${result.lessons.length} fictional learning records are in the file. The latest lesson is: ${result.lessons[0].finding}`, 'review');
-      if (!$('#dossierDialog').open) $('#dossierDialog').showModal();
       return { intent, result, manager: 'incident_commander', training_only: true, external_effects: false };
     }
     if (intent === 'read_status') {
@@ -1040,9 +1081,10 @@ function renderCrew() {
     const personId = { fsm: 'responder-a-rahman', security: 'responder-mei-lin', 'warden-east': 'responder-d-kumar', 'warden-west': 'responder-s-tan', mobility: 'responder-s-tan' }[role.id];
     const ui = personUi[personId];
     const photo = person ? `has-photo` : '';
-    return `<button type="button" class="crew-member ${person ? '' : 'missing'}" ${personId ? `data-person-id="${personId}"` : ''}><span class="crew-member-avatar ${photo}" style="--portrait-url:url('assets/people/fictional-response-team.png');--portrait-position:${ui?.portrait || '0% 0%'}">${ui?.initials || '?'}</span><span class="crew-member-copy"><span>${role.label}</span><strong>${person || 'Unassigned'}</strong><small>${person ? (resolved ? 'Assigned during exercise' : 'Ready') : 'Gap in roster'}</small></span></button>`;
+    return `<button type="button" class="crew-member ${person ? '' : 'missing'}" ${person ? `data-person-id="${personId}"` : 'data-missing-role="mobility"'}><span class="crew-member-avatar ${photo}" style="--portrait-url:url('assets/people/fictional-response-team.png');--portrait-position:${ui?.portrait || '0% 0%'}">${person ? ui?.initials || '?' : '?'}</span><span class="crew-member-copy"><span>${role.label}</span><strong>${person || 'Unassigned'}</strong><small>${person ? (resolved ? 'Assigned during exercise' : 'Ready') : 'Gap in roster'}</small></span></button>`;
   }).join('');
   $('#crewStrip').querySelectorAll('[data-person-id]').forEach((button) => button.addEventListener('click', () => openPerson(button.dataset.personId)));
+  $('#crewStrip').querySelector('[data-missing-role]')?.addEventListener('click', () => { openFullConversation(); answerChat('Which role has no owner?'); });
   renderPeopleLayer();
 }
 
@@ -1281,20 +1323,35 @@ function renderGuidedBrief() {
     : `<span>What this step changes</span><strong>${escapeHtml(step?.change || 'No further agent action is required.')}</strong>`;
   const button = $('#guidedNextButton');
   button.textContent = completed ? (state.approved ? 'Approved by a human ✓' : 'Review and approve →') : `${step.button} →`;
-  button.disabled = state.approved;
+  button.disabled = state.approved || guideBusy || chatBusy;
+  $('#deckStepLabel').textContent = completed ? 'Ready for review' : `Next action · ${guidedStep + 1} of ${GUIDED_SEQUENCE.length}`;
+  $('#deckNextTitle').textContent = completed ? 'Review the evidence' : step.title;
+  $('#deckNextDescription').textContent = completed ? 'Final approval is a separate human control.' : step.description;
+  $('#chatNextHint').textContent = step?.tool === 'record_action' ? 'Only record this if you confirm it in the exercise.' : 'One step. No automatic replay.';
+  for (const id of ['deckNextButton', 'chatNextButton']) {
+    $( `#${id}`).textContent = guideBusy ? 'Working…' : button.textContent;
+    $(`#${id}`).disabled = button.disabled;
+  }
 }
 
 async function runGuidedStep() {
+  if (guideBusy || chatBusy || toolDepth) return;
   const step = GUIDED_SEQUENCE[guidedStep];
   if (!step) {
+    if ($('#conversationDialog').open) $('#conversationDialog').close();
     $('#reportPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
   if (selectedFloor !== 7) selectFloor(7, true);
-  beginConversation(step.button);
+  guideBusy = true;
+  renderGuidedBrief();
+  beginConversation(step.button, `Next action: ${step.title}`);
   try {
     await callTool(step.tool, step.input);
   } catch {
+    renderGuidedBrief();
+  } finally {
+    guideBusy = false;
     renderGuidedBrief();
   }
 }
@@ -1319,7 +1376,7 @@ function renderStatus() {
 function renderOperation() {
   const latest = state.activity.at(-1);
   const details = traceDetails(latest);
-  const activePhase = managerBusy ? 'Thinking' : details.phase;
+  const activePhase = managerBusy ? 'Routing' : details.phase;
   $('#operationCard').innerHTML = `<div class="operation-signal ${managerBusy ? 'working' : ''}"><i></i><span>${activePhase}</span></div><div><strong>${details.owner}</strong><p>${details.outcome}</p></div><small>${details.boundary}</small>`;
 }
 
@@ -1405,20 +1462,11 @@ async function registerWebMCP() {
 }
 
 async function runGuidedRehearsal() {
-  localStorage.removeItem(STORAGE_KEY);
-  state = createInitialState();
-  peopleState = MusterPeopleData.resetPeopleState();
-  planRead = false;
-  guidedStep = 0;
-  elapsed = 0;
-  if (timer) { clearInterval(timer); timer = null; }
-  $('#exerciseClock').textContent = '00:00';
   $('#toolDialog').close();
   selectFloor(7);
-  setSpatialMode('building');
-  conversation = [{ role: 'assistant', text: 'We will rehearse one decision at a time. First, let me read the visible Floor 7 plan.' }];
+  if (state.status !== 'ready') setSpatialMode('floor');
   render();
-  $('#guidedBrief').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('#guidedBrief').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
 }
 
 function toolPreset(toolName) {
@@ -1472,7 +1520,8 @@ function setupSpatialInteractions() {
     onSiteSelect: (pointId) => selectSitePoint(pointId),
   });
   $('#buildingViewport').classList.toggle('webgl-ready', Boolean(buildingScene));
-  selectFloor(7);
+  selectFloor(selectedFloor);
+  setSpatialMode(spatialMode);
   applyOrbit();
   applyFloorView();
 
@@ -1526,6 +1575,7 @@ function setupSpatialInteractions() {
   let orbitDrag = null;
   building.addEventListener('pointerdown', (event) => {
     if (event.target.closest('button')) return;
+    if (event.pointerType === 'touch') return;
     orbitDrag = { x: event.clientX, y: event.clientY, startX: orbit.x, startZ: orbit.z };
     building.setPointerCapture(event.pointerId);
     building.classList.add('dragging');
@@ -1546,6 +1596,7 @@ function setupSpatialInteractions() {
   building.addEventListener('pointerup', endOrbit);
   building.addEventListener('pointercancel', endOrbit);
   building.addEventListener('wheel', (event) => {
+    if (!event.ctrlKey && !event.metaKey) return;
     event.preventDefault();
     orbit.scale = Math.max(.72, Math.min(1.32, orbit.scale - Math.sign(event.deltaY) * .08));
     applyOrbit();
@@ -1563,7 +1614,7 @@ function setupSpatialInteractions() {
       renderRouteSketch();
       return;
     }
-    if (event.target.closest('[data-floor-zone]')) return;
+    if (event.pointerType === 'touch' || event.target.closest('[data-floor-zone], [data-person-id]')) return;
     panDrag = { x: event.clientX, y: event.clientY, startX: floorView.x, startY: floorView.y };
     floor.setPointerCapture(event.pointerId);
     floor.classList.add('dragging');
@@ -1608,12 +1659,15 @@ function setupSpatialInteractions() {
   floor.addEventListener('pointerup', endFloorGesture);
   floor.addEventListener('pointercancel', endFloorGesture);
   floor.addEventListener('wheel', (event) => {
+    if (!event.ctrlKey && !event.metaKey) return;
     event.preventDefault();
     floorView.scale = Math.max(1, Math.min(2.2, floorView.scale - Math.sign(event.deltaY) * .12));
     applyFloorView();
   }, { passive: false });
 
   $('#resetPlanView').addEventListener('click', resetFloorView);
+  $('#zoomInPlan').addEventListener('click', () => { floorView.scale = Math.min(2.2, floorView.scale + .2); applyFloorView(); });
+  $('#zoomOutPlan').addEventListener('click', () => { floorView.scale = Math.max(1, floorView.scale - .2); applyFloorView(); });
   $('#drawRouteButton').addEventListener('click', () => {
     routeDrawMode = !routeDrawMode;
     routePoints = [];
@@ -1622,7 +1676,7 @@ function setupSpatialInteractions() {
     floor.classList.toggle('drawing', routeDrawMode);
     $('#drawRouteButton').classList.toggle('active', routeDrawMode);
     $('#drawRouteButton').textContent = routeDrawMode ? 'Drawing… release to analyze' : 'Draw a route';
-    $('#planGesture').textContent = routeDrawMode ? 'Draw from a room to an exit. Release to run the route tool.' : 'Click a room · drag to pan · scroll to zoom';
+    $('#planGesture').textContent = routeDrawMode ? 'Draw from a room to an exit. Release to run the route tool.' : 'Click a room · drag to pan · + / − to zoom';
   });
 
   document.querySelectorAll('[data-floor-zone]').forEach((hotspot) => hotspot.addEventListener('click', () => {
@@ -1666,37 +1720,72 @@ $('#conversationToggle').addEventListener('click', () => {
 });
 $('#personDialog').addEventListener('click', (event) => { if (event.target === $('#personDialog')) $('#personDialog').close(); });
 $('#rehearsalButton').addEventListener('click', runGuidedRehearsal);
-$('#guidedNextButton').addEventListener('click', () => runGuidedStep().catch(() => {}));
+for (const id of ['guidedNextButton', 'deckNextButton', 'chatNextButton']) $(`#${id}`).addEventListener('click', () => runGuidedStep().catch(() => {}));
+function openFullConversation() {
+  const dock = $('#conversationDock');
+  dock.classList.remove('collapsed');
+  $('#conversationToggle').setAttribute('aria-expanded', 'true');
+  $('#conversationToggle').textContent = 'Collapse';
+  $('#conversationDialog').append(dock);
+  $('#conversationExpand').textContent = 'Close full chat';
+  $('#conversationDialog').showModal();
+  $('#agentPrompt').focus();
+}
+$('#conversationExpand').addEventListener('click', () => {
+  if ($('#conversationDialog').open) $('#conversationDialog').close(); else openFullConversation();
+});
+$('#openChatButton').addEventListener('click', openFullConversation);
+$('#conversationDialog').addEventListener('close', () => {
+  $('#conversationHome').after($('#conversationDock'));
+  $('#conversationExpand').textContent = 'Full chat ↗';
+});
+$('#conversationDialog').addEventListener('click', (event) => { if (event.target === $('#conversationDialog')) $('#conversationDialog').close(); });
 $('#toolDialog').addEventListener('click', (event) => { if (event.target === $('#toolDialog')) $('#toolDialog').close(); });
 $('#dossierDialog').addEventListener('click', (event) => { if (event.target === $('#dossierDialog')) $('#dossierDialog').close(); });
 document.querySelectorAll('[data-zone]').forEach((button) => button.addEventListener('click', () => callTool('inspect_zone', { zone_id: button.dataset.zone })));
 document.querySelectorAll('[data-dossier-view]').forEach((button) => button.addEventListener('click', () => { dossierView = button.dataset.dossierView; renderDossier(); }));
 document.querySelectorAll('[data-agent-prompt]').forEach((button) => button.addEventListener('click', () => {
-  if (button.dataset.agentPrompt === 'rehearse') {
-    runGuidedRehearsal().catch(() => {});
-    return;
-  }
-  const intent = { plan: 'orient', people: state.status === 'ready' ? 'orient' : 'read_status', equipment: 'inspect_equipment', roles: 'find_gaps', rehearse: 'rehearse' }[button.dataset.agentPrompt];
-  const messages = { plan: 'Show me the Floor 7 plan', people: 'Who is on this floor?', equipment: 'Show planned safety equipment', roles: 'Which role has no owner?', rehearse: 'Run the complete demonstration' };
-  beginConversation(messages[button.dataset.agentPrompt]);
-  callTool('run_drill_manager', { intent }).catch(() => {});
+  const messages = { plan: 'What is this floor?', people: 'How many people are on this floor?', equipment: 'Where is the extinguisher?', roles: 'Who is in charge?', rehearse: 'What do I do next?' };
+  answerChat(messages[button.dataset.agentPrompt]);
 }));
+async function answerChat(rawPrompt) {
+  if (chatBusy || guideBusy || toolDepth) return;
+  const request = routeQuestion(rawPrompt, { selectedFloor, zone: state.focusZone });
+  chatBusy = true;
+  managerBusy = true;
+  beginConversation(rawPrompt, request.intent);
+  const turnIndex = pendingAssistant;
+  $('#agentForm button').disabled = true;
+  document.querySelectorAll('[data-agent-prompt]').forEach((button) => { button.disabled = true; });
+  renderGuidedBrief();
+  const results = [];
+  try {
+    for (const call of request.calls) {
+      pendingAssistant = turnIndex;
+      const result = await callTool(call.name, call.input);
+      results.push({ name: call.name, result });
+    }
+    setAgentMessage(answerQuestion(request, results, { nextLabel: GUIDED_SEQUENCE[guidedStep]?.button }), '', turnIndex);
+    conversation[turnIndex].status = 'done';
+  } catch (error) {
+    conversation[turnIndex].status = 'error';
+    setAgentMessage(`I could not finish that request: ${error.message}. Completed calls remain visible below. You can still use Next action.`, '', turnIndex);
+  } finally {
+    chatBusy = false;
+    managerBusy = false;
+    pendingAssistant = null;
+    $('#agentForm button').disabled = false;
+    document.querySelectorAll('[data-agent-prompt]').forEach((button) => { button.disabled = false; });
+    render();
+  }
+}
 $('#agentForm').addEventListener('submit', (event) => {
   event.preventDefault();
+  if (chatBusy || guideBusy || toolDepth) return;
   const rawPrompt = $('#agentPrompt').value.trim();
   if (!rawPrompt) return;
-  const prompt = rawPrompt.toLowerCase();
   $('#agentPrompt').value = '';
-  beginConversation(rawPrompt);
-  const zone = ['west', 'east', 'meeting', 'studio', 'lobby', 'electrical'].find((candidate) => prompt.includes(candidate));
-  const intent = /run|rehears|simulate|stress/.test(prompt) ? 'rehearse'
-    : /report|prepare review|after.action/.test(prompt) ? 'prepare_review'
-      : /equipment|extinguisher|hose|call point|serviceability/.test(prompt) ? 'inspect_equipment'
-        : /history|previous|lesson|last drill/.test(prompt) ? 'read_history'
-          : /status|accounted|clearance|complete/.test(prompt) ? 'read_status'
-            : zone ? 'inspect_zone'
-              : /gap|missing|risk|owner|people|role/.test(prompt) ? 'find_gaps' : 'orient';
-  callTool('run_drill_manager', { intent, ...(zone ? { zone_id: zone } : {}) }).catch(() => {});
+  answerChat(rawPrompt);
 });
 
 setupSpatialInteractions();

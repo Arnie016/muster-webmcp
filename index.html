@@ -187,7 +187,7 @@
         <div class="floor-wrap view-hidden" id="floorView">
           <div class="plan-controls">
             <div><button id="backToBuilding" type="button">← Building</button><strong id="floorPlanHeading">Floor 07 · office command · 1:200</strong></div>
-            <div><button id="drawRouteButton" type="button">Draw a route</button><button id="resetPlanView" type="button">Reset view</button><span id="floorZoomLabel">100%</span></div>
+            <div><button id="drawRouteButton" type="button">Draw a route</button><button id="zoomOutPlan" type="button" aria-label="Zoom out of floor plan">−</button><button id="zoomInPlan" type="button" aria-label="Zoom into floor plan">+</button><button id="resetPlanView" type="button">Reset view</button><span id="floorZoomLabel">100%</span></div>
           </div>
           <section class="scenario-sequence" id="scenarioSequence" aria-label="Current exercise sequence" aria-live="polite"></section>
           <div class="floor-viewport" id="floorViewport">
@@ -314,7 +314,7 @@
           <aside class="route-receipt" id="routeReceipt" hidden aria-live="polite"></aside>
           <div class="simulation-status"><i></i><span id="simulationLabel">Simulation idle</span></div>
           <div class="narrative-caption" id="narrativeCaption"><span>Authored exercise story</span><strong>Plan ready · no active signal</strong></div>
-          <div class="plan-gesture" id="planGesture">Click a room · drag to pan · scroll to zoom</div>
+          <div class="plan-gesture" id="planGesture">Click a room · drag to pan · + / − to zoom</div>
           <div class="scan-beam" aria-hidden="true"></div>
         </div>
 
@@ -323,15 +323,18 @@
           <div class="crew-strip" aria-label="Exercise roles" id="crewStrip"></div>
         </section>
 
-        <section class="conversation-dock" aria-label="Conversation with the drill manager">
+        <div id="conversationHome"></div>
+        <section class="conversation-dock" aria-label="Conversation with the drill manager" id="conversationDock">
           <header class="conversation-head">
             <div class="commander-avatar" aria-hidden="true">IC</div>
-            <div><span class="eyebrow">Incident Commander</span><strong>Ask the plan, people, equipment, or review desk</strong></div>
+            <div><span class="eyebrow">Incident Commander · local tool router</span><strong>Ask about your drill</strong></div>
             <span class="conversation-state"><i></i> Ready</span>
+            <button class="conversation-toggle" id="conversationExpand" type="button">Full chat ↗</button>
             <button class="conversation-toggle" id="conversationToggle" type="button" aria-expanded="true">Collapse</button>
           </header>
           <div class="conversation-body">
-            <div class="conversation-history" id="conversationHistory" role="log" aria-live="polite">
+            <div class="conversation-meta"><span id="conversationCount">0 requests · saved in this tab</span><span>Page tools, not a hosted AI model</span></div>
+            <div class="conversation-history" id="conversationHistory" role="log" aria-live="polite" tabindex="0" aria-label="Full conversation history">
               <article class="conversation-turn assistant"><span>IC</span><p>Start with the plan. I will open one decision at a time, show every tool call, and wait for you before anything changes.</p></article>
             </div>
             <div class="quick-actions command-desks" aria-label="Command desks">
@@ -343,9 +346,10 @@
             </div>
             <form class="agent-composer" id="agentForm">
               <label class="sr-only" for="agentPrompt">Ask the Incident Commander</label>
-              <input id="agentPrompt" autocomplete="off" placeholder="Ask: who is on Floor 7, what is missing, or which route is open?" />
+              <input id="agentPrompt" autocomplete="off" maxlength="1500" placeholder="Where is the extinguisher? What should I do next?" />
               <button type="submit" aria-label="Send request">→</button>
             </form>
+            <div class="chat-next"><span id="chatNextHint">One step at a time. You control changes.</span><button class="primary-button" id="chatNextButton" type="button">Read the plan →</button></div>
           </div>
         </section>
 
@@ -373,6 +377,13 @@
           <span class="runtime-connection" id="runtimeConnection"><i></i> Manual mode</span>
           <button class="icon-button" id="resetButton" type="button" aria-label="Reset fictional exercise">Reset</button>
         </div>
+        <section class="next-action-card" aria-label="Next action">
+          <span class="eyebrow" id="deckStepLabel">Next action</span>
+          <strong id="deckNextTitle">Read the visible plan</strong>
+          <p id="deckNextDescription">Each step waits for you.</p>
+          <button class="primary-button" id="deckNextButton" type="button">Read the plan →</button>
+          <button class="quiet-button" id="openChatButton" type="button">Open conversation ↗</button>
+        </section>
         <div class="specialist-rail" id="specialistRail" aria-label="Managed specialists">
           <small class="specialist-label">Agent route · one specialist lights up per call</small>
           <span data-specialist="plan">Plan</span><span data-specialist="people">People</span><span data-specialist="equipment">Equipment</span><span data-specialist="review">Review</span>
@@ -430,6 +441,7 @@
       <div class="person-card" id="personCard"></div>
       <button class="icon-button" id="closePerson" type="button">Close</button>
     </dialog>
+    <dialog id="conversationDialog" aria-label="Full drill conversation"></dialog>
 
     <script type="module" src="app.js"></script>
   </body>

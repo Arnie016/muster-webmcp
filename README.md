@@ -54,6 +54,10 @@ The tools update the same interface the person is using. Selecting a live-trace 
 
 The bottom command desk is also usable in a normal browser. Its deterministic question router can answer from the building file, focus a zone, inspect equipment or history, find ownership gaps, and open the guided rehearsal. It never advances or completes the sequence without the facilitator. In a WebMCP-capable browser, the same tools are registered through `document.modelContext.registerTool` for agent discovery.
 
+The conversation now shows a recognized intent and actual named tool calls, with expandable input/output receipts in each reply. It is explicitly a **local tool router, not a hosted LLM**. Unsupported questions ask for clarification instead of returning the same occupancy answer. **Full chat** opens the complete session; history is stored in this browser tab's session storage and survives reload. No chat text is sent to a server. **Guide me** preserves the run. A matching **Next action** button in the sidebar and chat advances one step; it does not auto-approve a report. Ordinary page scrolling no longer zooms the plan: use the explicit + / − controls or Ctrl/Command + scroll.
+
+`npm run test:chat` verifies actual user questions, topic-specific responses, in-session receipts, full history, reload, unsupported intent, non-destructive guidance, zoom recovery, mobile layout, and a complete next-button workflow that stops before human approval.
+
 ```js
 for (const tool of toolDefinitions) {
   await document.modelContext.registerTool({
