@@ -1300,8 +1300,10 @@ async function runGuidedStep() {
 }
 
 function renderStatus() {
+  document.body.classList.toggle('scenario-unstarted', state.status === 'ready' && !planRead);
   $('#resumeScenarioButton').textContent = state.status === 'ready' ? 'Start scenario →'
     : state.status === 'review' || state.approved ? 'Review scenario →' : 'Resume scenario →';
+  $('#launchScenarioButton').textContent = $('#resumeScenarioButton').textContent;
   const status = $('#statusDot');
   status.className = `status-dot ${state.status}`;
   status.textContent = state.status === 'ready' ? 'Ready' : state.status === 'running' ? 'In exercise' : state.status === 'review' ? 'Review' : 'Complete';
@@ -1484,10 +1486,12 @@ function setupSpatialInteractions() {
   };
   $('#enterFloorButton').addEventListener('click', openFloor);
   let scenarioOpening = false;
+  $('#launchScenarioButton').addEventListener('click', () => $('#resumeScenarioButton').click());
   $('#resumeScenarioButton').addEventListener('click', async () => {
     if (scenarioOpening) return;
     scenarioOpening = true;
     $('#resumeScenarioButton').disabled = true;
+    $('#launchScenarioButton').disabled = true;
     try {
       selectFloor(7, true);
       if (state.status === 'ready') {
@@ -1504,6 +1508,7 @@ function setupSpatialInteractions() {
     } finally {
       scenarioOpening = false;
       $('#resumeScenarioButton').disabled = false;
+      $('#launchScenarioButton').disabled = false;
     }
   });
   $('#floorMode').addEventListener('click', openFloor);

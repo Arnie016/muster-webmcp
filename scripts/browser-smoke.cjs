@@ -17,7 +17,10 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4179';
   await page.reload({ waitUntil: 'networkidle' });
 
   assert.match(await page.locator('#phaseGuide').innerText(), /Mission stage 1 of 5/i);
-  assert.match(await page.locator('#guidedBrief').innerText(), /Next page-tool action[\s\S]*Muster stops after this visible change/i);
+  assert.match(await page.locator('#guidedBrief').innerText(), /Next page-tool action/i);
+  assert.ok(await page.locator('#launchScenarioButton').isVisible());
+  assert.ok(await page.locator('.scenario-rail').isHidden());
+  assert.ok(await page.locator('#guidedDescription').isHidden());
   assert.match(await page.locator('#specialistRail').innerText(), /Agent route.*one specialist lights up per call/is);
 
   assert.equal(await page.locator('[data-building-floor]').count(), 18);
@@ -194,7 +197,7 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4179';
   assert.ok(await fallback.locator('#enterFloorButton').isHidden());
   assert.ok(await fallback.locator('#floorMode').isDisabled());
   assert.match(await fallback.locator('#resumeScenarioButton').innerText(), /Start scenario/);
-  await fallback.locator('#resumeScenarioButton').click();
+  await fallback.locator('#launchScenarioButton').click();
   await fallback.waitForFunction(() => document.querySelector('#resumeScenarioButton')?.textContent.includes('Resume scenario'));
   assert.ok(await fallback.locator('#floorView').isVisible());
   assert.match(await fallback.locator('#floorPlanHeading').innerText(), /F07/);

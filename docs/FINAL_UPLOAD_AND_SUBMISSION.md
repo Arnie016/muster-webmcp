@@ -20,7 +20,7 @@ Agent operator skill: https://muster-fire-drill.vercel.app/SKILL.md
 
 Devpost: https://devpost.com/software/muster-the-agentic-fire-drill
 
-Muster exposes one manager and 18 bounded page tools through WebMCP. In the tested Chrome 152 tab, `document.modelContext` discovered all 19 tools, executed `read_plan`, then routed the manager's `orient` intent through named page tools. Mission progress and the selected input/output receipt updated on the same page. The product also works as a guided manual rehearsal when WebMCP is unavailable.
+Muster exposes one manager and 18 bounded page tools through WebMCP. In the tested Chrome 152 tab, `document.modelContext` discovered all 19 tools and executed the declared fictional rehearsal on the same page. The manager routed named calls, mission progress advanced, the review draft was staged, and the separate human approval control remained untouched. The product also works as a guided manual rehearsal when WebMCP is unavailable.
 
 00:00 Why rehearsal matters
 00:12 One shared command room
@@ -56,14 +56,16 @@ WebMCP, OpenAI, agentic AI, fire drill, emergency preparedness, human AI collabo
 - Duration: 132.544 seconds
 - Picture: H.264, 1920 by 1080, 30 fps
 - Audio: AAC, 48 kHz stereo; measured integrated loudness -16.1 LUFS and true peak -4.5 dBTP
-- SHA-256: `ac899356395cc59a3c9b24cc10e4bdf191b6c1b005f5dff4adc770ad6a9aee41`
+- SHA-256: `6ef6dc30cd172983789f613b06d348fd538fcc5099d5c415b48ab4a2a1b924e7`
+- Published replacement: https://youtu.be/BARCGYvzk78
+- YouTube Studio publication receipt verified 4 September 2026. Public, 2:13, AIGonezWild, English (United Kingdom) captions, custom thumbnail, AI-use disclosure, Science & Technology category. Copyright check: no issues found at publication.
 - Local speech-to-text check begins with the emergency problem, contains the complete product story and safety boundary, and contains no generator preamble or sign-off.
 
 ## Devpost update
 
 Use the complete humanized project narrative in `docs/DEVPOST_SUBMISSION.md`.
 
-Before saving, replace the old YouTube URL with the new public video URL. Keep these links unchanged:
+The existing entry was updated and re-submitted through the official Devpost connector on 4 September 2026 with https://youtu.be/BARCGYvzk78. Live readback confirmed project state `published`, the new video URL, and the WebMCP entry still submitted. Submission ID: `1169160`. No duplicate project was created. Keep these links unchanged:
 
 - Live demo: https://muster-fire-drill.vercel.app/
 - Public repository: https://github.com/Arnie016/muster-webmcp
@@ -72,8 +74,8 @@ Before saving, replace the old YouTube URL with the new public video URL. Keep t
 
 The strongest judge path is:
 
-1. Click **Inspect Floor 07**.
-2. Click **Run demo** in the Incident Commander dock.
+1. Click **Start scenario** (or **Resume scenario** on a returning visit).
+2. Use the next guided action to advance one visible change at a time.
 3. Watch Stair B become unavailable, inspect the route receipt, and see the missing assistance owner become explicit.
 4. Open one Live trace row to inspect the request, delegation, input, result, visible change, duration, and guardrail.
 5. Review the staged after-action draft and the separate human approval control.

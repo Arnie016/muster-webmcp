@@ -36,7 +36,7 @@ The displayed distances are fictional plan fixtures. A drawn route is not an app
 
 Muster registers one manager and 18 bounded page tools through `document.modelContext.registerTool` when the API is available. `run_drill_manager` accepts a high-level exercise intent and delegates to plan, people, equipment, or review specialists. The remaining tools expose narrowly scoped operations over the same visible page.
 
-Current native proof uses Chrome 152 with WebMCP testing enabled. `document.modelContext.getTools()` discovered all 19 tools. `document.modelContext.executeTool()` then invoked `read_plan` and `run_drill_manager({"intent":"orient"})`. Named plan/register subcalls, mission progress, and the selected input/output receipt all changed on the same page. This proves discovery and execution in that tested production tab. It does not prove support in every browser or every ChatGPT surface.
+Current native proof uses Chrome 152 with WebMCP testing enabled. `document.modelContext.getTools()` discovered all 19 tools. `document.modelContext.executeTool()` then ran the declared fictional rehearsal: plan read, manager orientation, scenario start, zone inspection, exit change, route comparison, three facilitator-confirmed records, coverage check, and manager-prepared review. The same page reached “Ready for human review”; the approval control remained untouched. This proves discovery and a deterministic fixture sequence in that tested production tab. It does not prove autonomous planning, support in every browser, or every ChatGPT surface.
 
 ## Tool groups
 

@@ -29,7 +29,7 @@
     "read": ["README.md", "app.js", "drill-core.js", "tests.mjs", "docs/DEVPOST_SUBMISSION.md"],
     "capture": ["spatial-command", "floor-route"],
     "missingAccess": [],
-    "verifiedAccess": ["Chrome 152 native document.modelContext discovery and read_plan execution"]
+    "verifiedAccess": ["Chrome 152 native document.modelContext discovery and declared rehearsal execution through the human approval gate"]
   },
   "productAnalysis": {
     "audience": "Fire-safety drill facilitators and WebMCP judges",
@@ -118,7 +118,7 @@
     },
     {
       "id": "native-webmcp-discovery",
-      "claim": "Chrome discovers all nineteen page tools through document.modelContext and executes read_plan against the visible tab.",
+      "claim": "Chrome discovers all nineteen page tools through document.modelContext, executes the declared fictional rehearsal, stages review, and stops before human approval.",
       "source": "docs/screenshots/muster-native-webmcp.png",
       "destination": "proof/native-webmcp.png",
       "status": "captured-and-executed-in-Chrome-152"
@@ -189,7 +189,7 @@
       {"sceneId": "trace", "start": 84, "end": 96, "owner": "trace-explainer", "screenShare": 0.92, "reason": "Make input, output, why, visible change, and guardrail readable."},
       {"sceneId": "authority", "start": 97.5, "end": 108, "owner": "review-report", "screenShare": 0.86, "reason": "Make the human-only approval boundary unmistakable."},
       {"sceneId": "proof", "start": 108, "end": 113.5, "owner": "proof-ledger", "screenShare": 0.82, "reason": "Separate the working product, deterministic tests, native discovery, and native execution."},
-      {"sceneId": "contracts", "start": 115, "end": 123.5, "owner": "native-contract-proof", "screenShare": 0.9, "reason": "Show Chrome's WebMCP live receipt and the resulting read_plan trace."},
+      {"sceneId": "contracts", "start": 115, "end": 123.5, "owner": "native-contract-proof", "screenShare": 0.9, "reason": "Show Chrome's WebMCP-live rehearsal at staged review with human approval still separate."},
       {"sceneId": "review-proof", "start": 123.5, "end": 127.5, "owner": "report-proof", "screenShare": 0.92, "reason": "End product proof on the reviewable report and approval control."},
       {"sceneId": "cta", "start": 127.5, "end": 132.5, "owner": "cta", "screenShare": 0.68, "reason": "End on one action and the training boundary."}
     ]
@@ -399,11 +399,11 @@
       "start": 115,
       "end": 123.5,
       "asset": "proof/native-webmcp.png",
-      "headline": "Chrome found all nineteen tools.",
-      "support": "document.modelContext · read_plan executed · visible trace updated",
+      "headline": "Chrome ran the declared rehearsal.",
+      "support": "19 tools · staged review · human approval untouched",
       "narration": "One manager and eighteen page tools expose purpose, example input, visible effect, and safety boundary before the fixture can be run.",
       "focus": {"x": 50, "y": 49, "scale": 1.13},
-      "intelligenceRole": "The native receipt proves discovery and execution in the same visible Chrome tab."
+      "intelligenceRole": "The native receipt proves discovery and a deterministic consequential sequence in the same visible Chrome tab."
     },
     {
       "id": "review-proof",

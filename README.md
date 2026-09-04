@@ -4,11 +4,15 @@ Muster is a WebMCP-enabled tabletop fire-drill command room for building Fire Sa
 
 **Live demo:** https://muster-fire-drill.vercel.app
 
+**2-minute demo:** https://youtu.be/BARCGYvzk78 · **Submitted project:** https://devpost.com/software/muster-the-agentic-fire-drill
+
 **Agent context:** [llms.txt](https://muster-fire-drill.vercel.app/llms.txt) · [llms-full.txt](https://muster-fire-drill.vercel.app/llms-full.txt) · [operator skill](https://muster-fire-drill.vercel.app/SKILL.md)
 
 ![Muster spatial command room](docs/screenshots/muster-spatial-command.png)
 
 The interface makes the next action explicit:
+
+Click **Start scenario** at the top to open Floor 07 and introduce the first fictional signal. The same action becomes **Resume scenario** once started, and **Review scenario** when a draft is ready. Exploring other floors preserves progress. Only Floors 03, 07, and 12 contain schematics; only Floor 07 runs the rehearsal.
 
 1. Read the plan and roster.
 2. Start a fictional smoke scenario.
@@ -74,19 +78,19 @@ npm run serve
 
 Open `http://localhost:4179` in ChatGPT's in-app browser or a WebMCP-enabled Chrome build. The visible controls also provide a manual rehearsal when WebMCP is unavailable.
 
-`npm test` includes 500 shuffled workflows that check idempotency, route-sketch boundaries, invalid transitions, human approval gates, fictional-person referential integrity, and the no-external-effects boundary. `npm run test:browser` exercises the 18-floor model, the complete Floor 07 drill plus two reference-plan views, guided rehearsal, persistent route receipt, inspectable tool and person details, report approval, and 390×844 mobile layout when Playwright is available. `npm run test:webmcp` launches Chrome with WebMCP testing enabled, discovers all 19 native `document.modelContext` tools, executes `read_plan`, then executes `run_drill_manager` with the `orient` intent and verifies that named subcalls, mission progress, and the detailed visible receipt update together.
+`npm test` includes 500 shuffled workflows that check idempotency, route-sketch boundaries, invalid transitions, human approval gates, fictional-person referential integrity, and the no-external-effects boundary. `npm run test:browser` exercises the 18-floor model, the complete Floor 07 drill plus two reference-plan views, guided rehearsal, persistent route receipt, inspectable tool and person details, report approval, and 390×844 mobile layout when Playwright is available. `npm run test:webmcp` launches Chrome with WebMCP testing enabled, discovers all 19 native `document.modelContext` tools, executes `read_plan` and the manager's `orient` intent, then completes the declared rehearsal through native page-tool calls. It verifies the report is ready for human review and that approval remains untouched.
 
 ## What existed before
 
 The design and code in this directory were created for the WebMCP workflow. Earlier projects in the wider workspace explored an ocean education Site and a filmmaking review relay; neither contained this fire-drill product, data model, floor plan, or tool contract.
 
-## What WebMCP adds
+## What we added for WebMCP
 
 Without WebMCP, a facilitator clicks through the exercise manually. With WebMCP, an agent can read the selected plan, operate the controlled timeline, preserve structured team actions, check responsibility coverage, and stage the report while the human remains responsible for facilitation and approval.
 
 ## Evidence boundary
 
-This MVP is publicly deployed. Local verification proves the deterministic page workflow, interactive building and floor-plan controls, manager routing, visible call inspector, and native WebMCP registration and execution in Chrome 152 with testing enabled. The displayed count of 84 is a fictional exercise register, not live occupancy. The native test proves only that this page registered 19 tools and that Chrome executed `read_plan` plus one `run_drill_manager({"intent":"orient"})` request against the same visible tab. It does not prove ChatGPT-specific behavior, real fire-team adoption, regulatory compliance, multiplayer collaboration, or integration with emergency services.
+This MVP is publicly deployed. Local verification proves the deterministic page workflow, interactive building and floor-plan controls, manager routing, visible call inspector, and native WebMCP registration and execution in Chrome 152 with testing enabled. The displayed count of 84 is a fictional exercise register, not live occupancy. The native test proves only that this page registered 19 tools and that Chrome executed the declared fictional rehearsal against the same visible tab, including manager routing and report staging. It stopped before the separate human approval control. It does not prove ChatGPT-specific behavior, autonomous planning, real fire-team adoption, regulatory compliance, multiplayer collaboration, or integration with emergency services.
 
 ## References
 

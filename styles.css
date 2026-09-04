@@ -1038,3 +1038,20 @@ footer { padding: 13px 28px; background: #090a08; font-size: 10px; }
 @media (prefers-reduced-motion: reduce) {
   .scenario-sequence li.current > i { animation: none; }
 }
+
+/* Final command-room entry: the scenario comes before the instrumentation. */
+.launch-actions { margin-top: 22px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.launch-actions .primary-button { min-height: 46px; padding: 0 23px; border-radius: 10px; font-size: 14px; box-shadow: 0 7px 28px rgba(255,107,53,.13); }
+.demo-link { color: #b9ccc5; font-size: 12px; text-decoration: none; }
+.demo-link:hover { color: var(--ink); text-decoration: underline; }
+.demo-link span { margin-left: 7px; color: var(--signal); }
+.scenario-unstarted .scenario-rail { display: none; }
+.scenario-unstarted .guided-brief { padding-top: 12px; padding-bottom: 12px; grid-template-columns: 44px 1fr auto; }
+.scenario-unstarted .guided-change, .scenario-unstarted #guidedDescription { display: none; }
+.scenario-unstarted .guided-copy > .eyebrow { color: #90aaa2; }
+.building-copy h2 { font-size: clamp(28px,2.5vw,38px); line-height: 1.06; letter-spacing: -.035em; }
+@media (max-width: 760px) {
+  .launch-actions { gap: 13px; }
+  .scenario-unstarted .guided-brief { grid-template-columns: 40px 1fr; }
+  .scenario-unstarted .guided-brief .primary-button { grid-column: 1 / -1; }
+}
