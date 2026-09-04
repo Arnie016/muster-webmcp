@@ -85,12 +85,46 @@ const chromePath = process.env.MUSTER_CHROME_PATH
     assert.match(JSON.stringify(managerResult), /incident_commander/);
     assert.match(await page.locator('#runtimeEvents').innerText(), /Route one mission intent/i);
     assert.match(await page.locator('#traceInspector').innerText(), /Incident Commander[\s\S]*orient[\s\S]*Output/i);
+
+    const nativeRehearsal = await page.evaluate(async () => {
+      const registered = await document.modelContext.getTools();
+      const toolsByName = new Map(registered.map((tool) => [tool.name, tool]));
+      const run = async (name, input = {}) => {
+        const raw = await document.modelContext.executeTool(toolsByName.get(name), JSON.stringify(input));
+        return typeof raw === 'string' ? JSON.parse(raw) : raw;
+      };
+      const steps = [
+        ['start_drill', {}],
+        ['inspect_zone', { zone_id: 'studio' }],
+        ['send_inject', { inject_id: 'stair' }],
+        ['compare_routes', { zone_id: 'studio' }],
+        ['record_action', { action_id: 'reroute' }],
+        ['send_inject', { inject_id: 'roster' }],
+        ['record_action', { action_id: 'assist' }],
+        ['record_action', { action_id: 'account' }],
+      ];
+      const receipts = [];
+      for (const [name, input] of steps) receipts.push({ name, output: await run(name, input) });
+      const review = await run('run_drill_manager', { intent: 'prepare_review' });
+      return { receipts, review };
+    });
+
+    assert.equal(nativeRehearsal.receipts.length, 8);
+    assert.equal(nativeRehearsal.review.staged, true);
+    assert.equal(nativeRehearsal.review.human_approval_required, true);
+    assert.match(await page.locator('#guidedBrief').getAttribute('aria-label'), /Guided rehearsal complete/i);
+    assert.match(await page.locator('#phaseGuide').innerText(), /Mission stage 5 of 5/i);
+    assert.match(await page.locator('#reportPanel').innerText(), /Ready for human review/i);
+    assert.equal(await page.locator('#approveButton').isEnabled(), true);
+    assert.match(await page.locator('#traceInspector').innerText(), /Incident Commander[\s\S]*prepare_review[\s\S]*staged[\s\S]*cannot[\s\S]*approve the report/i);
+    assert.match(await page.locator('#runtimeEvents').innerText(), /Prepare review[\s\S]*Check responsibilities/i);
     assert.deepEqual(errors, []);
 
     await page.screenshot({ path: path.join(root, 'docs', 'screenshots', 'muster-native-webmcp.png'), fullPage: false });
     console.log(`PASS · Native document.modelContext registered ${probe.toolNames.length} tools in Chrome`);
     console.log('PASS · document.modelContext.executeTool ran read_plan and changed the visible trace');
     console.log('PASS · Native manager intent routed named page tools into one inspectable receipt');
+    console.log('PASS · Native page tools completed the consequential rehearsal and stopped at human approval');
   } finally {
     await browser.close();
   }
