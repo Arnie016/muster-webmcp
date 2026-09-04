@@ -30,7 +30,7 @@ type Scene = {
 export type Manifest = {
   project: {title: string; fps: number; durationSeconds: number};
   scenes: Scene[];
-  audio: {enabled: boolean; source: string};
+  audio: {enabled: boolean; source: string; gainDb?: number};
   cta: {label: string; url: string};
   architecture: {authorityBoundary: string};
   toolContractProof: {boundedPageTools: number; totalToolContracts: number};
@@ -433,5 +433,5 @@ const SceneRenderer: React.FC<{scene: Scene; manifest: Manifest}> = ({scene, man
 
 export const MusterDemo: React.FC<MusterDemoProps> = ({manifest}) => {
   const {fps} = useVideoConfig();
-  return <AbsoluteFill style={{...base, background: palette.ink}}>{manifest.scenes.map((scene) => <Sequence key={scene.id} from={Math.round(scene.start * fps)} durationInFrames={Math.round((scene.end - scene.start) * fps)}><SceneRenderer scene={scene} manifest={manifest} /></Sequence>)}{manifest.audio.enabled ? <Audio src={staticFile(manifest.audio.source)} volume={1} /> : null}</AbsoluteFill>;
+  return <AbsoluteFill style={{...base, background: palette.ink}}>{manifest.scenes.map((scene) => <Sequence key={scene.id} from={Math.round(scene.start * fps)} durationInFrames={Math.round((scene.end - scene.start) * fps)}><SceneRenderer scene={scene} manifest={manifest} /></Sequence>)}{manifest.audio.enabled ? <Audio src={staticFile(manifest.audio.source)} volume={10 ** ((manifest.audio.gainDb || 0) / 20)} /> : null}</AbsoluteFill>;
 };

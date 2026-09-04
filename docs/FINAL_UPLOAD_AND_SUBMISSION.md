@@ -20,7 +20,7 @@ Agent operator skill: https://muster-fire-drill.vercel.app/SKILL.md
 
 Devpost: https://devpost.com/software/muster-the-agentic-fire-drill
 
-Muster exposes one manager and 18 bounded page tools through WebMCP. In the tested Chrome 152 tab, `document.modelContext` discovered all 19 tools, executed `read_plan`, and updated the same visible trace. The product also works as a guided manual rehearsal when WebMCP is unavailable.
+Muster exposes one manager and 18 bounded page tools through WebMCP. In the tested Chrome 152 tab, `document.modelContext` discovered all 19 tools, executed `read_plan`, then routed the manager's `orient` intent through named page tools. Mission progress and the selected input/output receipt updated on the same page. The product also works as a guided manual rehearsal when WebMCP is unavailable.
 
 00:00 Why rehearsal matters
 00:12 One shared command room
@@ -56,7 +56,7 @@ WebMCP, OpenAI, agentic AI, fire drill, emergency preparedness, human AI collabo
 - Duration: 132.544 seconds
 - Picture: H.264, 1920 by 1080, 30 fps
 - Audio: AAC, 48 kHz stereo; measured integrated loudness -16.1 LUFS and true peak -4.5 dBTP
-- SHA-256: `d55de9cd9a95edc2cbe0405766bcb201b7c5b6dc4c10ca353f536f632e9f07bb`
+- SHA-256: `ac899356395cc59a3c9b24cc10e4bdf191b6c1b005f5dff4adc770ad6a9aee41`
 - Local speech-to-text check begins with the emergency problem, contains the complete product story and safety boundary, and contains no generator preamble or sign-off.
 
 ## Devpost update

@@ -432,6 +432,7 @@
   "audio": {
     "enabled": true,
     "source": "audio/narration.wav",
+    "gainDb": 3,
     "policy": "AI narration generated from the approved script with GPT Realtime 2.1 using the Marin voice. It is not a human firefighter recording."
   },
   "cta": {

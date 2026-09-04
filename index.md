@@ -22,7 +22,7 @@ The app combines an orbitable 18-floor WebGL twin, a pan-and-zoom response plan,
 
 Muster exposes one manager and 18 bounded page tools through WebMCP. The agent operates the same page the facilitator sees. Each call leaves a receipt containing its input, result, purpose, visible consequence, timing, and guardrail. The agent may stage a report, but only the human can approve it.
 
-In the tested production Chrome tab, the native WebMCP API discovered all 19 tools, executed `read_plan`, and updated the visible trace. A normal browser can run the same controlled workflow manually.
+In the tested production Chrome tab, the native WebMCP API discovered all 19 tools, executed `read_plan`, then routed `run_drill_manager({"intent":"orient"})` through named page tools. Mission progress and the detailed visible receipt updated on the same page. A normal browser can run the same controlled workflow manually.
 
 ## Evidence boundary
 

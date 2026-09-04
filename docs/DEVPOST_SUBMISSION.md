@@ -26,7 +26,7 @@ A deterministic JavaScript state machine holds the fictional drill state in the 
 
 Without WebMCP, the visible controls still run the rehearsal manually. When `document.modelContext` is available, Muster attempts to register the same 19 contracts so an agent can discover named actions, receive structured results, and make its work visible on the page. This makes the website a shared work surface rather than a chat window beside a disconnected plan.
 
-The proof has two distinct layers. The source contains the registration code, and the test suite verifies one manager plus 18 page tools. Those checks do not prove browser discovery. Separately, a current Chrome 152 capture with WebMCP testing enabled shows all 19 tools discovered through `document.modelContext`; Chrome then invoked `read_plan` with `document.modelContext.executeTool`, and the result appeared in the page's Live trace. That is native compatible-browser discovery and execution proof for the tested tab. It is not proof that every judge browser exposes the API.
+The proof has two distinct layers. The source contains the registration code, and the test suite verifies one manager plus 18 page tools. Those checks do not prove browser discovery. Separately, a current Chrome 152 capture with WebMCP testing enabled shows all 19 tools discovered through `document.modelContext`; Chrome invoked `read_plan`, then routed `run_drill_manager({"intent":"orient"})` through named plan/register calls. Mission progress and the selected input/output receipt changed on the same page. That is native compatible-browser discovery and execution proof for the tested tab. It is not proof that every judge browser exposes the API.
 
 ## Human and agent boundary
 
@@ -60,15 +60,15 @@ Next, add an agent-driven end-to-end evaluation set for the manager intent route
 
 - **Live demo:** https://muster-fire-drill.vercel.app/
 
-  Verified in production on 4 September 2026. The public `index.html`, `app.js`, and `styles.css` byte-match source commit `cd1367b702fc7c268b7f0220914042afe59dac9b`. The desktop, 390 by 844 mobile, 18-floor WebGL, Floor 07 route, and human-approved report browser checks pass against this URL.
+  Verified in production on 4 September 2026. The public `index.html`, `app.js`, and `styles.css` byte-match product source commit `2fa51ebba8b9b7bf813afddbc156433b0c9897ee`. The desktop, 390 by 844 mobile, 18-floor WebGL, Floor 07 route, and human-approved report browser checks pass against this URL.
 
 - **Public source:** https://github.com/Arnie016/muster-webmcp
 
-  Verified public. Exact product source commit: https://github.com/Arnie016/muster-webmcp/commit/cd1367b702fc7c268b7f0220914042afe59dac9b
+  Verified public. Exact product source commit: https://github.com/Arnie016/muster-webmcp/commit/2fa51ebba8b9b7bf813afddbc156433b0c9897ee
 
-- **WebMCP registration source:** https://github.com/Arnie016/muster-webmcp/blob/cd1367b702fc7c268b7f0220914042afe59dac9b/app.js#L1360-L1369
-- **Tool-count test:** https://github.com/Arnie016/muster-webmcp/blob/cd1367b702fc7c268b7f0220914042afe59dac9b/tests.mjs#L60-L66
-- **Native WebMCP test harness:** https://github.com/Arnie016/muster-webmcp/blob/cd1367b702fc7c268b7f0220914042afe59dac9b/scripts/webmcp-native-smoke.cjs
+- **WebMCP registration source:** https://github.com/Arnie016/muster-webmcp/blob/2fa51ebba8b9b7bf813afddbc156433b0c9897ee/app.js#L1377-L1393
+- **Tool-count test:** https://github.com/Arnie016/muster-webmcp/blob/2fa51ebba8b9b7bf813afddbc156433b0c9897ee/tests.mjs#L60-L66
+- **Native WebMCP test harness:** https://github.com/Arnie016/muster-webmcp/blob/2fa51ebba8b9b7bf813afddbc156433b0c9897ee/scripts/webmcp-native-smoke.cjs#L49-L93
 - **Agent-readable project index:** https://muster-fire-drill.vercel.app/llms.txt
 - **Full agent context and boundaries:** https://muster-fire-drill.vercel.app/llms-full.txt
 - **Downloadable operator skill:** https://muster-fire-drill.vercel.app/SKILL.md
@@ -87,7 +87,7 @@ Next, add an agent-driven end-to-end evaluation set for the manager intent route
 
 - **Native WebMCP production evidence:** https://github.com/Arnie016/muster-webmcp/blob/main/docs/screenshots/muster-native-webmcp.png
 
-  The production test launches Chrome 152 with WebMCP testing enabled, discovers 19 tools through `document.modelContext.getTools()`, invokes `read_plan` through `document.modelContext.executeTool`, and verifies that the same visible page trace changed. This proves the tested Chrome tab, not every browser or ChatGPT surface.
+  The production test launches Chrome 152 with WebMCP testing enabled, discovers 19 tools through `document.modelContext.getTools()`, invokes `read_plan` and the manager's `orient` intent through `document.modelContext.executeTool`, and verifies that mission progress plus the same visible page trace changed. This proves the tested Chrome tab, not every browser or ChatGPT surface.
 
 ## 30-second judge path
 
