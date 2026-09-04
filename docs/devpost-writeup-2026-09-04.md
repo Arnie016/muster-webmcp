@@ -74,7 +74,7 @@ The first version exposed many controls but made it hard to know where to start.
 
 Codex assisted with implementation, test generation, debugging and visual iteration. The media package combines an AI-generated planning-room illustration and AI narration with real browser captures and an explanatory architecture diagram.
 
-[Watch the latest 2:05 working-product demonstration](https://muster-fire-drill.vercel.app/demo.html): 3D room inspection, a human-confirmed responder assignment, a typed question with real tool results, and the printable review. The embedded YouTube video shows an earlier working build; the live app, this latest demonstration and the public source include the newer features described here.
+[Watch the latest 2:05 working-product demonstration](https://muster-fire-drill.vercel.app/demo.html): 3D room inspection, a human-confirmed responder assignment, a typed question with real tool results, and the printable review. The public YouTube demo shows this updated working build, with audio, English captions, actual page interactions and the tool architecture: https://www.youtube.com/watch?v=nY-HxnzdF2s
 
 ## Boundaries and next steps
 

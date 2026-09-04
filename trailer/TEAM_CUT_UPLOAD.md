@@ -37,4 +37,8 @@ The opening illustration and narration are AI-generated. App interactions are ac
 
 ## Publication gate
 
-Publish to the user's existing GamezGoneWild channel only through its authenticated session. Keep the old published video intact. Verify the new public watch URL before changing Devpost's `video_url`. Do not treat the self-hosted player as satisfying the challenge's public-YouTube requirement.
+Published 4 September 2026 at approximately 15:51 Singapore time on AIGonezWild / @GamezGoneWild: https://www.youtube.com/watch?v=nY-HxnzdF2s
+
+YouTube displayed “Video published” after Public was selected. Its copyright checks returned “No issues found.” The watch page played through 31 seconds of the 125.181-second video. The AI-use disclosure is visible. The reviewed timed caption file was saved in Studio; the immediate watch page still reported captions unavailable, so public caption propagation remains to be checked. The self-hosted player has all 33 cues verified.
+
+Devpost's video URL was updated through the official connector, version 12. The older published videos were left intact.

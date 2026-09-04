@@ -47,3 +47,10 @@ One next safe action: verify the rendered MP4, then replace the hosted video onl
 - Approximately 85 minutes elapsed since the 14:24 implementation checkpoint, versus a bounded shared-state enhancement plus release pass. Media capture, rendering and browser recovery expanded the pass. Exact turn token cost is unavailable; external billing was not enabled.
 
 Next safe action: verify the new public YouTube video, update Devpost's video URL, and read back the published entry.
+
+## Published and submitted: 15:52 Singapore time
+
+- New public YouTube video: https://www.youtube.com/watch?v=nY-HxnzdF2s. Studio confirmed “Video published”; the public page played through 31 seconds of the 125.181-second cut, with the correct title, channel and AI-use disclosure. High Definition processing completed. No copyright issues were reported by YouTube's checks.
+- Devpost update version 12 replaced `video_url` with the new public watch URL. Live connector readback confirmed the exact URL, state `published`, and the WebMCP submission still present. Earlier videos were not deleted or changed.
+- Source/media commit `ef87ed3` was pushed to the public main branch. It includes the final player, editable Remotion composition, source captures and reviewed captions.
+- Remaining narrow check: verify public subtitle propagation and publish the final documentation-link consistency update.

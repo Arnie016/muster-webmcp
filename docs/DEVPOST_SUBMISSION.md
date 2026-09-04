@@ -1,5 +1,7 @@
 # Muster: The Agentic Fire Drill
 
+> Earlier submission draft retained for history. The current write-up is [devpost-writeup-2026-09-04.md](devpost-writeup-2026-09-04.md); the final public video is https://www.youtube.com/watch?v=nY-HxnzdF2s and the current build has 20 WebMCP tools.
+
 **Tagline:** A WebMCP command room where a facilitator and an agent rehearse a changing building incident on the same visible plan.
 
 ## Hook

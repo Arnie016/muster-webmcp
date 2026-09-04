@@ -1,5 +1,7 @@
 # Muster final upload package
 
+> Superseded by the 15:52 Singapore release on 4 September 2026. Final video: https://www.youtube.com/watch?v=nY-HxnzdF2s. Devpost version 12 is published with this URL. See [TEAM_HANDOFF_RECEIPT.md](TEAM_HANDOFF_RECEIPT.md) and [the current write-up](devpost-writeup-2026-09-04.md). The earlier receipt below is retained as history, not current upload instructions.
+
 ## YouTube
 
 **Title**
