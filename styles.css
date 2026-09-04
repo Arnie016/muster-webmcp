@@ -557,6 +557,7 @@ footer { padding: 13px 28px; background: #090a08; font-size: 10px; }
 
 .decision-deck { background: linear-gradient(180deg, #10120f, #0b0d0b); }
 .decision-deck .specialist-rail { margin-top: 18px; padding: 0; border: 0; }
+.decision-deck .specialist-label { grid-column: 1 / -1; margin-bottom: 2px; color: #6f7771; font: 700 7px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
 .decision-deck .specialist-rail span { min-height: 38px; display: grid; place-items: center; border-radius: 10px; color: #777c75; background: rgba(255,255,255,.014); font-size: 10px; }
 .decision-deck .specialist-rail span.active { border-color: rgba(109, 194, 182, .48); color: #9ae0d5; background: rgba(82, 174, 162, .08); box-shadow: inset 0 0 18px rgba(82,174,162,.04); animation: specialist-pulse 1.8s ease-in-out infinite; }
 .decision-deck .runtime-trace { margin-top: 10px; border-color: rgba(132,185,177,.18); background: #090c0a; }

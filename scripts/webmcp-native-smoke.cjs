@@ -70,11 +70,27 @@ const chromePath = process.env.MUSTER_CHROME_PATH
     assert.match(resultText, /training_only/);
     assert.match(await page.locator('#runtimeEvents').innerText(), /Read plan/i);
     assert.match(await page.locator('#runtimeConnection').innerText(), /WebMCP live/i);
+    assert.equal(await page.locator('#guidedStepIndex').innerText(), '02');
+    assert.match(await page.locator('#phaseGuide').innerText(), /Mission stage 2 of 5/i);
+    assert.match(await page.locator('#traceInspector').innerText(), /Why this call[\s\S]*Visible change[\s\S]*Input[\s\S]*Output/i);
+    assert.match(await page.locator('#traceInspector').innerText(), /plan_version/i);
+    assert.match(await page.locator('.runtime-event.selected time').innerText(), /^\d+ ms$/i);
+
+    const rawManagerResult = await page.evaluate(async () => {
+      const tools = await document.modelContext.getTools();
+      const manager = tools.find((tool) => tool.name === 'run_drill_manager');
+      return document.modelContext.executeTool(manager, JSON.stringify({ intent: 'orient' }));
+    });
+    const managerResult = typeof rawManagerResult === 'string' ? JSON.parse(rawManagerResult) : rawManagerResult;
+    assert.match(JSON.stringify(managerResult), /incident_commander/);
+    assert.match(await page.locator('#runtimeEvents').innerText(), /Route one mission intent/i);
+    assert.match(await page.locator('#traceInspector').innerText(), /Incident Commander[\s\S]*orient[\s\S]*Output/i);
     assert.deepEqual(errors, []);
 
     await page.screenshot({ path: path.join(root, 'docs', 'screenshots', 'muster-native-webmcp.png'), fullPage: false });
     console.log(`PASS · Native document.modelContext registered ${probe.toolNames.length} tools in Chrome`);
     console.log('PASS · document.modelContext.executeTool ran read_plan and changed the visible trace');
+    console.log('PASS · Native manager intent routed named page tools into one inspectable receipt');
   } finally {
     await browser.close();
   }

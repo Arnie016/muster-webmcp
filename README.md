@@ -52,7 +52,10 @@ The bottom command desk is also usable in a normal browser. Its deterministic qu
 
 ```js
 for (const tool of toolDefinitions) {
-  await document.modelContext.registerTool(tool);
+  await document.modelContext.registerTool({
+    ...tool,
+    execute: async (input) => callTool(tool.name, normaliseToolInput(input)),
+  });
 }
 ```
 

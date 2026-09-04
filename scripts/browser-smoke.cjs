@@ -16,6 +16,10 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4179';
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
 
+  assert.match(await page.locator('#phaseGuide').innerText(), /Mission stage 1 of 5/i);
+  assert.match(await page.locator('#guidedBrief').innerText(), /Next page-tool action[\s\S]*Muster stops after this visible change/i);
+  assert.match(await page.locator('#specialistRail').innerText(), /Agent route.*one specialist lights up per call/is);
+
   assert.equal(await page.locator('[data-building-floor]').count(), 18);
   assert.ok(await page.locator('#buildingView').isVisible());
   assert.ok(await page.locator('#buildingViewport.webgl-ready').isVisible());
@@ -65,6 +69,8 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4179';
 
   await page.locator('#guidedNextButton').click();
   await page.waitForFunction(() => /Start one authored signal/i.test(document.querySelector('#guidedTitle')?.textContent || ''));
+  assert.equal(await page.locator('#guidedStepIndex').innerText(), '02');
+  assert.match(await page.locator('#phaseGuide').innerText(), /Mission stage 2 of 5/i);
   assert.ok(await page.locator('[data-sequence-stage="plan"]').evaluate((element) => element.classList.contains('done')));
   assert.ok(await page.locator('[data-sequence-stage="signal"]').evaluate((element) => element.classList.contains('current')));
 

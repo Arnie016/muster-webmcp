@@ -502,6 +502,18 @@ function tracePayload(value) {
   }
 }
 
+function normaliseToolInput(value) {
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
+
 function attachTraceEvidence(name, input, result, durationMs, activityStart) {
   let target = -1;
   for (let index = state.activity.length - 1; index >= activityStart; index -= 1) {
@@ -540,6 +552,7 @@ const specialistForTool = {
 };
 
 const friendlyToolNames = {
+  run_drill_manager: 'Route one mission intent',
   read_plan: 'Read plan',
   start_drill: 'Start smoke scenario',
   send_inject: 'Advance scenario',
@@ -563,6 +576,7 @@ const friendlyToolNames = {
 const traceMeta = {
   'Exercise loaded': { phase: 'Observe', owner: 'System', why: 'Load a clean fictional exercise state.', change: 'No building state changed.', boundary: 'No network or emergency connection.' },
   'WebMCP ready': { phase: 'Ready', owner: 'Manager', why: 'Expose the visible page actions to an enabled browser agent.', change: 'Tools became discoverable in this tab.', boundary: 'Registration does not grant hidden data or external control.' },
+  run_drill_manager: { phase: 'Route', owner: 'Incident Commander', why: 'Turn one human intent into a bounded sequence of named page tools.', change: 'Specialist results and their visible receipts are reconciled on this page.', boundary: 'The manager cannot call emergency services, control building systems, or approve the report.' },
   read_plan: { phase: 'Think', owner: 'Plan specialist', why: 'Ground the exercise in the visible plan revision, exits, roles, and fixture counts.', change: 'Plan context is available to the drill manager.', boundary: 'Reads only this fictional page.' },
   start_drill: { phase: 'Act', owner: 'Plan specialist', why: 'Begin the authored tabletop sequence.', change: 'The smoke inject appears beside room 7-E.', boundary: 'No alarm, dispatch, door, or building system is activated.' },
   send_inject: { phase: 'Act', owner: 'People specialist', why: 'Introduce one controlled complication for the team to respond to.', change: 'The timeline, map, and responsibility checks update together.', boundary: 'The facilitator chooses when an inject is delivered.' },
@@ -794,6 +808,7 @@ async function callTool(name, input = {}) {
 }
 
 function summariseToolResult(name, result) {
+  if (name === 'run_drill_manager') return `Routed “${String(result.intent || 'request').replaceAll('_', ' ')}” through the Incident Commander. Named specialist calls remain visible below.`;
   if (name === 'read_plan') return `${result.occupants} people, ${result.exits.length} exits, and ${result.assisted_occupants} people needing an assigned assistance owner.`;
   if (name === 'start_drill') return 'The drill is live. A scripted smoke signal is now shown beside room 7-E. Record the team response, then advance the scenario.';
   if (name === 'send_inject') return state.injectIds.includes('roster') ? 'The final event is live: two people need assistance, but no owner is assigned. Record who takes responsibility.' : 'Stair B is now unavailable in the exercise. Record the alternate route before continuing.';
@@ -916,7 +931,7 @@ function renderScenarioSequence() {
     { key: 'review', label: reportStaged ? 'Review draft' : 'Human review', detail: approved ? 'Approved by FSM' : reportStaged ? 'Waiting for human' : 'Evidence not staged', tone: 'review' },
   ];
 
-  container.innerHTML = `<header><span>Exercise sequence</span><strong>${approved ? 'Human-approved record' : `Decision ${Math.min(currentIndex + 1, stages.length)} of ${stages.length}`}</strong></header><ol>${stages.map((stage, index) => {
+  container.innerHTML = `<header><span>Scenario state</span><strong>${approved ? 'Human-approved record' : `Stage ${Math.min(currentIndex + 1, stages.length)} of ${stages.length}`}</strong></header><ol>${stages.map((stage, index) => {
     const isDone = approved || index < currentIndex;
     const isCurrent = !approved && index === currentIndex;
     return `<li class="${isDone ? 'done' : ''} ${isCurrent ? 'current' : ''} tone-${stage.tone}" data-sequence-stage="${stage.key}" ${isCurrent ? 'aria-current="step"' : ''}><i>${isDone ? '✓' : index + 1}</i><div><strong>${stage.label}</strong><span>${stage.detail}</span></div></li>`;
@@ -1237,7 +1252,7 @@ function renderPhaseGuide() {
     ['Record the team', 'The facilitator records routes, accounting, and ownership.'],
     ['Review the drill', 'The agent checks gaps; a human approves the final report.'],
   ];
-  $('#phaseGuide').innerHTML = `<div class="phase-intro"><span>Step ${Math.min(phase + 1, 5)} of 5</span><strong>${steps[phase][0]}</strong><p>${steps[phase][1]}</p></div><ol>${steps.map(([title], index) => `<li class="${index < phase ? 'done' : index === phase ? 'current' : ''}"><i>${index < phase ? '✓' : index + 1}</i><span>${title}</span></li>`).join('')}</ol>`;
+  $('#phaseGuide').innerHTML = `<div class="phase-intro"><span>Mission stage ${Math.min(phase + 1, 5)} of 5</span><strong>${steps[phase][0]}</strong><p>${steps[phase][1]}</p></div><ol>${steps.map(([title], index) => `<li class="${index < phase ? 'done' : index === phase ? 'current' : ''}"><i>${index < phase ? '✓' : index + 1}</i><span>${title}</span></li>`).join('')}</ol>`;
 }
 
 function renderGuidedBrief() {
@@ -1246,13 +1261,14 @@ function renderGuidedBrief() {
   const latest = state.activity.at(-1);
   const completed = !step;
   container.classList.toggle('complete', completed);
+  container.setAttribute('aria-label', completed ? 'Guided rehearsal complete' : `Guided action ${guidedStep + 1} of ${GUIDED_SEQUENCE.length}`);
   $('#guidedStepIndex').textContent = String(Math.min(guidedStep + 1, GUIDED_SEQUENCE.length)).padStart(2, '0');
   $('#guidedStepTotal').textContent = `of ${GUIDED_SEQUENCE.length}`;
-  $('#guidedEyebrow').textContent = completed ? 'Guided rehearsal complete' : `Guided rehearsal · ${traceMeta[step.tool]?.phase || 'Next'}`;
+  $('#guidedEyebrow').textContent = completed ? 'Guided rehearsal complete' : `Next page-tool action · ${traceMeta[step.tool]?.phase || 'Next'}`;
   $('#guidedTitle').textContent = completed ? 'The draft is ready for a human' : step.title;
   $('#guidedDescription').textContent = completed
     ? 'Review the evidence below. The agent cannot approve its own report.'
-    : step.description;
+    : `${step.description} Muster stops after this visible change.`;
   $('#guidedChange').innerHTML = latest && latest.title !== 'Exercise loaded'
     ? `<span>Last visible change</span><strong>${escapeHtml(traceDetails(latest).change)}</strong>`
     : `<span>What this step changes</span><strong>${escapeHtml(step?.change || 'No further agent action is required.')}</strong>`;
@@ -1318,7 +1334,9 @@ function renderRuntime() {
   const selectedLabel = friendlyToolNames[selected?.title] || selected?.title?.replaceAll('_', ' ') || 'Exercise state';
   const traceNodes = selected?.type === 'human'
     ? ['Human authority', 'Approval gate', selectedLabel, 'Visible record']
-    : ['Human request', 'Incident Commander', `${details.owner} · ${selectedLabel}`, 'Visible page'];
+    : selected?.title === 'run_drill_manager'
+      ? ['Human request', 'Incident Commander', 'Named specialist calls', 'Visible page']
+      : ['Human request', 'Incident Commander', `${details.owner} · ${selectedLabel}`, 'Visible page'];
   const traceGraph = `<div class="trace-orchestration" aria-label="Delegation path for selected call">${traceNodes.map((node, index) => `<span class="${index === traceNodes.length - 1 ? 'output' : ''}">${escapeHtml(node)}</span>`).join('')}</div>`;
   $('#traceInspector').innerHTML = `${traceGraph}<div><span>Why this call</span><strong>${details.why}</strong></div><div><span>Visible change</span><strong>${details.change}</strong></div><div class="trace-payload"><div><span>Input</span><pre>${escapeHtml(JSON.stringify(input, null, 2))}</pre></div><div><span>Output</span><pre>${escapeHtml(JSON.stringify(output, null, 2))}</pre></div></div><div class="trace-bars" aria-label="Recent tool duration chart">${bars}</div><p>${details.boundary}</p>`;
 }
@@ -1363,7 +1381,12 @@ async function registerWebMCP() {
     $('#runtimeConnection').innerHTML = '<i></i> Manual mode';
     return;
   }
-  for (const tool of toolDefinitions) await document.modelContext.registerTool(tool);
+  for (const tool of toolDefinitions) {
+    await document.modelContext.registerTool({
+      ...tool,
+      execute: async (input) => callTool(tool.name, normaliseToolInput(input)),
+    });
+  }
   $('#runtimeConnection').classList.add('live');
   $('#runtimeConnection').innerHTML = '<i></i> WebMCP live';
   logTool('WebMCP ready', `${toolDefinitions.length} tools registered in this tab`);
