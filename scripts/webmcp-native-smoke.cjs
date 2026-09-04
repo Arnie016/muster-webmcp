@@ -50,7 +50,7 @@ const chromePath = process.env.MUSTER_CHROME_PATH
     assert.equal(probe.registerTool, 'function');
     assert.equal(probe.getTools, 'function');
     assert.equal(probe.executeTool, 'function');
-    assert.equal(probe.toolNames.length, 19);
+    assert.equal(probe.toolNames.length, 20);
     assert.ok(probe.toolNames.includes('run_drill_manager'));
     assert.ok(probe.toolNames.includes('read_plan'));
     assert.ok(probe.toolNames.includes('stage_report'));
@@ -112,7 +112,7 @@ const chromePath = process.env.MUSTER_CHROME_PATH
     assert.equal(nativeRehearsal.receipts.length, 8);
     assert.equal(nativeRehearsal.review.staged, true);
     assert.equal(nativeRehearsal.review.human_approval_required, true);
-    assert.match(await page.locator('#guidedBrief').getAttribute('aria-label'), /Guided rehearsal complete/i);
+    assert.match(await page.locator('#guidedBrief').getAttribute('aria-label'), /Human review ready/i);
     assert.match(await page.locator('#phaseGuide').innerText(), /Mission stage 5 of 5/i);
     assert.match(await page.locator('#reportPanel').innerText(), /Ready for human review/i);
     assert.equal(await page.locator('#approveButton').isEnabled(), true);
@@ -142,6 +142,42 @@ const chromePath = process.env.MUSTER_CHROME_PATH
     console.log('PASS · document.modelContext.executeTool ran read_plan and changed the visible trace');
     console.log('PASS · Native manager intent routed named page tools into one inspectable receipt');
     console.log('PASS · Native page tools completed the consequential rehearsal and stopped at human approval');
+    await page.locator('#resetButton').click();
+    const handoff=await page.evaluate(async()=>{
+      const tools=await document.modelContext.getTools();
+      const run=async(name,input={})=>{const raw=await document.modelContext.executeTool(tools.find(t=>t.name===name),JSON.stringify(input));return typeof raw==='string'?JSON.parse(raw):raw;};
+      await run('start_drill');
+      const proposal=await run('prepare_team_handoff',{person_id:'responder-s-tan',room_id:'studio',task:'assistance_brief'});
+      const register=await run('read_floor_register');
+      return {proposal,register,names:tools.map(t=>t.name)};
+    });
+    assert.equal(handoff.proposal.requires_human_confirmation,true);
+    assert.equal(handoff.register.team_positions.find(p=>p.id==='responder-s-tan').room_id,'west');
+    assert.ok(!handoff.names.some(n=>/confirm.*handoff|confirm.*assignment/.test(n)));
+    assert.equal(await page.locator('#teamConfirm').isEnabled(),true);
+    await page.locator('#teamConfirm').click();
+    const readback=await page.evaluate(async()=>{const tools=await document.modelContext.getTools();const raw=await document.modelContext.executeTool(tools.find(t=>t.name==='read_status_board'),'{}');return typeof raw==='string'?JSON.parse(raw):raw;});
+    assert.equal(readback.team_assignments.length,1);assert.equal(readback.team_assignments[0].arrived,false);
+    assert.equal(readback.team_positions.find(p=>p.id==='responder-s-tan').room_id,'studio');
+    assert.deepEqual(errors,[]);
+    console.log('PASS · Native agent proposed a handoff, human confirmed, and native tool read back the shared assignment');
+    await page.locator('#resetButton').click();
+    await page.evaluate(async()=>{
+      const tools=await document.modelContext.getTools();
+      const run=(name,input={})=>document.modelContext.executeTool(tools.find(t=>t.name===name),JSON.stringify(input));
+      await run('read_plan');await run('start_drill');
+      await run('send_inject',{inject_id:'stair'});await run('record_action',{action_id:'reroute'});
+      await run('send_inject',{inject_id:'roster'});await run('record_action',{action_id:'assist'});
+      await run('record_action',{action_id:'account'});await run('stage_report');
+    });
+    assert.match(await page.locator('#guidedBrief').getAttribute('aria-label'),/Human review ready/);
+    await page.locator('#deckNextButton').click();
+    await page.locator('#agentPrompt').fill('What do I do next?');await page.locator('#agentForm button').click();
+    await page.waitForFunction(()=>!document.querySelector('#agentForm button').disabled);
+    assert.match(await page.locator('#conversationHistory').innerText(),/The draft is ready/);
+    assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('muster-demo-state-v2')).approved),false);
+    assert.deepEqual(errors,[]);
+    console.log('PASS · A native route that skips optional guide inspections still leads to human review, not an earlier step');
   } finally {
     await browser.close();
   }

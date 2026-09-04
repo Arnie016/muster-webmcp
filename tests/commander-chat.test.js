@@ -50,3 +50,11 @@ test('unknown queries ask for clarification with zero tools', () => {
   assert.deepEqual(request.calls, []);
   assert.match(answerQuestion(request, []), /No tool was called/);
 });
+test('named assignment language prepares a preview, never a confirmation',()=>{
+ const request=routeQuestion('Prepare S Tan for an assistance handoff to the Studio');
+ assert.equal(request.kind,'handoff');assert.deepEqual(request.calls,[{name:'prepare_team_handoff',input:{person_id:'responder-s-tan',room_id:'studio',task:'assistance_brief'}}]);
+ assert.equal(routeQuestion('dispatch S Tan to studio').kind,'emergency');
+ assert.equal(routeQuestion('assign S Tan').kind,'next');
+ const text=answerQuestion(request,[{name:'prepare_team_handoff',result:{person:'S. Tan',to_label:'Studio',task_label:'Assistance handoff',diagram_metres:35.6}}]);
+ assert.match(text,/No assignment, arrival, or clearance/);
+});

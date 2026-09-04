@@ -34,9 +34,9 @@ The displayed distances are fictional plan fixtures. A drawn route is not an app
 
 ## WebMCP model
 
-Muster registers one manager and 18 bounded page tools through `document.modelContext.registerTool` when the API is available. `run_drill_manager` accepts a high-level exercise intent and delegates to plan, people, equipment, or review specialists. The remaining tools expose narrowly scoped operations over the same visible page.
+Muster registers one manager and 19 bounded page tools through `document.modelContext.registerTool` when the API is available. `run_drill_manager` accepts a high-level exercise intent and delegates to plan, people, equipment, or review specialists. The remaining tools expose narrowly scoped operations over the same visible page.
 
-Current native proof uses Chrome 152 with WebMCP testing enabled. `document.modelContext.getTools()` discovered all 19 tools. `document.modelContext.executeTool()` then ran the declared fictional rehearsal: plan read, manager orientation, scenario start, zone inspection, exit change, route comparison, three facilitator-confirmed records, coverage check, and manager-prepared review. The same page reached “Ready for human review”; the approval control remained untouched. This proves discovery and a deterministic fixture sequence in that tested production tab. It does not prove autonomous planning, support in every browser, or every ChatGPT surface.
+Current native proof uses Chrome 152 with WebMCP testing enabled. `document.modelContext.getTools()` discovered all 20 tools. `document.modelContext.executeTool()` then ran the declared fictional rehearsal: plan read, manager orientation, scenario start, zone inspection, exit change, route comparison, three facilitator-confirmed records, coverage check, and manager-prepared review. The same page reached “Ready for human review”; the approval control remained untouched. This proves discovery and a deterministic fixture sequence in that tested production tab. It does not prove autonomous planning, support in every browser, or every ChatGPT surface.
 
 ## Tool groups
 
@@ -55,6 +55,8 @@ Current native proof uses Chrome 152 with WebMCP testing enabled. `document.mode
 - `read_room_profile`: inspect one room's use, plan-derived dimensions, located equipment, and exercise context; `view: "3d"` focuses the room in the Floor 07 cutaway.
 
 ### People and scenario
+
+- `prepare_team_handoff`: preview a known fictional responder, destination room and task on the shared 3D plan. Returns a diagram path, rationale checks and `requires_human_confirmation`. Human-only confirmation updates the assignment record, 2D/3D markers, roster and native readback. No arrival, clearance, assistance completion or dispatch is inferred. Older previews become invalid after scenario changes.
 
 - `send_inject`: add an authored complication to the exercise.
 - `record_action`: preserve a facilitator-confirmed team action and owner.
@@ -91,7 +93,7 @@ Current native proof uses Chrome 152 with WebMCP testing enabled. `document.mode
 - **WebMCP leverage:** the agent discovers structured tools and operates the same live page as the facilitator. Calls produce visible plan, people, route, scenario, trace, and review changes rather than disconnected chat text.
 - **Execution:** the public product supports a complete guided rehearsal on desktop and mobile, an interactive WebGL/CSS spatial view, inspectable tool contracts and receipts, deterministic tests, and native discovery and execution evidence.
 - **Potential impact:** Muster targets the real coordination shape of tabletop building drills: changing conditions, named responsibilities, route evidence, and after-action review. No field adoption, safety outcome, or professional validation is claimed yet.
-- **Creativity and ambition:** one manager coordinates four bounded specialist desks and 18 page tools over a spatial command room while preserving an explicit human approval boundary.
+- **Creativity and ambition:** one manager coordinates four bounded specialist desks and 19 page tools over a spatial command room while preserving an explicit human approval boundary.
 
 ## Safety and truth boundaries
 

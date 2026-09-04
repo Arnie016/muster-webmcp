@@ -19,7 +19,7 @@ Operate the same visible exercise state as the human facilitator. Keep every cla
 
 ## Tool surface
 
-Muster defines one manager and eighteen specialist tools:
+Muster defines one manager and nineteen specialist tools (20 total):
 
 | Tool | Input | Operator use |
 |---|---|---|
@@ -37,6 +37,7 @@ Muster defines one manager and eighteen specialist tools:
 | `read_hazard` | none | Read the current authored scenario phase; it is not a fire-spread prediction or sensor feed. |
 | `read_floor_register` | none | Read aggregate fictional zone counts and assistance ownership; no personal data is returned. |
 | `read_status_board` | none | Read facilitator-recorded exercise status without claiming floor clearance. |
+| `prepare_team_handoff` | `person_id`: `responder-a-rahman`, `responder-mei-lin`, `responder-d-kumar`, `responder-s-tan`; `room_id`: `west`, `east`, `meeting`, `studio`, `lobby`; `task`: `room_check`, `assistance_brief`, `equipment_check` | Preview a named assignment and cyan room-to-room path. The agent cannot confirm it. Ask the human to inspect and press Confirm assignment. Stale proposals require a new preview. |
 | `read_site_context` | none | Read fictional setting, assembly areas, access notes, and explicit live-data limits. |
 | `read_room_profile` | `room_id`: `west`, `east`, `meeting`, `studio`, `lobby`, or `electrical` | Focus a room and read its fictional use, protection fixtures, and operating context without inferring cause. |
 | `read_equipment` | none | Read equipment shown on the plan; presence, serviceability, adequacy, and compliance are not certified. |
@@ -57,7 +58,11 @@ Keep summaries short: observation, source tool, unresolved gap, and next human d
 
 ## Room-scale 3D walkthrough
 
-The tool count remains nineteen. Three existing tools also accept bounded visual options:
+### Assignment loop
+
+Read `read_floor_register` for `team_positions`. Prepare `prepare_team_handoff({person_id:"responder-s-tan",room_id:"studio",task:"assistance_brief"})`. Inspect the returned source, destination, diagram distance, checks and `requires_human_confirmation`. Ask the human to use **Confirm assignment** on the page. Do not try to bypass this control or claim arrival. Then read `read_status_board` to verify `team_assignments` and `team_positions`. A stale preview must be regenerated after state changes. This assignment record does not satisfy a separate `record_action` or prove an assistance task happened.
+
+Three existing tools also accept bounded visual options:
 
 - `read_room_profile({room_id: "studio", view: "3d"})` opens the F07 cutaway and returns room bounds, horizontal dimensions, fixture people and located equipment. `view` may be `current`, `plan` or `3d`. The 3 m elevation, door openings and furniture are inferred.
 - `read_equipment({item_id: "MCP-07-L1", view: "3d"})` opens and focuses the manual call-point marker. Other IDs: `EX-07-W1`, `HR-07-E1`, `PWD-07-S1`, `signal-7e`. Both inputs are optional. No device is operated.

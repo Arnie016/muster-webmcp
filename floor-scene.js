@@ -134,7 +134,54 @@ export function initFloorScene(canvas, onSelect) {
   avatar.visible=false;
   let visible=false, active=false, selected='studio', yaw=-.50, pitch=.91, distance=53, target=new THREE.Vector3(0,0,0), route=null, step=0, fraction=0, follow=false;
   let transition=null, last=0;
+  const teamMeshes=new Map(), teamMoves=new Map();
+  const handoffGroup=new THREE.Group(); handoffGroup.name='proposed-team-assignment';model.add(handoffGroup);
+  let handoffKey=null;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function setTeam(people) {
+    for(const p of people) {
+      let group=teamMeshes.get(p.id);
+      if(!group){
+        group=new THREE.Group();group.name=p.id;model.add(group);teamMeshes.set(p.id,group);
+        const body=box(.52,.82,.32,'#d4b455',[0,.66,0],`${p.id}-jacket`,group);
+        const head=mesh(new THREE.SphereGeometry(.22,14,10),mat('#efdab7'),[0,1.26,0],`${p.id}-head`,group);
+        const helmet=mesh(new THREE.SphereGeometry(.27,16,10,0,Math.PI*2,0,Math.PI/2),mat('#ffd567'),[0,1.35,0],`${p.id}-helmet`,group);
+        mesh(new THREE.CylinderGeometry(.65,.65,.025,24),mat('#e9c564',0,.75),[0,.15,0],`${p.id}-selection-disc`,group);
+        for(const dx of [-.15,.15])box(.16,.44,.20,'#354549',[dx,.25,0],`${p.id}-leg`,group);
+        const icon=document.createElement('canvas');icon.width=128;icon.height=128;
+        const ctx=icon.getContext('2d');ctx.fillStyle='#ffda73';ctx.beginPath();ctx.arc(64,64,59,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle='#19232b';ctx.lineWidth=6;ctx.stroke();ctx.fillStyle='#18252a';ctx.font='bold 46px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.initials,64,67);
+        const texture=new THREE.CanvasTexture(icon);texture.colorSpace=THREE.SRGBColorSpace;
+        const tag=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,depthTest:false}));tag.name=`${p.id}-initials`;tag.position.set(0,2.4,0);tag.scale.set(1.15,1.15,1);tag.renderOrder=10;group.add(tag);
+        for(const object of [body,head,helmet,tag]){object.userData={type:'person',id:p.id};selectable.push(object);}
+      }
+      if(!teamMoves.has(p.id))group.position.set(...at(p.point));
+      group.userData.room=p.room_id;
+    }
+    canvas.dataset.teamPositions=JSON.stringify(people.map(p=>({id:p.id,room:p.room_id,status:p.status})));
+  }
+  function setHandoff(proposal) {
+    const key=proposal?JSON.stringify([proposal.person_id,proposal.to_room,proposal.revision]):null;
+    routeGroup.visible=!proposal;avatar.visible=!proposal&&Boolean(route);
+    if(key===handoffKey)return;handoffKey=key;
+    for(const child of [...handoffGroup.children]){child.geometry?.dispose();child.material?.dispose();handoffGroup.remove(child);}
+    routeGroup.visible=!proposal;avatar.visible=!proposal&&Boolean(route);
+    if(proposal){
+      const points=proposal.points.map(p=>new THREE.Vector3(...at(p,.27)));
+      const curve=new THREE.CurvePath();for(let i=1;i<points.length;i++)if(points[i].distanceTo(points[i-1])>.001)curve.add(new THREE.LineCurve3(points[i-1],points[i]));
+      handoffGroup.add(new THREE.Mesh(new THREE.TubeGeometry(curve,100,.10,7,false),new THREE.MeshBasicMaterial({color:0x70d7f5})));
+      for(let i=0;i<points.length;i++){
+        const marker=new THREE.Mesh(new THREE.SphereGeometry(i===points.length-1?.38:.16,12,8),new THREE.MeshBasicMaterial({color:i===points.length-1?0xffd46d:0x9beaff}));marker.position.copy(points[i]);handoffGroup.add(marker);
+      }
+    }
+    canvas.dataset.handoff=proposal?`${proposal.person_id}:${proposal.to_room}`:'';
+  }
+  function animateHandoff(proposal){
+    if(reduced)return;
+    const curve=new THREE.CurvePath();const points=proposal.points.map(p=>new THREE.Vector3(...at(p)));
+    for(let i=1;i<points.length;i++)if(points[i].distanceTo(points[i-1])>.001)curve.add(new THREE.LineCurve3(points[i-1],points[i]));
+    teamMoves.set(proposal.person_id,{curve,start:performance.now()});
+  }
   function updateCamera() {
     const center=follow&&avatar.visible?avatar.position.clone():target;
     const radius=(follow?12:distance)*Math.max(1,1.4/camera.aspect);
@@ -201,6 +248,7 @@ export function initFloorScene(canvas, onSelect) {
   canvas.addEventListener('wheel',(e)=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();distance=Math.min(75,Math.max(18,distance+e.deltaY*.03));updateCamera();},{passive:false});
   renderer.setAnimationLoop((time)=>{
     if(!visible||document.hidden)return;
+    for(const [id,move] of teamMoves){const t=Math.min(1,(time-move.start)/1800);teamMeshes.get(id)?.position.copy(move.curve.getPoint(t));if(t===1)teamMoves.delete(id);}
     if(transition){const t=Math.min(1,(time-transition.start)/1300);avatar.position.copy(transition.curve.getPoint(t));if(t===1)transition=null;updateCamera();}
     if(!reduced&&active){const pulse=1+Math.sin(time*.002)*.08;signal.scale.setScalar(pulse);ring.material.opacity=.45+Math.sin(time*.002)*.18;}
     renderer.render(scene,camera);
@@ -211,6 +259,9 @@ export function initFloorScene(canvas, onSelect) {
     select(id){selected=id;roomMeshes.forEach(m=>{m.material.emissive.set(m.userData.id===id?'#21665f':'#000000');m.material.emissiveIntensity=m.userData.id===id?.30:0;});canvas.dataset.selectedRoom=id;},
     setHazard(value){active=value;signal.visible=value;ring.visible=value;},
     setRoute,
+    setTeam,setHandoff,animateHandoff,
+    clearTeamMotion(){teamMoves.clear();},
+    focusPerson(id){const p=teamMeshes.get(id);if(p){camera=perspectiveCamera;target.copy(p.position);distance=29;follow=false;updateCamera();}},
     focusEquipment(id){const item=[...SPATIAL_EQUIPMENT,DETECTOR].find(e=>e.id===id);if(!item)return;camera=perspectiveCamera;selectedPin.position.set(...at(item.point,.2));selectedPin.visible=true;target.set(...at(item.point));distance=24;follow=false;canvas.dataset.selectedEquipment=id;updateCamera();},
     view(mode){follow=mode==='follow';camera=mode==='top'?orthographicCamera:perspectiveCamera;if(mode==='top'){pitch=Math.PI/2-.0001;yaw=0;distance=48;target.set(0,0,0);orthographicCamera.zoom=1;}else if(mode==='reset'){pitch=.91;yaw=-.50;distance=53;target.set(0,0,0);}canvas.dataset.projection=camera===orthographicCamera?'orthographic':'perspective';resize();},
     zoom(delta){distance=Math.min(75,Math.max(18,distance+delta));if(camera===orthographicCamera){orthographicCamera.zoom=48/distance;orthographicCamera.updateProjectionMatrix();}updateCamera();},

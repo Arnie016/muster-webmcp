@@ -60,8 +60,8 @@ assert.throws(() => analyzeRouteSketch(state, 'studio', [{ x: 10, y: 10 }]), /be
 const app = await readFile(new URL('./app.js', import.meta.url), 'utf8');
 const html = await readFile(new URL('./index.html', import.meta.url), 'utf8');
 const toolNames = [...app.matchAll(/name: '([a-z_]+)'/g)].map((match) => match[1]);
-assert.deepEqual(toolNames, ['run_drill_manager', 'read_plan', 'start_drill', 'send_inject', 'record_action', 'check_coverage', 'stage_report', 'inspect_zone', 'compare_routes', 'analyze_route_sketch', 'read_drill_guide', 'read_hazard', 'read_floor_register', 'read_status_board', 'read_site_context', 'read_room_profile', 'read_equipment', 'read_lessons', 'record_human_signal']);
-assert.equal(new Set(toolNames).size, 19);
+assert.deepEqual(toolNames, ['run_drill_manager', 'read_plan', 'start_drill', 'send_inject', 'record_action', 'check_coverage', 'stage_report', 'inspect_zone', 'compare_routes', 'analyze_route_sketch', 'read_drill_guide', 'read_hazard', 'read_floor_register', 'read_status_board', 'read_site_context', 'read_room_profile', 'read_equipment', 'read_lessons', 'record_human_signal', 'prepare_team_handoff']);
+assert.equal(new Set(toolNames).size, 20);
 assert.ok(toolNames.every((name) => name.length <= 30));
 assert.match(app, /document\.modelContext\.registerTool/);
 assert.match(html, /Training only/);
@@ -77,7 +77,7 @@ assert.match(html, /data-agent-prompt="equipment"/);
 assert.doesNotMatch(app, /fetch\(|XMLHttpRequest|tel:/);
 
 console.log('PASS · deterministic drill state and report approval');
-console.log('PASS · one manager plus eighteen unique WebMCP tools, all names <= 30 characters');
+console.log('PASS · one manager plus nineteen unique WebMCP tools, all names <= 30 characters');
 console.log('PASS · human signals are facilitator observations, never inferred intent');
 console.log('PASS · zone, route, assistance, and scripted-hazard boundaries');
 console.log('PASS · training boundary visible and no network or call integration');

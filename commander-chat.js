@@ -1,4 +1,4 @@
-// Deterministic, read-only question routing. Not an LLM or hidden reasoning.
+// Deterministic question routing and explicit assignment previews. Not an LLM or hidden reasoning.
 const call = (name, input = {}) => ({ name, input });
 const route = (kind, intent, calls, extra = {}) => ({ kind, intent, calls, ...extra });
 
@@ -9,6 +9,8 @@ export function routeQuestion(raw, context = {}) {
   const requestedFloor = floor ? Number(floor[1]) : context.selectedFloor || 7;
   const meta = { zone: zone || context.zone || 'studio', requestedFloor, query: q };
   if (/\b(real fire|actual fire|on fire|trapped|call 995|dispatch|emergency now)\b/.test(q)) return route('emergency', 'Outside this training app', [], meta);
+  const person = /\brahman\b/.test(q) ? 'responder-a-rahman' : /\bmei\b/.test(q) ? 'responder-mei-lin' : /\bkumar\b/.test(q) ? 'responder-d-kumar' : /\btan\b/.test(q) ? 'responder-s-tan' : null;
+  if (person && zone && /\b(prepare|preview|assign|move|send|handoff)\b/.test(q)) return route('handoff', 'Preview an assignment; wait for human confirmation', [call('prepare_team_handoff', {person_id:person,room_id:zone,task:/assist|handoff/.test(q)?'assistance_brief':/equipment/.test(q)?'equipment_check':'room_check'})], meta);
   if (/\b(approve|delete|reset|restart|assign|record|block|unblock|start|resume|continue|next|begin|run|simulate)\b/.test(q) && !/\b(why|when|where|who|what|which|how many)\b/.test(q)) return route('next', 'Show the next action for your confirmation', [call('read_status_board')], meta);
   if (/\b(next|progress|stuck|help|guide|how.*(?:play|use|work|proceed|continue|start)|what.*(?:do|now))\b/.test(q)) return route('next', 'Find your next step without restarting', [call('read_status_board')], meta);
   if (/\b(webmcp|mcp|llm|model|real ai|chatgpt|thinking|runtime|what can you)\b/.test(q)) return route('capability', 'Explain how this session works', [], meta);
@@ -46,6 +48,10 @@ export function answerQuestion(request, results, context = {}) {
     return `Floor ${String(f.floor).padStart(2, '0')} · ${f.label}. ${f.actionable ? 'This is the active drill floor.' : 'This is a reference plan, not an executable drill.'}\n${f.occupants} fictional occupants; ${f.assisted} need assistance. Drawing ${f.drawing}, revision ${f.revision}. ${f.actionable ? next : 'Resume scenario returns to Floor 07.'}`;
   }
   if (request.kind === 'people') return `${register.zones.reduce((sum, z) => sum + z.occupants, 0)} people are listed on Floor 07.\n${register.zones.map((z) => `${z.zone}: ${z.occupants}`).join(' · ')}.\n${register.assisted_total} need assistance. ${register.assistance_owner ? `Recorded owner: ${register.assistance_owner}.` : 'No assistance owner has been recorded yet.'} These are exercise counts, not live occupancy.`;
+  if (request.kind === 'handoff') {
+    const h=get('prepare_team_handoff');
+    return `Prepared ${h.person} → ${h.to_label}: ${h.task_label}. The cyan path is ${h.diagram_metres} m on the diagram.\nReview the preview in 3D rooms, then press Confirm assignment. No assignment, arrival, or clearance has been recorded yet.`;
+  }
   if (request.kind === 'roles') {
     const names = plan.roles.filter((r) => request.query.includes(r.person?.toLowerCase().split(' ').at(-1) || '___') || request.query.includes(r.label.toLowerCase()));
     return `${(names.length ? names : plan.roles).map((r) => `${r.label}: ${r.person || register.assistance_owner || 'not assigned'}`).join('\n')}\nThese are fictional exercise roles. Only a human can approve the final report.`;

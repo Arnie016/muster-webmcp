@@ -26,9 +26,11 @@ Select **Start scenario** and use **Next action** to progress. Open **3D rooms Â
 
 ## Why WebMCP matters
 
-Muster exposes one manager and 18 bounded page tools through WebMCP. The agent operates the same page the facilitator sees. Each call leaves a receipt containing its input, result, purpose, visible consequence, timing, and guardrail. The agent may stage a report, but only the human can approve it.
+In 3D rooms, choose a responder, destination and task. `prepare_team_handoff` draws a cyan assignment preview. A separate human confirmation updates the visible 2D/3D markers, roster and assignment history. The agent can read back the result but cannot approve the assignment itself. This record does not claim the responder arrived or an assistance task was completed.
 
-In the tested production Chrome tab, the native WebMCP API discovered all 19 tools and executed the declared fictional rehearsal on the same page. It routed manager and specialist calls, advanced mission progress, staged the report, and stopped before the separate human approval control. A normal browser can run the same controlled workflow manually.
+Muster exposes one manager and 19 bounded page tools through WebMCP. The agent operates the same page the facilitator sees. Each call leaves a receipt containing its input, result, purpose, visible consequence, timing, and guardrail. The agent may stage a report, but only the human can approve it.
+
+In the tested production Chrome tab, the native WebMCP API discovered all 20 tools and executed the declared fictional rehearsal on the same page. It routed manager and specialist calls, advanced mission progress, staged the report, and stopped before the separate human approval control. A normal browser can run the same controlled workflow manually.
 
 ## Evidence boundary
 

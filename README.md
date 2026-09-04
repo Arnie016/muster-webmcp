@@ -8,13 +8,19 @@ Muster is a WebMCP-enabled tabletop fire-drill command room for building Fire Sa
 
 **Agent context:** [llms.txt](https://muster-fire-drill.vercel.app/llms.txt) · [llms-full.txt](https://muster-fire-drill.vercel.app/llms-full.txt) · [operator skill](https://muster-fire-drill.vercel.app/SKILL.md)
 
-### Room-scale walkthrough and printable drill pack
+### Named team assignments
+
+In **3D rooms · F07**, select a responder, destination and task. **Preview assignment** draws a cyan room-to-room path with four explicit checks. **Confirm assignment** is a separate human control: it updates the same assignment record shown by the 3D figure, 2D marker, roster and tool readback. Confirmation animates the marker along the authored path; reduced-motion mode changes it instantly. An assignment is not arrival, clearance or completed assistance. Changing scenario conditions invalidates an older preview. The history survives reload and resets with the exercise.
+
+An agent can call the new `prepare_team_handoff` tool; there is no agent confirmation tool. The built-in local router also supports “Prepare S Tan for an assistance handoff to the Studio.” `read_floor_register` returns current fictional team positions and `read_status_board` returns confirmed assignments. There are now **20 page tools**. `npm run test:team` exercises the human approval loop, shared positions, persistence, stale previews, reset and mobile layout; the native Chrome test covers agent preparation and readback around a human confirmation.
+
+### Interior and exports
 
 Choose **3D rooms · F07** for six inspectable zones, original procedural furniture, equipment markers, perspective orbit, true orthographic top view and optional marker-follow camera. A five-checkpoint route preview uses the same wall/room coordinate model as the vector plan. All ten room-to-exit paths are tested against wall intersections. Scripted blocked Stair B caps playback before entering the landing. A visual preview is not a recorded evacuation, route approval or a fire-spread simulation.
 
 **Print pack** generates a timestamped snapshot: two A3 pages for browser Print/Save PDF, a resolution-independent SVG, and a 5500 × 4250 PNG. It includes a numbered route, equipment locations, explicit missing owners, blank observed-at-assembly counts and facilitator checks. No export silently approves a report. These are fictional training materials, not approved emergency signage.
 
-The existing `read_room_profile`, `read_equipment` and `compare_routes` WebMCP tools can open these same 3D views with optional visual arguments documented in [Skill.md](SKILL.md). No extra tool count or hidden agent is invented. [Model basis and inference ledger](docs/spatial-model-basis.md) separates authored horizontal dimensions from inferred height, door openings and props. No third-party Fab asset is bundled.
+The existing `read_room_profile`, `read_equipment` and `compare_routes` WebMCP tools can open these same 3D views with optional visual arguments documented in [Skill.md](SKILL.md). These view options reuse existing tools; team assignment adds one new preparation tool. [Model basis and inference ledger](docs/spatial-model-basis.md) separates authored horizontal dimensions from inferred height, door openings and props. No third-party Fab asset is bundled.
 
 `npm run test:spatial` checks desktop, mobile and no-WebGL flows, route stops, tool receipts, SVG/PNG exports and print-footer bounds. The native WebMCP test also verifies agent-side room, marker and checkpoint control. The hosted video predates this additional interior/print pass.
 
@@ -59,6 +65,7 @@ Muster is training software. It does not monitor a real building, place calls, r
 - `read_equipment` — expose plan equipment and fixture inspection status without certifying adequacy.
 - `read_lessons` — retrieve dated fictional exercise findings and the changes they motivated.
 - `record_human_signal` — preserve a facilitator-observed confirmation, uncertainty, disagreement, or delay without inferring intent.
+- `prepare_team_handoff` — preview a named responder assignment and room-to-room path, then wait for the separate human confirmation control.
 
 The tools update the same interface the person is using. Selecting a live-trace event shows the delegation path from human request through the Incident Commander and bounded specialist to the named tool and visible page change. Human report approval is deliberately not exposed as a tool.
 
@@ -92,7 +99,7 @@ npm run serve
 
 Open `http://localhost:4179` in ChatGPT's in-app browser or a WebMCP-enabled Chrome build. The visible controls also provide a manual rehearsal when WebMCP is unavailable.
 
-`npm test` includes 500 shuffled workflows that check idempotency, route-sketch boundaries, invalid transitions, human approval gates, fictional-person referential integrity, and the no-external-effects boundary. `npm run test:browser` exercises the 18-floor model, the complete Floor 07 drill plus two reference-plan views, guided rehearsal, persistent route receipt, inspectable tool and person details, report approval, and 390×844 mobile layout when Playwright is available. `npm run test:webmcp` launches Chrome with WebMCP testing enabled, discovers all 19 native `document.modelContext` tools, executes `read_plan` and the manager's `orient` intent, then completes the declared rehearsal through native page-tool calls. It verifies the report is ready for human review and that approval remains untouched.
+`npm test` includes 500 shuffled workflows that check idempotency, route-sketch boundaries, invalid transitions, human approval gates, fictional-person referential integrity, and the no-external-effects boundary. `npm run test:browser` exercises the 18-floor model, the complete Floor 07 drill plus two reference-plan views, guided rehearsal, persistent route receipt, inspectable tool and person details, report approval, and 390×844 mobile layout when Playwright is available. `npm run test:webmcp` launches Chrome with WebMCP testing enabled, discovers all 20 native `document.modelContext` tools, executes `read_plan` and the manager's `orient` intent, then completes the declared rehearsal through native page-tool calls. It verifies the report is ready for human review and that approval remains untouched.
 
 ## What existed before
 
@@ -104,7 +111,7 @@ Without WebMCP, a facilitator clicks through the exercise manually. With WebMCP,
 
 ## Evidence boundary
 
-This MVP is publicly deployed. Local verification proves the deterministic page workflow, interactive building and floor-plan controls, manager routing, visible call inspector, and native WebMCP registration and execution in Chrome 152 with testing enabled. The displayed count of 84 is a fictional exercise register, not live occupancy. The native test proves only that this page registered 19 tools and that Chrome executed the declared fictional rehearsal against the same visible tab, including manager routing and report staging. It stopped before the separate human approval control. It does not prove ChatGPT-specific behavior, autonomous planning, real fire-team adoption, regulatory compliance, multiplayer collaboration, or integration with emergency services.
+This MVP is publicly deployed. Local verification proves the deterministic page workflow, interactive building and floor-plan controls, manager routing, visible call inspector, and native WebMCP registration and execution in Chrome 152 with testing enabled. The displayed count of 84 is a fictional exercise register, not live occupancy. The native test proves only that this page registered 20 tools and that Chrome executed the declared fictional rehearsal against the same visible tab, including manager routing and report staging. It stopped before the separate human approval control. It does not prove ChatGPT-specific behavior, autonomous planning, real fire-team adoption, regulatory compliance, multiplayer collaboration, or integration with emergency services.
 
 ## References
 

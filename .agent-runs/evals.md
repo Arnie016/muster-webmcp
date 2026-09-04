@@ -19,4 +19,4 @@ Regression found and fixed: an existing room-focused 142% zoom plus retained scr
 
 Tests establish the fictional page workflow, not fire physics, real evacuation safety, actual clearance, human competence, or field outcomes. Specialist labels are deterministic routing, not separate hosted models. View changes never raise alarms or dispatch anyone.
 
-Public app-code checkpoint: dpl_D4QmN2HVERfhmVSRPn7ecUrDEffa. A documentation-only packaging follow-up exposes the operator guide and social-preview image that the previous ignore rules excluded.
+Public app-code checkpoint: dpl_D4QmN2HVERfhmVSRPn7ecUrDEffa. A documentation-only packaging follow-up exposes the operator guide; the social-preview image uses the verified public repository because the deploy excludes screenshot artifacts.

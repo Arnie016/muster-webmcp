@@ -2,5 +2,6 @@
 /*.png
 trailer/node_modules/
 trailer/out/
+trailer/public/captures/team-cut/*.webm
 trailer/public/audio/narration-raw.wav
 trailer/public/audio/narration-v*-raw.wav

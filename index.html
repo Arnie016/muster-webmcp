@@ -9,7 +9,7 @@
     <meta property="og:title" content="Muster · The Agentic Fire Drill" />
     <meta property="og:description" content="A Fire Safety Manager and an agent rehearse a changing fictional building incident on the same visible plan." />
     <meta property="og:url" content="https://muster-fire-drill.vercel.app/" />
-    <meta property="og:image" content="https://muster-fire-drill.vercel.app/docs/screenshots/muster-spatial-command.png" />
+    <meta property="og:image" content="https://raw.githubusercontent.com/Arnie016/muster-webmcp/main/docs/screenshots/muster-spatial-command.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <title>Muster · Fire drill room</title>
     <link rel="canonical" href="https://muster-fire-drill.vercel.app/" />
@@ -33,7 +33,7 @@
         "featureList": [
           "Interactive 18-floor training twin",
           "Inspectable Floor 07 response plan",
-          "One WebMCP manager and 18 bounded page tools",
+          "One WebMCP manager and 19 bounded page tools",
           "Visible tool-call trace and human approval boundary"
         ]
       }
@@ -53,7 +53,7 @@
       <div class="topbar-actions">
         <a class="quiet-button skill-download" href="SKILL.md" download>Skill.md ↓</a>
         <button class="quiet-button" id="dossierButton" type="button">Building file</button>
-        <button class="quiet-button" id="toolButton" type="button"><span id="toolCount">19</span> tools</button>
+        <button class="quiet-button" id="toolButton" type="button"><span id="toolCount">20</span> tools</button>
         <span class="training-pill"><i></i> Training only</span>
       </div>
     </header>
@@ -138,6 +138,14 @@
               <div class="interior-stage"><canvas id="interiorCanvas" aria-label="Interactive Floor 07 cutaway. Use the room buttons below for keyboard access."></canvas><div id="interiorFallback" hidden>3D is unavailable on this device. The room controls, vector plan and route steps still work.</div><span class="interior-watermark">FICTIONAL TRAINING MODEL · INFERRED ELEVATION</span><span class="interior-gesture">Drag to orbit · select a room or marker</span><div class="interior-play-caption" id="interiorCaption" aria-live="polite"></div></div>
               <aside class="room-inspector"><nav id="interiorRooms" aria-label="Inspect a room"></nav><div id="interiorDetail" aria-live="polite"></div><div class="equipment-pins" id="interiorEquipment" aria-label="Inspect equipment locations"></div><div id="equipmentDetail" aria-live="polite"></div></aside>
             </div>
+            <section class="team-desk" id="teamDesk" aria-label="Team assignment desk">
+              <div class="team-desk-heading"><div><span class="eyebrow">People → place → task</span><h3>Give the team a clear assignment.</h3></div><span class="team-legend">● Yellow: responders · Cyan: proposed handoff</span></div>
+              <div class="team-fields"><label>Who<select id="teamResponder"></select></label><label>Where<select id="teamDestination"></select></label><label>What<select id="teamTask"></select></label><button id="teamPreview" class="primary-button" type="button">Preview assignment →</button></div>
+              <p id="teamState" class="team-state" role="status"></p>
+              <div id="teamProposal" hidden></div>
+              <div class="team-approval"><button id="teamStart" type="button" class="secondary-button" hidden>Start scenario to confirm</button><button id="teamConfirm" class="primary-button" type="button" hidden>Confirm assignment</button><button id="teamCancel" class="secondary-button" type="button" hidden>Dismiss preview</button></div>
+              <details id="teamHistory" class="team-history"></details>
+            </section>
             <section class="walkthrough-desk" aria-label="Route walkthrough">
               <div class="walkthrough-heading"><div><span class="eyebrow">Point A → point B · visual preview only</span><h3 id="walkthroughTitle">Studio to Stair A</h3></div><div class="interior-controls"><label>From <select id="walkthroughRoom"><option value="studio">Studio</option><option value="east">East workplace</option><option value="west">West workplace</option><option value="meeting">Meeting suite</option><option value="lobby">Lift lobby</option></select></label><label>To <select id="walkthroughExit"><option value="A">Stair A</option><option value="B">Stair B</option></select></label></div></div>
               <div id="walkthroughSteps" class="walkthrough-steps"></div>

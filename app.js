@@ -29,6 +29,7 @@ import { routeQuestion, answerQuestion } from './commander-chat.js';
 import { initFloorScene } from './floor-scene.js';
 import { ROOMS, SPATIAL_EQUIPMENT, DETECTOR, roomSpatialProfile, routeWalkthrough } from './spatial-data.js';
 import { openDrillPack } from './print-pack.js';
+import { TEAM_ROOMS, TEAM_TASKS, teamRoster, handoffRecords, handoffRevision, prepareHandoff, confirmHandoff } from './team-handoff.js';
 
 const STORAGE_KEY = 'muster-demo-state-v2';
 const $ = (selector) => document.querySelector(selector);
@@ -67,6 +68,8 @@ let buildingScene = null;
 let floorScene = null;
 let interiorRoom = 'studio', interiorEquipment = null, walkRoom = 'studio', walkExit = 'A', walkStep = 0, walkTimer = null;
 let peopleState = MusterPeopleData.resetPeopleState();
+let teamProposal = null, teamPerson = 'responder-s-tan', teamRoom = 'studio', teamTask = 'assistance_brief';
+let teamNotice = '';
 let conversation = [
   { role: 'assistant', text: 'Ask about the floor, people, exits, or equipment. Or use Next action to advance the drill. I read the page tools; you confirm changes.' },
 ];
@@ -359,6 +362,7 @@ const toolDefinitions = [
         zones: Object.values(ZONES).map((zone) => ({ zone: zone.label, occupants: zone.occupants, assisted: zone.assisted })),
         assisted_total: BUILDING.assistedOccupants,
         assistance_owner: assistanceAssigned ? ACTIONS.assist.owner : null,
+        team_positions: teamRoster(state),
         personal_data: false,
         external_effects: false,
       };
@@ -384,6 +388,8 @@ const toolDefinitions = [
         alternate_route_recorded: rerouted,
         assistance_owner_recorded: assisted,
         clearance_claimed: false,
+        team_assignments: handoffRecords(state),
+        team_positions: teamRoster(state),
         note: 'Muster never infers or claims real floor clearance.',
         external_effects: false,
       };
@@ -475,6 +481,24 @@ const toolDefinitions = [
       return { training_only: true, recorded: state.humanSignals.at(-1), inference: false, external_effects: false };
     },
   },
+  {
+    name: 'prepare_team_handoff',
+    description: 'Preview one fictional responder assignment between F07 rooms. Shows the path and checks on the live page. Does not move a marker or record completion; only the human Confirm assignment button can accept it.',
+    inputSchema: { type: 'object', properties: {
+      person_id: { type: 'string', enum: MusterPeopleData.FICTIONAL_RESPONDERS.map(p => p.id) },
+      room_id: { type: 'string', enum: TEAM_ROOMS },
+      task: { type: 'string', enum: Object.keys(TEAM_TASKS) },
+    }, required: ['person_id', 'room_id', 'task'] },
+    annotations: { readOnlyHint: false },
+    execute: async ({person_id, room_id, task}) => {
+      const proposal = prepareHandoff(state, person_id, room_id, task);
+      stopWalk(); teamProposal = proposal; teamPerson = person_id; teamRoom = room_id; teamTask = task; teamNotice = '';
+      interiorRoom = room_id; interiorEquipment = null;
+      setSpatialMode('interior'); floorScene?.view('reset');
+      logTool('prepare_team_handoff', `${proposal.person} → ${proposal.to_label} · awaiting human confirmation`);
+      render(); return proposal;
+    },
+  },
 ].map((tool) => ({
   ...tool,
   title: tool.name.split('_').map((word) => `${word[0].toUpperCase()}${word.slice(1)}`).join(' '),
@@ -528,7 +552,7 @@ function tracePayload(value) {
   if (value === undefined) return {};
   try {
     const text = JSON.stringify(value);
-    return text.length > 900 ? { summary: `${text.slice(0, 860)}…`, truncated: true } : JSON.parse(text);
+    return text.length > 12000 ? { summary: `${text.slice(0, 11900)}…`, truncated: true } : JSON.parse(text);
   } catch {
     return { summary: String(value) };
   }
@@ -577,6 +601,7 @@ function maybeAdvanceGuide(name, input) {
 }
 
 const specialistForTool = {
+  prepare_team_handoff: 'people',
   read_plan: 'plan', start_drill: 'plan', inspect_zone: 'plan', compare_routes: 'plan', analyze_route_sketch: 'plan', read_hazard: 'plan', read_site_context: 'plan',
   send_inject: 'people', read_floor_register: 'people', read_status_board: 'people', record_human_signal: 'people', record_action: 'people',
   read_equipment: 'equipment', read_room_profile: 'equipment', read_drill_guide: 'equipment',
@@ -584,6 +609,7 @@ const specialistForTool = {
 };
 
 const friendlyToolNames = {
+  prepare_team_handoff: 'Preview team assignment',
   run_drill_manager: 'Route one mission intent',
   read_plan: 'Read plan',
   start_drill: 'Start smoke scenario',
@@ -606,6 +632,7 @@ const friendlyToolNames = {
 };
 
 const traceMeta = {
+  prepare_team_handoff: { phase: 'Prepare', owner: 'People specialist', why: 'Connect one named responder, room and task for facilitator review.', change: 'A cyan path and assignment preview appear; no position changes yet.', boundary: 'Only a human confirmation records the assignment. Arrival and clearance remain unverified.' },
   'Exercise loaded': { phase: 'Observe', owner: 'System', why: 'Load a clean fictional exercise state.', change: 'No building state changed.', boundary: 'No network or emergency connection.' },
   'WebMCP ready': { phase: 'Ready', owner: 'Manager', why: 'Expose the visible page actions to an enabled browser agent.', change: 'Tools became discoverable in this tab.', boundary: 'Registration does not grant hidden data or external control.' },
   run_drill_manager: { phase: 'Route', owner: 'Incident Commander', why: 'Turn one human intent into a bounded sequence of named page tools.', change: 'Specialist results and their visible receipts are reconciled on this page.', boundary: 'The manager cannot call emergency services, control building systems, or approve the report.' },
@@ -885,6 +912,7 @@ async function callTool(name, input = {}) {
 }
 
 function summariseToolResult(name, result) {
+  if (name === 'prepare_team_handoff') return `Proposed: ${result.person} → ${result.to_label} for ${result.task_label.toLowerCase()}. Review the cyan path and confirm the assignment in the 3D view. Nothing is assigned yet.`;
   if (name === 'run_drill_manager') return `Routed “${String(result.intent || 'request').replaceAll('_', ' ')}” through the Incident Commander. Named specialist calls remain visible below.`;
   if (name === 'read_plan') return `${result.occupants} people, ${result.exits.length} exits, and ${result.assisted_occupants} people needing an assigned assistance owner.`;
   if (name === 'start_drill') return 'The drill is live. A scripted smoke signal is now shown beside room 7-E. Record the team response, then advance the scenario.';
@@ -1036,10 +1064,10 @@ function renderPeopleLayer() {
     return;
   }
   const responders = MusterPeopleData.FICTIONAL_RESPONDERS.map((base) => peopleState.find((person) => person.id === base.id) || base);
-  const assistanceAssigned = state.decisions.some((item) => item.actionId === 'assist');
+  const positions = teamRoster(state);
   const responderMarkup = responders.map((person) => {
     const ui = personUi[person.id];
-    const point = assistanceAssigned && person.id === 'responder-s-tan' ? [665, 420] : ui.start;
+    const point = positions.find(p => p.id === person.id).point;
     return `<g class="person-marker ${person.status === MusterPeopleData.PERSON_STATUSES.ASSISTING ? 'active' : ''}" data-person-id="${person.id}" tabindex="0" role="button" aria-label="Open ${person.displayName}, ${ui.role}" transform="translate(${point[0]} ${point[1]})">
       <circle r="13"></circle><circle r="8"></circle><text y="2.5">${ui.initials}</text><title>${person.displayName} · ${ui.role}</title>
     </g>`;
@@ -1065,24 +1093,23 @@ function openPerson(personId) {
   const ui = personUi[personId];
   if (!person || !ui) return;
   const task = MusterPeopleData.RESPONSE_TASKS.find((candidate) => candidate.id === person.taskId);
-  const roomName = MusterPeopleData.FLOOR_ARCHETYPES.flatMap((floor) => floor.rooms).find((room) => room.id === person.roomId)?.name || 'Transition point';
+  const position = teamRoster(state).find(p => p.id === personId);
+  const roomName = position.room;
   $('#personCard').innerHTML = `<div class="person-card-hero"><div class="person-portrait" style="--portrait-url:url('assets/people/fictional-response-team.png');--portrait-position:${ui.portrait}"></div><div><span>Fictional exercise profile</span><strong>${person.displayName}</strong><small>${ui.role}</small></div></div>
-    <div class="person-card-body"><div class="person-facts"><div><span>Current position</span><strong>${roomName}</strong></div><div><span>Status</span><strong>${person.status.replaceAll('-', ' ')}</strong></div><div><span>Assigned task</span><strong>${task?.label || 'Room-check rehearsal'}</strong></div><div><span>Authority</span><strong>Facilitator-confirmed actions only</strong></div></div>
-    <div class="person-actions"><button class="secondary-button" type="button" data-person-focus="${ui.zone}">Focus on room</button><button class="primary-button" type="button" data-person-move="${person.id}">Move to Studio</button></div><p class="person-boundary">This is a fictional rehearsal identity. Moving the marker changes only this page; it does not dispatch or track a real person.</p></div>`;
+    <div class="person-card-body"><div class="person-facts"><div><span>Assigned position</span><strong>${roomName}</strong></div><div><span>Status</span><strong>${position.status}</strong></div><div><span>Assigned task</span><strong>${position.task}</strong></div><div><span>Authority</span><strong>Facilitator-confirmed actions only</strong></div></div>
+    <div class="person-actions"><button class="secondary-button" type="button" data-person-focus="${position.room_id}">Focus on room</button><button class="primary-button" type="button" data-person-move="${person.id}">Prepare assignment</button></div><p class="person-boundary">This is a fictional rehearsal identity. An assignment is not arrival, room clearance, or a real dispatch.</p></div>`;
   $('#personDialog').showModal();
   $('#personCard').querySelector('[data-person-focus]').addEventListener('click', () => {
     $('#personDialog').close();
     setSpatialMode('floor');
-    focusFloorZone(ui.zone);
+    focusFloorZone(position.room_id);
   });
   $('#personCard').querySelector('[data-person-move]').addEventListener('click', () => {
-    try {
-      MusterPeopleData.movePerson(person.id, 'office-studio-07', MusterPeopleData.PERSON_STATUSES.MOVING);
-      peopleState = MusterPeopleData.getPeopleState();
-      state = { ...state, activity: [...state.activity, { type: 'human', title: 'Facilitator moved responder', detail: `${person.displayName} marker moved to Studio`, input: { person_id: person.id, room_id: 'office-studio-07' }, output: { status: 'moving', external_effects: false }, durationMs: 0, at: `T+${String(Math.floor(elapsed / 60)).padStart(2, '0')}:${String(elapsed % 60).padStart(2, '0')}` }] };
-      saveAndRender();
-      $('#personDialog').close();
-    } catch (error) { showToolResult({ error: error.message }); }
+    $('#personDialog').close(); teamPerson = person.id; teamProposal = null; teamNotice = '';
+    teamRoom = position.room_id === 'studio' ? 'meeting' : 'studio';
+    setSpatialMode('interior'); renderTeamDesk(); floorScene?.focusPerson(person.id);
+    $('#teamDesk').scrollIntoView({block: 'center', behavior: 'instant'});
+    $('#teamDestination').focus();
   });
 }
 
@@ -1108,7 +1135,8 @@ function renderCrew() {
     const personId = { fsm: 'responder-a-rahman', security: 'responder-mei-lin', 'warden-east': 'responder-d-kumar', 'warden-west': 'responder-s-tan', mobility: 'responder-s-tan' }[role.id];
     const ui = personUi[personId];
     const photo = person ? `has-photo` : '';
-    return `<button type="button" class="crew-member ${person ? '' : 'missing'}" ${person ? `data-person-id="${personId}"` : 'data-missing-role="mobility"'}><span class="crew-member-avatar ${photo}" style="--portrait-url:url('assets/people/fictional-response-team.png');--portrait-position:${ui?.portrait || '0% 0%'}">${person ? ui?.initials || '?' : '?'}</span><span class="crew-member-copy"><span>${role.label}</span><strong>${person || 'Unassigned'}</strong><small>${person ? (resolved ? 'Assigned during exercise' : 'Ready') : 'Gap in roster'}</small></span></button>`;
+    const currentPosition = teamRoster(state).find(p => p.id === personId)?.room;
+    return `<button type="button" class="crew-member ${person ? '' : 'missing'}" ${person ? `data-person-id="${personId}"` : 'data-missing-role="mobility"'}><span class="crew-member-avatar ${photo}" style="--portrait-url:url('assets/people/fictional-response-team.png');--portrait-position:${ui?.portrait || '0% 0%'}">${person ? ui?.initials || '?' : '?'}</span><span class="crew-member-copy"><span>${role.label}</span><strong>${person || 'Unassigned'}</strong><small>${person ? (resolved ? 'Assistance recorded' : currentPosition) : 'Gap in roster'}</small></span></button>`;
   }).join('');
   $('#crewStrip').querySelectorAll('[data-person-id]').forEach((button) => button.addEventListener('click', () => openPerson(button.dataset.personId)));
   $('#crewStrip').querySelector('[data-missing-role]')?.addEventListener('click', () => { openFullConversation(); answerChat('Which role has no owner?'); });
@@ -1333,16 +1361,22 @@ function renderPhaseGuide() {
   $('#phaseGuide').innerHTML = `<div class="phase-intro"><span>Mission stage ${Math.min(phase + 1, 5)} of 5</span><strong>${steps[phase][0]}</strong><p>${steps[phase][1]}</p></div><ol>${steps.map(([title], index) => `<li class="${index < phase ? 'done' : index === phase ? 'current' : ''}"><i>${index < phase ? '✓' : index + 1}</i><span>${title}</span></li>`).join('')}</ol>`;
 }
 
+function nextGuidedStep() {
+  // An external agent can legitimately skip optional inspection steps.
+  // Once review is staged, never send the human back to an earlier guide action.
+  return ['review', 'complete'].includes(state.status) && state.report ? undefined : GUIDED_SEQUENCE[guidedStep];
+}
+
 function renderGuidedBrief() {
   const container = $('#guidedBrief');
-  const step = GUIDED_SEQUENCE[guidedStep];
+  const step = nextGuidedStep();
   const latest = state.activity.at(-1);
   const completed = !step;
   container.classList.toggle('complete', completed);
-  container.setAttribute('aria-label', completed ? 'Guided rehearsal complete' : `Guided action ${guidedStep + 1} of ${GUIDED_SEQUENCE.length}`);
-  $('#guidedStepIndex').textContent = String(Math.min(guidedStep + 1, GUIDED_SEQUENCE.length)).padStart(2, '0');
-  $('#guidedStepTotal').textContent = `of ${GUIDED_SEQUENCE.length}`;
-  $('#guidedEyebrow').textContent = completed ? 'Guided rehearsal complete' : `Next page-tool action · ${traceMeta[step.tool]?.phase || 'Next'}`;
+  container.setAttribute('aria-label', completed ? 'Human review ready' : `Guided action ${guidedStep + 1} of ${GUIDED_SEQUENCE.length}`);
+  $('#guidedStepIndex').textContent = completed ? '✓' : String(Math.min(guidedStep + 1, GUIDED_SEQUENCE.length)).padStart(2, '0');
+  $('#guidedStepTotal').textContent = completed ? 'review' : `of ${GUIDED_SEQUENCE.length}`;
+  $('#guidedEyebrow').textContent = completed ? 'Report ready for review' : `Next page-tool action · ${traceMeta[step.tool]?.phase || 'Next'}`;
   $('#guidedTitle').textContent = completed ? 'The draft is ready for a human' : step.title;
   $('#guidedDescription').textContent = completed
     ? 'Review the evidence below. The agent cannot approve its own report.'
@@ -1365,7 +1399,7 @@ function renderGuidedBrief() {
 
 async function runGuidedStep() {
   if (guideBusy || chatBusy || toolDepth) return;
-  const step = GUIDED_SEQUENCE[guidedStep];
+  const step = nextGuidedStep();
   if (!step) {
     if ($('#conversationDialog').open) $('#conversationDialog').close();
     $('#reportPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1503,6 +1537,7 @@ function toolPreset(toolName) {
   const nextAction = state.injectIds.includes('roster') && !state.decisions.some((item) => item.actionId === 'assist') ? 'assist'
     : state.injectIds.includes('stair') && !state.decisions.some((item) => item.actionId === 'reroute') ? 'reroute' : 'account';
   return {
+    prepare_team_handoff: { person_id: 'responder-s-tan', room_id: 'studio', task: 'assistance_brief' },
     run_drill_manager: { intent: 'orient' }, read_plan: {}, start_drill: {}, send_inject: { inject_id: nextInject }, record_action: { action_id: nextAction }, check_coverage: {}, stage_report: {},
     inspect_zone: { zone_id: 'studio' }, compare_routes: { zone_id: 'studio' }, analyze_route_sketch: { zone_id: 'studio', points: [{ x: 704, y: 397 }, { x: 704, y: 330 }, { x: 637, y: 330 }, { x: 520, y: 420 }, { x: 205, y: 479 }] },
     read_drill_guide: { phase: 'before' }, read_hazard: {}, read_floor_register: {}, read_status_board: {}, read_site_context: {}, read_room_profile: { room_id: 'studio' }, read_equipment: {}, read_lessons: {}, record_human_signal: { role_id: 'security', signal: 'uncertain' },
@@ -1510,6 +1545,7 @@ function toolPreset(toolName) {
 }
 
 function toolCanRun(toolName) {
+  if (toolName === 'prepare_team_handoff') return !['review','complete'].includes(state.status) && teamRoster(state).at(-1).room_id !== 'studio';
   if (toolName === 'start_drill') return state.status === 'ready';
   if (toolName === 'send_inject' || toolName === 'record_action') return state.status === 'running';
   if (toolName === 'stage_report') return state.status === 'running' && state.injectIds.length > 1;
@@ -1575,6 +1611,9 @@ function renderInterior() {
   const route=routeWalkthrough(walkRoom,walkExit,state.injectIds.includes('stair'));
   walkStep=Math.min(walkStep,route.maxStep);
   floorScene?.setRoute(route,walkStep);
+  floorScene?.setTeam(teamRoster(state));
+  floorScene?.setHandoff(teamProposal);
+  renderTeamDesk();
   $('#walkthroughTitle').textContent=`${route.zone} → ${route.exit}${route.available?'':' · unavailable'}`;
   $('#walkthroughRoom').value=walkRoom;$('#walkthroughExit').value=walkExit;
   $('#walkthroughSteps').innerHTML=route.steps.map((s,i)=>`<button type="button" data-walk-step="${i}" class="${i===walkStep?'active':''} ${i>route.maxStep?'unavailable':''}" ${i>route.maxStep?'disabled':''}><span>${String(i+1).padStart(2,'0')}</span><strong>${escapeHtml(s.label)}</strong></button>`).join('');
@@ -1586,14 +1625,68 @@ function renderInterior() {
   $('#walkthroughLogic').innerHTML=route.logic.map((l,i)=>`<article><span>0${i+1} · ${l.label}</span><p>${escapeHtml(l.text)}</p></article>`).join('');
 }
 
+function renderTeamDesk() {
+  const roster = teamRoster(state);
+  $('#teamResponder').innerHTML = roster.map(p => `<option value="${p.id}">${p.name} · ${p.room}</option>`).join('');
+  $('#teamResponder').value = teamPerson;
+  $('#teamDestination').value = teamRoom; $('#teamTask').value = teamTask;
+  const person = roster.find(p => p.id === teamPerson);
+  const stale = Boolean(teamProposal && teamProposal.revision !== handoffRevision(state));
+  $('#teamPreview').disabled = ['review','complete'].includes(state.status) || person.room_id === teamRoom;
+  $('#teamConfirm').hidden = !teamProposal;
+  $('#teamConfirm').disabled = !teamProposal || stale || state.status !== 'running';
+  $('#teamCancel').hidden = !teamProposal;
+  $('#teamState').textContent = teamProposal ? stale ? 'Exercise changed · preview again' : 'Waiting for your confirmation' : teamNotice || 'Select a responder and a room. Preview first, confirm second.';
+  $('#teamProposal').hidden = !teamProposal;
+  if (teamProposal) {
+    $('#teamProposal').innerHTML = `<div class="handoff-summary"><div><small>ASSIGNMENT PREVIEW · NOT ARRIVAL</small><h3>${escapeHtml(teamProposal.person)} → ${escapeHtml(teamProposal.to_label)}</h3><p>${escapeHtml(teamProposal.task_label)} · ${teamProposal.diagram_metres} m on the diagram</p></div><span class="handoff-status">${stale ? 'RECHECK' : 'PROPOSED'}</span></div><ol class="handoff-checks">${teamProposal.checks.map(c=>`<li>${escapeHtml(c)}</li>`).join('')}</ol>`;
+  }
+  $('#teamStart').hidden = state.status !== 'ready';
+  const records = handoffRecords(state);
+  $('#teamMapStatus').hidden = !records.length;
+  if(records.length){const latest=records.at(-1);$('#teamMapStatus').textContent=`${latest.person} → ${ROOMS.find(r=>r.id===latest.to_room).label} · assigned, not arrived`;}
+  $('#teamHistory').innerHTML = records.length ? `<summary>${records.length} confirmed assignment${records.length===1?'':'s'} · inspect history</summary>${records.slice().reverse().map(h=>`<div class="handoff-history-row"><b>${escapeHtml(h.person)}</b><span>${ROOMS.find(r=>r.id===h.from_room).label} → ${ROOMS.find(r=>r.id===h.to_room).label}</span><small>${TEAM_TASKS[h.task]} · arrival not recorded</small></div>`).join('')}` : '<summary>No assignments confirmed yet</summary>';
+}
+
+function setupTeamDesk() {
+  $('#teamDestination').innerHTML = TEAM_ROOMS.map(id=>`<option value="${id}">${ROOMS.find(r=>r.id===id).label}</option>`).join('');
+  $('#teamTask').innerHTML = Object.entries(TEAM_TASKS).map(([id,label])=>`<option value="${id}">${label}</option>`).join('');
+  const change = () => {teamPerson=$('#teamResponder').value;teamRoom=$('#teamDestination').value;teamTask=$('#teamTask').value;teamProposal=null;teamNotice='';renderInterior();};
+  ['teamResponder','teamDestination','teamTask'].forEach(id=>$(`#${id}`).addEventListener('change',change));
+  $('#teamPreview').addEventListener('click',async()=>{
+    const person=teamRoster(state).find(p=>p.id===teamPerson);
+    beginConversation(`Prepare ${TEAM_TASKS[teamTask].toLowerCase()} for ${person.name} in ${ROOMS.find(r=>r.id===teamRoom).label}.`);
+    try { await callTool('prepare_team_handoff',{person_id:teamPerson,room_id:teamRoom,task:teamTask}); }
+    catch(error){teamNotice=error.message;renderTeamDesk();}
+  });
+  $('#teamCancel').addEventListener('click',()=>{teamProposal=null;teamNotice='Preview dismissed. No assignment changed.';renderInterior();});
+  $('#teamStart').addEventListener('click',async()=>{teamProposal=null;await callTool('start_drill');setSpatialMode('interior');});
+  $('#teamConfirm').addEventListener('click',()=>{
+    try {
+      const proposal=teamProposal;
+      state=confirmHandoff(state,proposal,new Date().toISOString());
+      const record=handoffRecords(state).at(-1);
+      state={...state,activity:[...state.activity,{type:'human',title:'Assignment confirmed',detail:`${proposal.person} → ${proposal.to_label} · ${proposal.task_label}`,input:{person_id:proposal.person_id,room_id:proposal.to_room,task:proposal.task},output:record,durationMs:0,at:`T+${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')}`}]};
+      $('#interiorCanvas').scrollIntoView({block:'center',behavior:'instant'});
+      floorScene?.view('reset'); floorScene?.animateHandoff(proposal);
+      teamProposal=null; teamNotice=`${proposal.person} is assigned to ${proposal.to_label}. Arrival and completion are still unrecorded.`;
+      beginConversation(`I confirm ${proposal.person}'s assignment to ${proposal.to_label}.`);
+      setAgentMessage(teamNotice); conversation[pendingAssistant].status='done'; pendingAssistant=null; saveAndRender();
+    } catch(error){teamNotice=error.message;renderTeamDesk();}
+  });
+}
+
 function setupSpatialInteractions() {
+  setupTeamDesk();
   renderTower();
   $('#walkthroughSteps').before($('#interiorCaption'));
   floorScene = initFloorScene($('#interiorCanvas'), (target) => {
     if (target.type === 'room') inspectInteriorRoom(target.id);
+    else if (target.type === 'person') openPerson(target.id);
     else inspectInteriorEquipment(target.id);
   });
   $('#interiorFallback').hidden = Boolean(floorScene);
+  const mapStatus=document.createElement('div');mapStatus.id='teamMapStatus';mapStatus.className='team-map-status';mapStatus.hidden=true;$('#interiorCanvas').parentElement.append(mapStatus);
   $('#interiorRooms').innerHTML = ROOMS.map(r => `<button type="button" data-interior-room="${r.id}">${r.label}</button>`).join('');
   $('#interiorEquipment').innerHTML = [...SPATIAL_EQUIPMENT,DETECTOR].map(e=>`<button type="button" data-interior-equipment="${e.id}"><b>${e.symbol}</b>${e.type}</button>`).join('');
   $('#interiorRooms').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>inspectInteriorRoom(b.dataset.interiorRoom)));
@@ -1792,6 +1885,7 @@ $('#reportButton').addEventListener('click', () => callTool('stage_report'));
 $('#resetButton').addEventListener('click', () => {
   localStorage.removeItem(STORAGE_KEY);
   state = createInitialState(); planRead = false; elapsed = 0;
+  teamProposal = null; teamNotice = ''; floorScene?.clearTeamMotion();
   if (timer) { clearInterval(timer); timer = null; }
   $('#exerciseClock').textContent = '00:00';
   peopleState = MusterPeopleData.resetPeopleState();
@@ -1865,7 +1959,7 @@ async function answerChat(rawPrompt) {
       const result = await callTool(call.name, call.input);
       results.push({ name: call.name, result });
     }
-    setAgentMessage(answerQuestion(request, results, { nextLabel: GUIDED_SEQUENCE[guidedStep]?.button }), '', turnIndex);
+    setAgentMessage(answerQuestion(request, results, { nextLabel: nextGuidedStep()?.button }), '', turnIndex);
     conversation[turnIndex].status = 'done';
   } catch (error) {
     conversation[turnIndex].status = 'error';

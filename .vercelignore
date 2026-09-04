@@ -1,9 +1,6 @@
 trailer
 docs/*
 !docs/OPERATOR_GUIDE.md
-!docs/screenshots/
-docs/screenshots/*
-!docs/screenshots/muster-spatial-command.png
 scripts
 tests.mjs
 stress-tests.mjs

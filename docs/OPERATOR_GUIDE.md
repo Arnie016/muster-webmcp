@@ -122,6 +122,10 @@ The human can use Print pack for a two-page A3 plan and review sheet, vector SVG
 
 ## Failure handling
 
+### Preview and confirm a team assignment
+
+Call `read_floor_register` for the current `team_positions`, then `prepare_team_handoff` with a known `person_id`, destination `room_id`, and task (`room_check`, `assistance_brief`, or `equipment_check`). The cyan path and four checks appear in the 3D room view. Only the human **Confirm assignment** button records the assignment. Read `read_status_board` afterward to verify the same record and positions. Do not call `record_action` simply because an assignment was confirmed: an assignment proves neither arrival nor task completion. Changed scenario conditions invalidate the preview; prepare a fresh one.
+
 - If a tool reports that the exercise must be started, do not fabricate progress. Ask whether to call `start_drill`.
 - If `check_coverage` returns unresolved items, do not bypass them or stage a “complete” claim.
 - If an input is outside the declared enum, show the allowed options and ask for a valid choice.
@@ -145,4 +149,4 @@ Human next step: [one decision or approval]
 
 For a local Codex installation, place this repository folder—or a copy containing `SKILL.md` and `docs/OPERATOR_GUIDE.md`—in the configured skills directory. Loading this skill teaches the operator the contract; it does not itself connect the browser or register tools.
 
-Muster registers through `document.modelContext.registerTool` only when that API exists. `npm run test:webmcp` now verifies discovery of all 19 tools and executes `read_plan` in Chrome 152 with WebMCP testing enabled. This is native browser proof for that test run, not evidence of ChatGPT-specific behavior or real-building integration.
+Muster registers through `document.modelContext.registerTool` only when that API exists. `npm run test:webmcp` verifies discovery of all 20 tools and native execution of the drill and assignment-preview loop in Chrome with WebMCP testing enabled. This is native browser proof for that test run, not evidence of ChatGPT-specific behavior or real-building integration.
