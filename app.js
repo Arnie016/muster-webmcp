@@ -640,12 +640,19 @@ function selectFloor(floor, openPlan = false) {
   const preset = FLOOR_PRESETS[selectedFloor];
   document.querySelectorAll('[data-building-floor]').forEach((button) => button.classList.toggle('selected', Number(button.dataset.buildingFloor) === selectedFloor));
   document.querySelectorAll('[data-plan-floor]').forEach((button) => button.classList.toggle('active', Number(button.dataset.planFloor) === selectedFloor));
-  $('#enterFloorButton').disabled = !preset;
-  $('#enterFloorButton').textContent = preset ? `Inspect ${preset.code} · ${preset.label} →` : 'Floor file unavailable';
+  $('#enterFloorButton').hidden = !preset;
+  $('#enterFloorButton').textContent = preset ? `View ${preset.code} schematic` : 'View schematic';
+  $('#floorMode').disabled = !preset;
   $('#buildingStatus').innerHTML = preset
     ? `<span>${preset.actionable ? 'Active exercise file' : 'Reference training plan'}</span><strong>${preset.code} · ${preset.label}</strong><p>${preset.occupants} fixture occupants · ${preset.assisted} assisted · revision ${preset.revision}</p>`
-    : `<span>Building context</span><strong>Floor ${String(selectedFloor).padStart(2, '0')}</strong><p>No training plan is loaded for this floor.</p>`;
-  if (!preset) return;
+    : `<span>3D model only</span><strong>Floor ${String(selectedFloor).padStart(2, '0')}</strong><p>No schematic for this floor. The scenario runs on Floor 07; your progress is kept.</p>`;
+  if (!preset) {
+    setSpatialMode('building');
+    renderMap();
+    renderPeopleLayer();
+    persistState();
+    return;
+  }
   $('#floorBeaconLabel').textContent = `${preset.code} · ${preset.actionable ? 'exercise loaded' : 'reference plan'}`;
   $('#floorPlanHeading').textContent = `${preset.code} · ${preset.label} · 1:200`;
   $('#floorTitle').textContent = `Fictional ${preset.code} ${preset.label} training plan`;
@@ -1293,6 +1300,8 @@ async function runGuidedStep() {
 }
 
 function renderStatus() {
+  $('#resumeScenarioButton').textContent = state.status === 'ready' ? 'Start scenario →'
+    : state.status === 'review' || state.approved ? 'Review scenario →' : 'Resume scenario →';
   const status = $('#statusDot');
   status.className = `status-dot ${state.status}`;
   status.textContent = state.status === 'ready' ? 'Ready' : state.status === 'running' ? 'In exercise' : state.status === 'review' ? 'Review' : 'Complete';
@@ -1466,6 +1475,7 @@ function setupSpatialInteractions() {
   applyFloorView();
 
   const openFloor = () => {
+    if (!FLOOR_PRESETS[selectedFloor]) return;
     setSpatialMode('floor');
     if (selectedFloor === 7 && !planRead) {
       beginConversation('Read the Floor 7 plan');
@@ -1473,6 +1483,29 @@ function setupSpatialInteractions() {
     }
   };
   $('#enterFloorButton').addEventListener('click', openFloor);
+  let scenarioOpening = false;
+  $('#resumeScenarioButton').addEventListener('click', async () => {
+    if (scenarioOpening) return;
+    scenarioOpening = true;
+    $('#resumeScenarioButton').disabled = true;
+    try {
+      selectFloor(7, true);
+      if (state.status === 'ready') {
+        beginConversation('Start the Floor 07 scenario');
+        if (!planRead) await callTool('read_plan');
+        await callTool('start_drill');
+      }
+      setSpatialMode('floor');
+      render();
+      const target = state.status === 'review' || state.approved ? $('#reportPanel') : $('#floorView');
+      target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+    } catch (error) {
+      $('#buildingStatus').textContent = `Could not open the scenario: ${error.message}. Your progress is kept.`;
+    } finally {
+      scenarioOpening = false;
+      $('#resumeScenarioButton').disabled = false;
+    }
+  });
   $('#floorMode').addEventListener('click', openFloor);
   $('#buildingMode').addEventListener('click', () => setSpatialMode('building'));
   $('#backToBuilding').addEventListener('click', () => setSpatialMode('building'));

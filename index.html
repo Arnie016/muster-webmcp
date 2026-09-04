@@ -127,7 +127,7 @@
             <div class="building-copy">
               <span class="building-kicker">Meridian Exchange · training twin</span>
               <h2>Select the floor.<br />Then read the plan.</h2>
-              <p>Drag to orbit, inspect the complete Floor 07 drill, or open two clearly labelled reference plans.</p>
+              <p>Run the Floor 07 scenario, or explore the building. Only the three highlighted floors have schematics.</p>
               <div class="building-metrics">
                 <div><strong>18</strong><span>floors</span></div>
                 <div><strong>84</strong><span>people · L07</span></div>
@@ -139,7 +139,10 @@
                 <button type="button" class="active" data-plan-floor="7">F07 <small>Live drill</small></button>
                 <button type="button" data-plan-floor="12">F12 <small>Reference</small></button>
               </div>
-              <button class="primary-button" id="enterFloorButton" type="button">Inspect Floor 07 →</button>
+              <div class="scenario-entry">
+                <button class="primary-button" id="resumeScenarioButton" type="button">Start scenario →</button>
+                <button class="secondary-button" id="enterFloorButton" type="button">View F07 schematic</button>
+              </div>
             </div>
             <div class="building-viewport" id="buildingViewport" aria-label="Draggable three-dimensional building model">
               <canvas class="building-canvas" id="buildingCanvas" aria-label="Interactive WebGL model of the fictional Meridian Exchange training site"></canvas>

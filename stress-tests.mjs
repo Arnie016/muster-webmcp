@@ -68,5 +68,5 @@ assert.throws(() => addInject(createInitialState(), 'stair'), /Start the exercis
 assert.throws(() => recordAction(createInitialState(), 'assist'), /Start the exercise/);
 assert.throws(() => inspectZone(createInitialState(), 'unknown'), /Unknown floor zone/);
 
-console.log('PASS · 500 shuffled manager workflows preserve idempotency and approval gates');
+console.log('PASS · 500 shuffled core-state workflows preserve idempotency and approval gates');
 console.log('PASS · invalid transitions fail closed and no simulated output gains external effects');

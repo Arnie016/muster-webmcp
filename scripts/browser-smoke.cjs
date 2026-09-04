@@ -187,6 +187,32 @@ const url = process.env.MUSTER_URL || 'http://127.0.0.1:4179';
   assert.equal(await fallback.locator('#buildingViewport.webgl-ready').count(), 0);
   assert.ok(await fallback.locator('#buildingOrbit').isVisible());
 
+  // A model-only floor must never strand the visitor or show a stale schematic.
+  await fallback.locator('[data-building-floor="8"]').focus();
+  await fallback.keyboard.press('Enter');
+  assert.match(await fallback.locator('#buildingStatus').innerText(), /No schematic for this floor/i);
+  assert.ok(await fallback.locator('#enterFloorButton').isHidden());
+  assert.ok(await fallback.locator('#floorMode').isDisabled());
+  assert.match(await fallback.locator('#resumeScenarioButton').innerText(), /Start scenario/);
+  await fallback.locator('#resumeScenarioButton').click();
+  await fallback.waitForFunction(() => document.querySelector('#resumeScenarioButton')?.textContent.includes('Resume scenario'));
+  assert.ok(await fallback.locator('#floorView').isVisible());
+  assert.match(await fallback.locator('#floorPlanHeading').innerText(), /F07/);
+  const savedBeforeResume = await fallback.evaluate(() => JSON.parse(localStorage.getItem('muster-demo-state-v2')));
+  assert.equal(savedBeforeResume.status, 'running');
+  assert.deepEqual(savedBeforeResume.injectIds, ['smoke']);
+  await fallback.locator('#backToBuilding').click();
+  await fallback.locator('[data-building-floor="8"]').focus();
+  await fallback.keyboard.press('Enter');
+  await fallback.locator('#resumeScenarioButton').click();
+  const savedAfterResume = await fallback.evaluate(() => JSON.parse(localStorage.getItem('muster-demo-state-v2')));
+  assert.deepEqual(savedAfterResume.injectIds, savedBeforeResume.injectIds);
+  assert.deepEqual(savedAfterResume.decisions, savedBeforeResume.decisions);
+  assert.equal(savedAfterResume.activity.length, savedBeforeResume.activity.length);
+  assert.equal(savedAfterResume.ui.selectedFloor, 7);
+  assert.ok(await fallback.locator('#floorView').isVisible());
+  console.log('PASS · model-only Floor 08 recovers through Start/Resume without duplicate actions or lost progress');
+
   assert.deepEqual(errors, []);
   assert.deepEqual(mobileErrors, []);
   await browser.close();
