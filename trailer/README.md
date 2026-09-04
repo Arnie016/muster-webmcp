@@ -1,6 +1,27 @@
 # Muster editable demo package
 
-This folder owns the 132.544-second judge-facing product film. It does not modify the app source.
+## Latest cut: 3D team handoff
+
+The new `MusterTeamCut` composition is 125.1 seconds at 1920 × 1080 / 30 fps. It uses seven actual page recordings: room inspection, guided scenario, drawn route, human-confirmed assignment, typed question and tool receipt, review draft, and printable pack. The prior `MusterDemo` composition and hosted video remain unchanged as a fallback.
+
+The new cut reuses the existing reviewed AI narration and illustration. It removes 115–122.4 seconds, which contained an obsolete tool count. No new paid voice or image generation was used. English captions are retimed to this cut in `captions/muster-team-demo.en.srt`; do not attach the older subtitle file to this version.
+
+Using the already-installed dependencies:
+
+```sh
+MUSTER_URL=http://127.0.0.1:4180 NODE_PATH=/path/to/node_modules node scripts/capture-team-cut.cjs
+npm run typecheck
+npx --no-install remotion render src/index.tsx MusterTeamCut out/muster-team-demo.mp4 --codec=h264 --crf=18 --pixel-format=yuv420p --concurrency=4
+node scripts/package-team-cut.cjs
+```
+
+`CAPTURE_ONLY=team,trace` limits capture to the named clips. The recorder uses a clean local browser context, native WebMCP fixtures and real UI actions. It does not access authenticated user accounts. Keep exported media separate from claims about an autonomous model: this is a recorded product demonstration.
+
+The packaged public player is `../demo.html`. It offers optional WebVTT captions, no autoplay, a download, and a direct return to the app. `../scripts/demo-video-smoke.cjs` verifies metadata, playback, seeking, captions and responsive layout.
+
+## Earlier cut
+
+The original composition below owns the 132.544-second film and its existing captions. Its nineteen-tool references describe an earlier build, not the current twenty-tool app.
 
 ## Refresh proof
 

@@ -13,7 +13,7 @@ import {
 } from 'remotion';
 
 type Focus = {x: number; y: number; scale: number};
-type Scene = {
+export type Scene = {
   id: string;
   type: 'why' | 'card' | 'proof' | 'live' | 'architecture' | 'runtime' | 'trace' | 'report' | 'ledger' | 'cta';
   start: number;
@@ -107,7 +107,7 @@ const ProofScene: React.FC<{scene: Scene}> = ({scene}) => {
   );
 };
 
-const WhyScene: React.FC<{scene: Scene}> = ({scene}) => {
+export const WhyScene: React.FC<{scene: Scene}> = ({scene}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const second = interpolate(frame, [fps * 2.7, fps * 3.2], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
@@ -127,7 +127,7 @@ const WhyScene: React.FC<{scene: Scene}> = ({scene}) => {
   );
 };
 
-const CardScene: React.FC<{scene: Scene}> = ({scene}) => {
+export const CardScene: React.FC<{scene: Scene}> = ({scene}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const enter = revealAt(frame, fps, 0, 105);
@@ -175,7 +175,7 @@ const FlowArrow: React.FC<{left: number; top: number; width: number; delay: numb
   );
 };
 
-const ArchitectureScene: React.FC<{scene: Scene; authorityBoundary: string}> = ({scene, authorityBoundary}) => {
+export const ArchitectureScene: React.FC<{scene: Scene; authorityBoundary: string}> = ({scene, authorityBoundary}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const show = (delay: number) => revealAt(frame, fps, delay, 105);
@@ -399,7 +399,7 @@ const ReportScene: React.FC<{scene: Scene}> = ({scene}) => {
   );
 };
 
-const LedgerScene: React.FC<{scene: Scene; totalToolContracts: number}> = ({scene, totalToolContracts}) => {
+export const LedgerScene: React.FC<{scene: Scene; totalToolContracts: number}> = ({scene, totalToolContracts}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const rows = [
@@ -411,7 +411,7 @@ const LedgerScene: React.FC<{scene: Scene; totalToolContracts: number}> = ({scen
   return <AbsoluteFill style={{...base, background: palette.ink}}><BrandBar sceneId={scene.id} /><div style={{position: 'absolute', left: 180, right: 180, top: 150}}><h1 style={{fontSize: 70, margin: 0, letterSpacing: '-0.05em'}}>{scene.headline}</h1><p style={{fontSize: 23, color: palette.muted, margin: '14px 0 30px'}}>{scene.support}</p><div style={{borderTop: `1px solid ${palette.line}`}}>{rows.map(([status, label, color], index) => {const enter = revealAt(frame, fps, index * 8, 110); return <div key={status} style={{display: 'grid', gridTemplateColumns: '180px 1fr 28px', alignItems: 'center', minHeight: 116, borderBottom: `1px solid ${palette.line}`, opacity: enter}}><Mono style={{fontSize: 15, color}}>{status}</Mono><strong style={{fontSize: 28}}>{label}</strong><span style={{width: 14, height: 14, borderRadius: 99, background: color}} /></div>;})}</div></div></AbsoluteFill>;
 };
 
-const CtaScene: React.FC<{scene: Scene; cta: Manifest['cta']}> = ({scene, cta}) => {
+export const CtaScene: React.FC<{scene: Scene; cta: Manifest['cta']}> = ({scene, cta}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const enter = revealAt(frame, fps, 0, 95);

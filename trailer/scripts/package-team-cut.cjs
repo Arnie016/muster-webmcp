@@ -1,0 +1,15 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'..');
+const ms=s=>{const [h,m,seconds]=s.replace(',','.').split(':').map(Number);return Math.round((h*3600+m*60+seconds)*1000);};
+const stamp=(t,separator=',')=>{const h=Math.floor(t/3600000),m=Math.floor(t/60000)%60,s=Math.floor(t/1000)%60;return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}${separator}${String(t%1000).padStart(3,'0')}`;};
+const entries=fs.readFileSync(path.join(root,'captions/muster-demo.en.srt'),'utf8').trim().split(/\r?\n\r?\n/).map(block=>{const lines=block.split(/\r?\n/),[a,b]=lines[1].split(' --> ');return{start:ms(a),end:ms(b),text:lines.slice(2).join('\n')};});
+const cut=entries.filter(e=>e.end<=115000||e.start>=122400).map(e=>({...e,start:e.start>=122400?e.start-7400:e.start,end:e.end>=122400?e.end-7400:e.end}));
+assert.ok(cut.length>20);assert.ok(!cut.some(e=>/eighteen page tools/.test(e.text)));assert.ok(cut.at(-1).end<125200);
+const encode=separator=>cut.map((e,i)=>`${i+1}\n${stamp(e.start,separator)} --> ${stamp(e.end,separator)}\n${e.text}`).join('\n\n')+'\n';
+fs.writeFileSync(path.join(root,'captions/muster-team-demo.en.srt'),encode(','));
+fs.writeFileSync(path.join(root,'../assets/muster-team-demo.en.vtt'),'WEBVTT\n\n'+encode('.'));
+fs.copyFileSync(path.join(root,'out/muster-team-demo.mp4'),path.join(root,'../assets/muster-team-demo.mp4'));
+fs.copyFileSync(path.join(root,'out/team-review-01.png'),path.join(root,'../assets/muster-demo-poster.png'));
+console.log(`Packaged verified cut with ${cut.length} retimed caption cues. Original cut remains untouched.`);

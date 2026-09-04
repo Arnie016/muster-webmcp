@@ -35,3 +35,15 @@ The Mac was locked when authenticated browser control was attempted. YouTube upl
 Scope: one substantial shared-state interaction, regression tests, deployment, and an updated demonstration. Approximately 70 minutes elapsed from the 14:24 Singapore implementation checkpoint to this receipt, including recording and visual review; media rendering is still in progress. Exact token consumption and model cost are not surfaced. No new paid provider generation, software purchase or paid asset was used. External service billing was not newly enabled.
 
 One next safe action: verify the rendered MP4, then replace the hosted video only through the unlocked authenticated browser.
+
+## Release checkpoint: 15:49 Singapore time
+
+- Final app fixes passed the deployed native Chrome test, including optional-step skipping, human review and the twentieth tool.
+- Production deployment `dpl_4MpibyVTKP22JL4kwWhA8MAU26nr` is aliased to the public Muster URL. It includes `/demo.html` and the finished MP4.
+- Public video tests passed at 1440 px and 390 px: 1920 × 1080 media, 125.162667-second duration, no autoplay, playback, seeking to 118 seconds, 33 caption cues, no horizontal overflow and no page errors. The local Python server did not pass the seek check; the production host did.
+- The MP4 fully decoded without errors. Audio analysis found only a 1.03-second final silence above the one-second threshold. No new provider generation credits were used.
+- Devpost project 1415442 remained published and submitted. Its write-up was updated through the official connector, version 11, adding the latest hosted demonstration. The existing YouTube URL is preserved pending the new upload.
+- Authenticated YouTube Studio became accessible. Upload is in progress after explicit action-time confirmation of YouTube terms; no new publication is claimed at this checkpoint.
+- Approximately 85 minutes elapsed since the 14:24 implementation checkpoint, versus a bounded shared-state enhancement plus release pass. Media capture, rendering and browser recovery expanded the pass. Exact turn token cost is unavailable; external billing was not enabled.
+
+Next safe action: verify the new public YouTube video, update Devpost's video URL, and read back the published entry.
