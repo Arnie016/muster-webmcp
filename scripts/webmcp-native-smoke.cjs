@@ -122,6 +122,23 @@ const chromePath = process.env.MUSTER_CHROME_PATH
 
     await page.screenshot({ path: path.join(root, 'docs', 'screenshots', 'muster-native-webmcp.png'), fullPage: false });
     console.log(`PASS · Native document.modelContext registered ${probe.toolNames.length} tools in Chrome`);
+    const spatialReceipt = await page.evaluate(async () => {
+      const tools = await document.modelContext.getTools();
+      const run = async (name,input) => {const raw=await document.modelContext.executeTool(tools.find(t=>t.name===name),JSON.stringify(input));return typeof raw==='string'?JSON.parse(raw):raw;};
+      const room=await run('read_room_profile',{room_id:'studio',view:'3d'});
+      const equipment=await run('read_equipment',{item_id:'MCP-07-L1',view:'3d'});
+      const route=await run('compare_routes',{zone_id:'studio',preview_exit:'B',checkpoint:4,view:'3d'});
+      return {room,equipment,route};
+    });
+    assert.equal(spatialReceipt.room.spatial_profile.width,13.1);
+    assert.equal(spatialReceipt.equipment.selected_item,'MCP-07-L1');
+    assert.equal(spatialReceipt.route.displayed_checkpoint,3);
+    assert.equal(spatialReceipt.route.walkthrough.available,false);
+    assert.equal(spatialReceipt.route.preview_only,true);
+    assert.ok(await page.locator('#interiorView').isVisible());
+    assert.match(await page.locator('#interiorCaption').innerText(),/Stop: unavailable/);
+    assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('muster-demo-state-v2')).approved),false);
+    console.log('PASS · Native tools opened a 3D room, focused the call point, and clamped the blocked-route preview without approval');
     console.log('PASS · document.modelContext.executeTool ran read_plan and changed the visible trace');
     console.log('PASS · Native manager intent routed named page tools into one inspectable receipt');
     console.log('PASS · Native page tools completed the consequential rehearsal and stopped at human approval');

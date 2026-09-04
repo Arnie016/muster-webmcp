@@ -1122,3 +1122,49 @@ footer { padding: 13px 28px; background: #090a08; font-size: 10px; }
   .scenario-unstarted .guided-brief { grid-template-columns: 40px 1fr; }
   .scenario-unstarted .guided-brief .primary-button { grid-column: 1 / -1; }
 }
+/* Room-scale spatial walkthrough: one model, one inspector, one route. */
+.interior-view { background:#0b141b; color:#e5f0ec; border-top:1px solid #304850; }
+.interior-toolbar,.walkthrough-heading { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:18px 20px; }
+.interior-toolbar strong { display:block; margin-top:6px; font-size:18px; }
+.interior-controls { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.interior-controls button,.walkthrough-controls button,.interior-controls select { border:1px solid #3c535b; border-radius:7px; background:#14232b; color:#dbece6; padding:9px 11px; min-height:38px; font:600 12px var(--sans); }
+.interior-controls label { font-size:12px; color:#a8c2c3; }
+.interior-layout { display:grid; grid-template-columns:minmax(0,1fr) 255px; border-block:1px solid #29414a; }
+.interior-stage { position:relative; height:580px; min-width:0; overflow:hidden; }
+#interiorCanvas { display:block; width:100%; height:100%; touch-action:pan-y; }
+#interiorFallback { padding:35px; color:#e8c98c; }
+.interior-watermark,.interior-gesture { position:absolute; pointer-events:none; color:#8baeb8; font:10px var(--mono); }
+.interior-watermark { top:15px;left:16px; }.interior-gesture { bottom:14px;left:16px; }
+.interior-play-caption { position:absolute; left:16px;bottom:40px; width:min(370px,calc(100% - 32px)); padding:14px 16px; background:#09151bf2; border:1px solid #59747b; border-left:3px solid #e6c376; border-radius:9px; pointer-events:none; }
+.interior-play-caption span { color:#a3c5bd;font:10px var(--mono); }.interior-play-caption strong { display:block;margin-top:6px;font-size:17px; }.interior-play-caption p { font-size:12px;line-height:1.5;color:#b7c9c9;margin:7px 0 0; }
+.room-inspector { background:#101e26;border-left:1px solid #29414a;padding:16px; }
+#interiorRooms { display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:20px; }
+#interiorRooms button { min-height:38px;border:1px solid #3b535c;background:#14262f;color:#b9cece;border-radius:6px;padding:6px;font-size:11px; }
+#interiorRooms button.active,.equipment-pins button.active { border-color:#83d6c4;background:#21483f;color:#e6fff5; }
+#interiorDetail h3 { font-size:23px;line-height:1.15;margin:7px 0 15px;letter-spacing:-.04em; }
+#interiorDetail p { font-size:12px;line-height:1.5;color:#bdcfca; }
+.room-metrics { display:grid;grid-template-columns:1.4fr 1fr;gap:8px; }
+.room-metrics strong,.room-metrics span { display:block; }.room-metrics strong {font:700 19px var(--mono);}.room-metrics span {color:#9bb3b6;font-size:10px;margin-top:5px;}
+.room-inspector p.interior-note { color:#9cb5bb;font-size:11px;line-height:1.5; }
+.equipment-pins { display:grid;gap:5px;border-top:1px solid #29414a;padding-top:12px; }
+.equipment-pins button { display:flex;align-items:center;gap:9px;text-align:left;border:1px solid transparent;background:#13252d;color:#c8d9d5;padding:7px;border-radius:5px;font-size:11px; }
+.equipment-pins b {width:24px;height:24px;display:grid;place-items:center;border:1px solid #a88e69;color:#f0cf91;font:12px var(--mono);}
+.equipment-explanation {padding:12px 0 0;}.equipment-explanation code {font-size:10px;color:#99d5c9;}.equipment-explanation strong {display:block;margin-top:7px;font-size:15px;}.equipment-explanation p {font-size:11px;line-height:1.5;color:#b7cdcf;}.equipment-explanation small {font-size:10px;color:#cfb787;}
+.walkthrough-desk {padding-bottom:18px;}.walkthrough-heading h3 {margin:5px 0 0;font-size:20px;}
+.walkthrough-steps {display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:0 20px;}
+.walkthrough-steps button {display:flex;align-items:flex-start;gap:8px;text-align:left;padding:13px 9px;min-height:66px;border:1px solid #365059;border-radius:6px;background:#101f28;color:#9cb4bb;}.walkthrough-steps button.active {border-color:#e0c27c;background:#2b3029;color:#f6ead0;}.walkthrough-steps span {font:11px var(--mono);}.walkthrough-steps strong {font-size:11px;line-height:1.4;}.walkthrough-steps .unavailable {opacity:.5;}
+.walkthrough-controls {display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:14px 20px;}.walkthrough-controls label {display:flex;align-items:center;gap:5px;font-size:11px;color:#b6cbc7;}.walkthrough-controls span {margin-left:auto;font:10px var(--mono);color:#90abae;}.walkthrough-controls button:disabled {opacity:.4;}.walkthrough-controls #walkPlay {background:#d7bc7b;color:#142025;border-color:#d7bc7b;}
+.walkthrough-logic {display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 20px;}.walkthrough-logic article {border-top:1px solid #3e5c66;padding-top:11px;}.walkthrough-logic span {font:10px var(--mono);color:#88cfbf;}.walkthrough-logic p {font-size:11px;line-height:1.5;color:#a8c0c4;margin:8px 0 0;}
+.interior-view.expanded {position:fixed;inset:10px;z-index:100;overflow:auto;border:1px solid #58727b;border-radius:12px;box-shadow:0 0 0 30px #000b;}.interior-view.expanded .interior-stage {height:min(66vh,800px);}
+@media(min-width:1800px){.interior-stage {height:670px;}.interior-layout {grid-template-columns:minmax(0,1fr) 290px;}}
+@media(max-width:1000px){.interior-layout {grid-template-columns:1fr;}.room-inspector {border-left:0;border-top:1px solid #29414a;display:grid;grid-template-columns:1fr 1fr;gap:12px;}#interiorRooms {grid-column:1/-1;grid-template-columns:repeat(3,1fr);margin:0;}.interior-stage {height:500px;}.walkthrough-logic {grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.interior-toolbar,.walkthrough-heading {flex-direction:column;align-items:stretch;padding:14px;}.interior-stage {height:450px;}.room-inspector {padding:14px;}.interior-watermark {font-size:8px;}.interior-play-caption {bottom:32px;padding:10px;}.interior-play-caption strong {font-size:15px;}.interior-play-caption p {font-size:11px;}.walkthrough-steps {padding:0 14px;grid-template-columns:repeat(5,minmax(55px,1fr));gap:3px;}.walkthrough-steps button {padding:8px 4px;flex-direction:column;gap:5px;}.walkthrough-steps strong {font-size:9px;}.walkthrough-controls {padding:12px 14px;}.walkthrough-controls span {margin:5px 0 0;width:100%;}.walkthrough-logic {padding:0 14px;}.view-switch {flex-wrap:wrap;}.interior-view.expanded {inset:3px;}}
+.print-pack-dialog { width:min(1400px,calc(100vw - 24px));max-width:none;height:94vh;max-height:94vh;padding:0;background:#0d1b22;color:#d7e9e4;border:1px solid #68828a;border-radius:12px; }
+.print-pack-dialog::backdrop{background:#000b;backdrop-filter:blur(5px)}.print-pack-dialog>header{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid #3d555c}.print-pack-dialog>header span{display:block;font-size:11px;color:#9db6b9;margin-top:5px}.print-pack-dialog nav{display:flex;flex-wrap:wrap;gap:6px}.print-pack-dialog button{padding:9px 12px;min-height:40px;border:1px solid #506a72;border-radius:6px;background:#203640;color:#e1f0ed;font:12px var(--sans)}.print-pack-dialog>p{padding:0 18px;font-size:11px;color:#bdd0c8}.print-pack-dialog iframe{width:100%;height:calc(100% - 116px);border:0;background:#d5dfdf}@media(max-width:650px){.print-pack-dialog>header{align-items:stretch;flex-direction:column}.print-pack-dialog iframe{height:calc(100% - 180px)}.print-pack-dialog{width:calc(100vw - 12px)}}
+.interior-view { scroll-margin-top:85px; }
+.interior-view .room-inspector { max-height:580px;overflow:auto;overscroll-behavior:contain; }
+.interior-view .interior-play-caption {position:static;width:auto;margin:0 20px 14px;pointer-events:auto;padding:12px 15px;}
+.interior-play-caption strong {display:inline;margin-left:12px;}.interior-play-caption p {margin-top:5px;}
+@media(min-width:1800px){.interior-view .room-inspector{max-height:670px}}
+@media(max-width:1000px){.interior-view .room-inspector{max-height:none;overflow:visible}}
+@media(max-width:600px){.interior-view .interior-play-caption{margin:0 14px 12px}.interior-play-caption strong{display:block;margin:7px 0 0}.interior-view .room-metrics{grid-template-columns:1fr}.interior-stage{height:380px}}

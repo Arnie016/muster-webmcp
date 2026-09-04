@@ -13,7 +13,8 @@ export function routeQuestion(raw, context = {}) {
   if (/\b(next|progress|stuck|help|guide|how.*(?:play|use|work|proceed|continue|start)|what.*(?:do|now))\b/.test(q)) return route('next', 'Find your next step without restarting', [call('read_status_board')], meta);
   if (/\b(webmcp|mcp|llm|model|real ai|chatgpt|thinking|runtime|what can you)\b/.test(q)) return route('capability', 'Explain how this session works', [], meta);
   if (requestedFloor !== 7 && !/\b(history|previous|site|assembly|storeys|floors)\b/.test(q)) return route(/\b(dimensions|size|width|length|scale)\b/.test(q) ? 'dimensions' : 'floor', 'Read this floor without borrowing another floor’s data', [call('read_plan')], meta);
-  if (/\b(extinguisher|extinguishers|hose|equipment|call point|holding point|sprinkler)\b/.test(q)) return route('equipment', 'Find equipment and its recorded location', [call('read_equipment')], meta);
+  if (/\b(extinguisher|extinguishers|hose|equipment|call point|holding point|sprinkler|where.*alarm|alarm.*location)\b/.test(q)) return route('equipment', 'Find equipment and its recorded location', [call('read_equipment')], meta);
+  if (zone && /\b(dimension|dimensions|size|width|length|3d|interior|furniture|room profile)\b/.test(q)) return route('room', 'Read the room geometry and equipment', [call('read_room_profile', { room_id: zone })], meta);
   if (/\b(history|previous|lesson|last drill|prehistory)\b/.test(q)) return route('history', 'Read the dated exercise lessons', [call('read_lessons')], meta);
   if (/\b(report|review|coverage|gap|gaps|missing|unassigned|owner|assistance|assist|medical)\b/.test(q)) return route('gaps', 'Check responsibilities against recorded actions', [call('read_floor_register'), call('check_coverage')], meta);
   if (/\b(fire|smoke|hazard|spread|burn|cause|alarm|signal)\b/.test(q) && !/fire safety manager/.test(q)) return route('hazard', 'Read the current scripted condition', [call('read_hazard')], meta);
@@ -52,11 +53,15 @@ export function answerQuestion(request, results, context = {}) {
   if (request.kind === 'equipment') {
     const items = get('read_equipment').equipment;
     const matched = items.filter((i) => request.query.includes(i.type.toLowerCase()) || (request.query.includes('hose') && i.type === 'Hose reel') || (request.query.includes('extinguisher') && i.type === 'Extinguisher'));
-    return `${(matched.length ? matched : items).map((i) => `${i.type} (${i.id}) — ${i.room}.`).join('\n')}\nThese are plan locations, not confirmation that equipment is serviceable. Sprinklers have no individual inventory positions in this demo.`;
+    return `${(matched.length ? matched : items).map((i) => `${i.type} (${i.id}) — ${i.room}.`).join('\n')}${/alarm|detector/.test(request.query) ? '\nScripted detector signal: beside electrical room 7-E. No physical alarm is connected.' : ''}\nThese are plan locations, not confirmation that equipment is serviceable. Sprinklers have no individual inventory positions in this demo.`;
   }
   if (request.kind === 'routes') {
     const result = get('compare_routes');
     return `From ${result.zone}:\n${result.alternatives.map((a) => `${a.exit}: ${a.distance_m} m, ${a.scenario_status} in this exercise.`).join('\n')}\nThis compares fictional distances; it is not a real evacuation instruction.`;
+  }
+  if (request.kind === 'room') {
+    const r = get('read_room_profile').spatial_profile;
+    return `${r.label}, Floor 07: ${r.width} × ${r.depth} m in the authored drawing. ${r.occupants} fixture occupants, ${r.assisted} assistance flags.\n${r.equipment.length ? r.equipment.map(e=>`${e.type}: ${e.room}`).join('\n') : 'No individually located equipment item is in this room’s register.'}\nThe 3 m height, door openings and furniture are illustrative, not a surveyed model. Use 3D rooms to inspect the cutaway.`;
   }
   if (request.kind === 'hazard') {
     const h = get('read_hazard');

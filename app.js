@@ -26,6 +26,9 @@ import {
 import MusterPeopleData from './people-data.js';
 import { initBuildingScene } from './building-scene.js';
 import { routeQuestion, answerQuestion } from './commander-chat.js';
+import { initFloorScene } from './floor-scene.js';
+import { ROOMS, SPATIAL_EQUIPMENT, DETECTOR, roomSpatialProfile, routeWalkthrough } from './spatial-data.js';
+import { openDrillPack } from './print-pack.js';
 
 const STORAGE_KEY = 'muster-demo-state-v2';
 const $ = (selector) => document.querySelector(selector);
@@ -49,7 +52,7 @@ let chatBusy = false;
 let guideBusy = false;
 let toolDepth = 0;
 let pendingAssistant = null;
-let spatialMode = restoredUi.spatialMode === 'floor' ? 'floor' : 'building';
+let spatialMode = ['floor','interior'].includes(restoredUi.spatialMode) ? restoredUi.spatialMode : 'building';
 let orbit = { x: 62, z: -38, scale: 1 };
 let floorView = { scale: 1, x: 0, y: 0, originX: 50, originY: 50 };
 let routeDrawMode = false;
@@ -61,6 +64,8 @@ let guidedStep = Number(restoredUi.guidedStep) || 0;
 let selectedToolName = 'read_plan';
 let lastRouteResult = restoredUi.lastRouteResult || null;
 let buildingScene = null;
+let floorScene = null;
+let interiorRoom = 'studio', interiorEquipment = null, walkRoom = 'studio', walkExit = 'A', walkStep = 0, walkTimer = null;
 let peopleState = MusterPeopleData.resetPeopleState();
 let conversation = [
   { role: 'assistant', text: 'Ask about the floor, people, exits, or equipment. Or use Next action to advance the drill. I read the page tools; you confirm changes.' },
@@ -259,26 +264,34 @@ const toolDefinitions = [
     execute: async ({ zone_id }) => {
       const inspection = inspectZone(state, zone_id);
       state = inspection.state;
-      setSpatialMode('floor');
+      if (selectedFloor !== 7) selectFloor(7);
+      interiorRoom = zone_id; interiorEquipment = null;
+      if (spatialMode !== 'interior') setSpatialMode('floor');
       focusFloorZone(zone_id);
       saveAndRender();
-      return inspection.result;
+      return { ...inspection.result, spatial_profile: roomSpatialProfile(zone_id) };
     },
   },
   {
     name: 'compare_routes',
-    description: 'Compare fictional plan distances and scripted route availability. Never directs a live evacuation or rescue.',
+    description: 'Compare authored routes; optionally open the 3D preview at one bounded checkpoint. Preview never records evacuation or approves safety.',
     inputSchema: {
       type: 'object',
-      properties: { zone_id: { type: 'string', enum: ['west', 'east', 'meeting', 'studio', 'lobby'] } },
+      properties: { zone_id: { type: 'string', enum: ['west', 'east', 'meeting', 'studio', 'lobby'] }, preview_exit: { type: 'string', enum: ['A','B'] }, checkpoint: { type: 'integer', minimum: 0, maximum: 4 }, view: { type: 'string', enum: ['current','3d'] } },
       required: ['zone_id'],
     },
-    annotations: { readOnlyHint: true },
-    execute: async ({ zone_id }) => {
+    annotations: { readOnlyHint: false },
+    execute: async ({ zone_id, preview_exit = walkExit, checkpoint = 0, view = 'current' }) => {
+      if (!['A','B'].includes(preview_exit) || !['current','3d'].includes(view) || !Number.isInteger(checkpoint) || checkpoint < 0 || checkpoint > 4) throw new Error('Invalid preview options');
       const result = compareRoutes(state, zone_id);
+      const walkthrough = routeWalkthrough(zone_id, preview_exit, state.injectIds.includes('stair'));
+      walkRoom = zone_id;
+      interiorRoom = zone_id; interiorEquipment = null;
+      walkExit = preview_exit; stopWalk(); walkStep = Math.min(checkpoint, walkthrough.maxStep);
+      if (view === '3d') setSpatialMode('interior');
       logTool('compare_routes', `${result.zone} · ${result.alternatives.length} plan routes`);
       render();
-      return result;
+      return { ...result, floor: 7, walkthrough, requested_checkpoint: checkpoint, displayed_checkpoint: walkStep, preview_only: true };
     },
   },
   {
@@ -394,30 +407,36 @@ const toolDefinitions = [
   },
   {
     name: 'read_room_profile',
-    description: 'Highlight one fictional room or zone and read use, protection fixtures, and operational context.',
+    description: 'Read one F07 room’s dimensions, equipment and use; optional 3d view opens the same visible cutaway. Height and furniture are inferred.',
     inputSchema: {
       type: 'object',
-      properties: { room_id: { type: 'string', enum: Object.keys(ROOM_PROFILES) } },
+      properties: { room_id: { type: 'string', enum: Object.keys(ROOM_PROFILES) }, view: { type: 'string', enum: ['current','plan','3d'] } },
       required: ['room_id'],
     },
     annotations: { readOnlyHint: false },
-    execute: async ({ room_id }) => {
+    execute: async ({ room_id, view = 'current' }) => {
+      if (!['current','plan','3d'].includes(view)) throw new Error('Invalid room view');
       const inspection = inspectZone(state, room_id);
       state = inspection.state;
       dossierView = 'rooms';
-      setSpatialMode('floor');
+      if (selectedFloor !== 7) selectFloor(7);
+      interiorRoom = room_id; interiorEquipment = null;
+      if (view === '3d') setSpatialMode('interior');
+      else if (view === 'plan' || spatialMode !== 'interior') setSpatialMode('floor');
       focusFloorZone(room_id);
       saveAndRender();
-      return { ...inspection.result, profile: ROOM_PROFILES[room_id], cause_inferred: false };
+      return { ...inspection.result, profile: ROOM_PROFILES[room_id], spatial_profile: roomSpatialProfile(room_id), cause_inferred: false };
     },
   },
   {
     name: 'read_equipment',
-    description: 'Read equipment shown on the fictional plan with room and inspection-fixture status. Does not certify adequacy.',
-    inputSchema: { type: 'object', properties: {} },
-    annotations: { readOnlyHint: true },
-    execute: async () => {
-      const result = { training_only: true, equipment: EQUIPMENT, adequacy: 'qualified review required', external_effects: false };
+    description: 'Read planned equipment; optional item_id and 3d view locate a marker. Never activates an alarm or certifies equipment.',
+    inputSchema: { type: 'object', properties: { item_id: { type: 'string', enum: [...SPATIAL_EQUIPMENT.map(e=>e.id),DETECTOR.id] }, view: { type: 'string', enum: ['current','3d'] } } },
+    annotations: { readOnlyHint: false },
+    execute: async ({ item_id, view = 'current' } = {}) => {
+      if (!['current','3d'].includes(view) || (item_id && ![...SPATIAL_EQUIPMENT,DETECTOR].some(e=>e.id===item_id))) throw new Error('Invalid equipment inspection');
+      if (item_id) { interiorEquipment = item_id; if(view==='3d')setSpatialMode('interior'); floorScene?.focusEquipment(item_id); }
+      const result = { training_only: true, floor: 7, equipment: SPATIAL_EQUIPMENT, selected_item: item_id || null, detector_signal: { ...DETECTOR, active: state.injectIds.includes('smoke') }, adequacy: 'qualified review required', external_effects: false };
       logTool('read_equipment', `${EQUIPMENT.length} plan items · adequacy not certified`);
       dossierView = 'equipment';
       render();
@@ -609,15 +628,21 @@ function escapeHtml(value) {
 }
 
 function setSpatialMode(mode) {
-  spatialMode = mode === 'floor' ? 'floor' : 'building';
+  spatialMode = ['floor','interior'].includes(mode) ? mode : 'building';
+  if (spatialMode === 'interior' && selectedFloor !== 7) { spatialMode = 'building'; selectFloor(7); spatialMode = 'interior'; }
   const preset = FLOOR_PRESETS[selectedFloor];
   $('#buildingView').classList.toggle('view-hidden', spatialMode !== 'building');
   $('#floorView').classList.toggle('view-hidden', spatialMode !== 'floor');
+  $('#interiorView').classList.toggle('view-hidden', spatialMode !== 'interior');
+  $('#interiorMode').classList.toggle('active', spatialMode === 'interior');
+  floorScene?.show(spatialMode === 'interior');
+  if (spatialMode !== 'interior') { stopWalk(); $('#interiorView').classList.remove('expanded'); }
   $('#buildingMode').classList.toggle('active', spatialMode === 'building');
   $('#floorMode').classList.toggle('active', spatialMode === 'floor');
   $('#spatialTitle').textContent = spatialMode === 'building'
     ? '18-floor building model'
-    : preset ? `${preset.code} ${preset.label} plan` : `Floor ${String(selectedFloor).padStart(2, '0')} plan`;
+    : spatialMode === 'interior' ? 'F07 · rooms, equipment and route preview' : preset ? `${preset.code} ${preset.label} plan` : `Floor ${String(selectedFloor).padStart(2, '0')} plan`;
+  if (spatialMode === 'interior') renderInterior();
   if (spatialMode === 'floor') requestAnimationFrame(applyFloorView);
   else requestAnimationFrame(() => buildingScene?.refresh());
   persistState();
@@ -648,6 +673,7 @@ function selectSitePoint(pointId) {
 
 function selectFloor(floor, openPlan = false) {
   selectedFloor = Number(floor);
+  if (spatialMode === 'interior' && selectedFloor !== 7) setSpatialMode('building');
   document.querySelectorAll('[data-site-point]').forEach((button) => button.classList.remove('selected'));
   buildingScene?.selectFloor(selectedFloor);
   const preset = FLOOR_PRESETS[selectedFloor];
@@ -725,6 +751,7 @@ function resetFloorView() {
   floorView = { scale: 1, x: 0, y: 0, originX: 50, originY: 50 };
   routeDrawMode = false;
   routeDrawing = false;
+  $('#floorViewport').classList.remove('drawing', 'dragging');
   $('#drawRouteButton').classList.remove('active');
   $('#drawRouteButton').textContent = 'Draw a route';
   $('#planGesture').textContent = 'Click a room · drag to pan · + / − to zoom';
@@ -1228,6 +1255,8 @@ function renderMap() {
   floor.classList.toggle('story-critical', rosterGap && !assistResolved);
   $('#buildingView').classList.toggle('drill-live', hasSmoke);
   buildingScene?.setSignal(actionableFloor && hasSmoke);
+  floorScene?.setHazard(hasSmoke);
+  renderInterior();
   buildingScene?.setRoutes({ active: actionableFloor && state.status !== 'ready', stairBlocked, resolved: routeRecorded });
   const buildingRouteState = $('#buildingRouteState');
   buildingRouteState.classList.toggle('active', actionableFloor && state.status !== 'ready');
@@ -1513,8 +1542,76 @@ function renderToolList() {
   }));
 }
 
+function stopWalk() {
+  if (walkTimer) clearInterval(walkTimer);
+  walkTimer = null;
+}
+
+async function inspectInteriorRoom(id) {
+  stopWalk(); interiorRoom = id; interiorEquipment = null;
+  if (id !== 'electrical') { walkRoom = id; walkStep = 0; }
+  beginConversation(`Inspect ${ZONES[id].label} in 3D`);
+  await callTool('read_room_profile', { room_id: id }).catch(()=>{});
+}
+
+async function inspectInteriorEquipment(id) {
+  interiorEquipment = id;
+  floorScene?.focusEquipment(id);
+  const item = [...SPATIAL_EQUIPMENT,DETECTOR].find(e=>e.id===id);
+  beginConversation(`Locate ${item.type} on Floor 07`);
+  await callTool('read_equipment', { item_id: id, view: '3d' }).catch(()=>{});
+  renderInterior();
+}
+
+function renderInterior() {
+  if (!$('#interiorDetail')) return;
+  const room = roomSpatialProfile(interiorRoom);
+  floorScene?.select(interiorRoom);
+  $('#interiorRooms').querySelectorAll('button').forEach(b=>{const selected=b.dataset.interiorRoom===interiorRoom;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected));});
+  $('#interiorDetail').innerHTML=`<span class="eyebrow">F07 / ${escapeHtml(room.use)}</span><h3>${escapeHtml(room.label)}</h3><div class="room-metrics"><div><strong>${room.width} × ${room.depth}</strong><span>metres · bounding box</span></div><div><strong>${room.occupants}</strong><span>registered people</span></div></div><p><b>${room.assisted} assistance flags</b> · ${escapeHtml(room.owner)}</p><p class="interior-note">3 m height and furnishings are illustrative. Only the horizontal drawing scale is authored.</p>`;
+  $('#interiorEquipment').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.interiorEquipment===interiorEquipment));
+  const item=[...SPATIAL_EQUIPMENT,DETECTOR].find(e=>e.id===interiorEquipment);
+  $('#equipmentDetail').innerHTML=item?`<div class="equipment-explanation"><code>${escapeHtml(item.id)}</code><strong>${escapeHtml(item.type)}</strong><p>${escapeHtml(item.room || 'Beside electrical room 7-E')}</p><p>${escapeHtml(item.why)}</p><small>${escapeHtml(item.inspection || (state.injectIds.includes('smoke')?'Scripted signal active':'No active signal'))}</small></div>`:'<p class="interior-note">Select E, H, M, P or D to inspect the equipment or signal. Every selection leaves a tool receipt.</p>';
+  const route=routeWalkthrough(walkRoom,walkExit,state.injectIds.includes('stair'));
+  walkStep=Math.min(walkStep,route.maxStep);
+  floorScene?.setRoute(route,walkStep);
+  $('#walkthroughTitle').textContent=`${route.zone} → ${route.exit}${route.available?'':' · unavailable'}`;
+  $('#walkthroughRoom').value=walkRoom;$('#walkthroughExit').value=walkExit;
+  $('#walkthroughSteps').innerHTML=route.steps.map((s,i)=>`<button type="button" data-walk-step="${i}" class="${i===walkStep?'active':''} ${i>route.maxStep?'unavailable':''}" ${i>route.maxStep?'disabled':''}><span>${String(i+1).padStart(2,'0')}</span><strong>${escapeHtml(s.label)}</strong></button>`).join('');
+  $('#walkthroughSteps').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{stopWalk();walkStep=Number(b.dataset.walkStep);renderInterior();}));
+  $('#interiorCaption').innerHTML=`<span>${String(walkStep+1).padStart(2,'0')} / 05 · ${route.available?'Preview, not an observed evacuation':'Candidate unavailable'}</span><strong>${escapeHtml(route.steps[walkStep].label)}</strong><p>${escapeHtml(route.steps[walkStep].detail)}</p>`;
+  $('#walkMeasure').textContent=`Diagram ${route.diagram_metres} m · authored route ${route.fixture_metres} m`;
+  $('#walkBack').disabled=walkStep===0;$('#walkNext').disabled=walkStep>=route.maxStep;
+  $('#walkPlay').textContent=walkTimer?'Pause':walkStep>=route.maxStep?'Replay preview':'Play walkthrough';
+  $('#walkthroughLogic').innerHTML=route.logic.map((l,i)=>`<article><span>0${i+1} · ${l.label}</span><p>${escapeHtml(l.text)}</p></article>`).join('');
+}
+
 function setupSpatialInteractions() {
   renderTower();
+  $('#walkthroughSteps').before($('#interiorCaption'));
+  floorScene = initFloorScene($('#interiorCanvas'), (target) => {
+    if (target.type === 'room') inspectInteriorRoom(target.id);
+    else inspectInteriorEquipment(target.id);
+  });
+  $('#interiorFallback').hidden = Boolean(floorScene);
+  $('#interiorRooms').innerHTML = ROOMS.map(r => `<button type="button" data-interior-room="${r.id}">${r.label}</button>`).join('');
+  $('#interiorEquipment').innerHTML = [...SPATIAL_EQUIPMENT,DETECTOR].map(e=>`<button type="button" data-interior-equipment="${e.id}"><b>${e.symbol}</b>${e.type}</button>`).join('');
+  $('#interiorRooms').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>inspectInteriorRoom(b.dataset.interiorRoom)));
+  $('#interiorEquipment').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>inspectInteriorEquipment(b.dataset.interiorEquipment)));
+  $('#interiorMode').addEventListener('click',()=>setSpatialMode('interior'));
+  $('#interiorTop').addEventListener('click',()=>floorScene?.view('top'));
+  $('#interiorReset').addEventListener('click',()=>{floorScene?.view('reset');$('#walkFollow').checked=false;});
+  $('#interiorZoomIn').addEventListener('click',()=>floorScene?.zoom(-5));
+  $('#interiorZoomOut').addEventListener('click',()=>floorScene?.zoom(5));
+  $('#interiorExpand').addEventListener('click',()=>{ const expanded=$('#interiorView').classList.toggle('expanded'); $('#interiorExpand').textContent=expanded?'Close expanded view':'Expand ↗'; requestAnimationFrame(()=>floorScene?.refresh()); });
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('#interiorView').classList.remove('expanded');$('#interiorExpand').textContent='Expand ↗';}});
+  $('#walkthroughRoom').addEventListener('change',()=>{stopWalk();walkRoom=$('#walkthroughRoom').value;walkStep=0;inspectInteriorRoom(walkRoom);});
+  $('#walkthroughExit').addEventListener('change',()=>{stopWalk();walkExit=$('#walkthroughExit').value;walkStep=0;beginConversation(`Compare routes from ${ZONES[walkRoom].label}`);callTool('compare_routes',{zone_id:walkRoom}).catch(()=>{});});
+  $('#walkBack').addEventListener('click',()=>{stopWalk();walkStep=Math.max(0,walkStep-1);renderInterior();});
+  $('#walkNext').addEventListener('click',()=>{stopWalk();walkStep=Math.min(walkStep+1,routeWalkthrough(walkRoom,walkExit,state.injectIds.includes('stair')).maxStep);renderInterior();});
+  $('#walkPlay').addEventListener('click',()=>{if(walkTimer)stopWalk();else {const r=routeWalkthrough(walkRoom,walkExit,state.injectIds.includes('stair'));if(walkStep===r.maxStep)walkStep=0;walkTimer=setInterval(()=>{const route=routeWalkthrough(walkRoom,walkExit,state.injectIds.includes('stair'));walkStep=Math.min(walkStep+1,route.maxStep);if(walkStep>=route.maxStep)stopWalk();renderInterior();},3000);}renderInterior();});
+  $('#walkFollow').addEventListener('change',()=>floorScene?.view($('#walkFollow').checked?'follow':'reset'));
+  $('#openPrintPack').addEventListener('click',()=>openDrillPack({state,room:walkRoom,exit:walkExit}));
   buildingScene = initBuildingScene($('#buildingCanvas'), {
     onFloorSelect: (floor) => selectFloor(floor),
     onSiteSelect: (pointId) => selectSitePoint(pointId),
@@ -1669,11 +1766,14 @@ function setupSpatialInteractions() {
   $('#zoomInPlan').addEventListener('click', () => { floorView.scale = Math.min(2.2, floorView.scale + .2); applyFloorView(); });
   $('#zoomOutPlan').addEventListener('click', () => { floorView.scale = Math.max(1, floorView.scale - .2); applyFloorView(); });
   $('#drawRouteButton').addEventListener('click', () => {
-    routeDrawMode = !routeDrawMode;
+    const enableDrawing = !routeDrawMode;
+    if (enableDrawing) resetFloorView();
+    routeDrawMode = enableDrawing;
     routePoints = [];
     lastRouteResult = null;
     renderRouteSketch();
     floor.classList.toggle('drawing', routeDrawMode);
+    if (routeDrawMode) floor.scrollIntoView({ block: 'center', behavior: 'instant' });
     $('#drawRouteButton').classList.toggle('active', routeDrawMode);
     $('#drawRouteButton').textContent = routeDrawMode ? 'Drawing… release to analyze' : 'Draw a route';
     $('#planGesture').textContent = routeDrawMode ? 'Draw from a room to an exit. Release to run the route tool.' : 'Click a room · drag to pan · + / − to zoom';

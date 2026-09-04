@@ -23,12 +23,12 @@ The current submission demonstrates one complete Floor 07 office rehearsal. Floo
 ## Thirty-second judge path
 
 1. Open https://muster-fire-drill.vercel.app/.
-2. Select **Inspect Floor 07**.
-3. In the Incident Commander desk, select **Run demo**.
-4. Watch the authored detector signal appear and Stair B become unavailable in the fictional scenario.
-5. Inspect the 30.1 metre drawn route receipt to Stair A and the named assistance owner.
-6. Open a Live trace row to inspect why the tool ran, its input and result, what changed on screen, and its boundary.
-7. Review the staged after-action draft and the separate human approval control.
+2. Select **Start scenario**, then use the visible **Next action** control to advance one declared tool call at a time.
+3. Watch the authored detector signal appear and Stair B become unavailable in the fictional scenario.
+4. Select **3D rooms · F07**. Inspect Studio, focus an equipment marker, then step through the room-to-stair walkthrough. A blocked Stair B preview stops before the landing.
+5. Ask a concrete question in the Commander conversation, such as where the manual call point is. Inspect the actual tool receipt attached to the turn.
+6. Open a Live trace row to inspect the input, result, stated purpose, and visible change. Continue the guided scenario to prepare the review draft; only the human can approve it.
+7. Select **Print pack** for the two-page A3 plan and review sheet, vector SVG, or 5500 × 4250 PNG.
 
 The displayed distances are fictional plan fixtures. A drawn route is not an approved evacuation route.
 
@@ -49,10 +49,10 @@ Current native proof uses Chrome 152 with WebMCP testing enabled. `document.mode
 - `read_plan`: read the selected building, floor, exits, roles, revision, and visible fixture counts.
 - `start_drill`: start the fictional tabletop scenario.
 - `inspect_zone`: focus one plan zone and return its fictional people, assistance need, and nearest-exit context.
-- `compare_routes`: compare scripted distance and availability without directing a real evacuation.
+- `compare_routes`: compare scripted distance and availability; optional `view: "3d"`, `preview_exit`, and `checkpoint` show a bounded five-checkpoint walkthrough. Previewing is not recording a decision or certifying an evacuation route.
 - `analyze_route_sketch`: measure a facilitator-drawn path and check its endpoint against the scenario's exit state.
 - `read_site_context`: read fictional setting, assembly areas, service access, and mapping boundaries.
-- `read_room_profile`: inspect one room's use, protection fixtures, and exercise context.
+- `read_room_profile`: inspect one room's use, plan-derived dimensions, located equipment, and exercise context; `view: "3d"` focuses the room in the Floor 07 cutaway.
 
 ### People and scenario
 
@@ -66,7 +66,7 @@ Current native proof uses Chrome 152 with WebMCP testing enabled. `document.mode
 
 - `read_drill_guide`: read the before, during, or after tabletop checklist.
 - `read_hazard`: read the authored scenario phase without claiming a physical fire-spread model.
-- `read_equipment`: read planned fixture and inspection records without certifying adequacy.
+- `read_equipment`: read planned fixture and inspection records without certifying adequacy; optional `item_id` and `view: "3d"` focus a named marker. A manual call point is inventory, not a button that raises an alarm.
 - `read_lessons`: read dated fictional exercise findings and the changes they motivated.
 
 ### Review
@@ -78,6 +78,9 @@ Current native proof uses Chrome 152 with WebMCP testing enabled. `document.mode
 
 - The 18-floor building is an orbitable WebGL training twin with direct floor selection and a CSS fallback.
 - Floor 07 is a pan-and-zoom response plan with dimensions, rooms, route state, equipment, fictional occupant groups, responder markers, and inspectable profiles.
+- Floor 07 also has a room-level cutaway with original procedural desks, seating, equipment, doors, inspection markers, perspective orbit, orthographic top view, and a checkpoint-follow camera. Geometry is derived from the fictional plan; height, furniture, and exact marker positions are illustrative, not surveyed.
+- Native WebMCP tests additionally focus Studio, inspect the manual call point, and request a blocked Stair B checkpoint. The visible preview clamps before the unavailable landing and does not record an action.
+- The print pack snapshots the same scenario and route into two A3 pages. Accounted-for counts and reviewer signoff stay blank unless actually recorded. SVG and 5500 × 4250 PNG export are available; high resolution does not establish engineering accuracy.
 - An animated orange authored-signal trail shows the scripted scenario changing. It is explicitly not a sensor event or physical spread prediction.
 - The guided flow advances one declared change at a time and explains what changed and what the facilitator should inspect next.
 - Browser checks cover desktop, 390 by 844 mobile, the WebGL twin, route analysis, the complete rehearsal, and human report approval.

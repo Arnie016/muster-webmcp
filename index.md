@@ -16,7 +16,13 @@ Tabletop drills often split the plan, occupant register, team roles, scenario no
 4. Inspect the affected group, compare the exercise's route options, and record facilitator-confirmed actions and owners.
 5. Check ownership coverage and prepare an after-action draft for human approval.
 
-The app combines an orbitable 18-floor WebGL twin, a pan-and-zoom response plan, fictional occupants and responders, animated scenario signals, route receipts, an Incident Commander desk, and a visible tool trace.
+The app combines an orbitable 18-floor WebGL twin, a detailed Floor 07 cutaway, a pan-and-zoom response plan, fictional occupants and responders, animated scenario signals, route receipts, an Incident Commander desk, and a visible tool trace.
+
+## Try the spatial workflow
+
+Select **Start scenario** and use **Next action** to progress. Open **3D rooms · F07**, inspect Studio or an equipment marker, and step through a room-to-stair walkthrough. The preview stops before an unavailable Stair B; it never records the team's decision automatically. Perspective, top-down, and marker-follow views make the route inspectable. Floor 07 is the only detailed interior; Floor 03 and Floor 12 remain reference schematics.
+
+**Print pack** creates a two-page A3 plan and review sheet from the current scenario, plus vector SVG and 5500 × 4250 PNG downloads. The pack labels unknown counts, missing owners, illustrative geometry, and pending human approval explicitly.
 
 ## Why WebMCP matters
 

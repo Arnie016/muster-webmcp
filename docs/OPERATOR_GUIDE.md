@@ -29,7 +29,7 @@ Use `run_drill_manager` when the human gives a high-level intent and wants the p
 | `read_status` | Calls `read_status_board`. |
 | `inspect_zone` | Calls `inspect_zone`; `zone_id` is optional and currently defaults to `studio`. |
 | `prepare_review` | Calls `check_coverage`; it stages the report only when no active gaps remain. |
-| `rehearse` | Runs the complete scripted demonstration and stages the report. This is a broad state-changing action, so obtain explicit human intent first. |
+| `rehearse` | Opens the guided sequence without running it automatically. The human advances each declared action. It does not reset an existing scenario or approve a report. |
 
 The manager is not an emergency commander, autonomous safety authority, or independent model. It is a deterministic router over the page tools.
 
@@ -45,6 +45,8 @@ Read tools may still change the visible focus or trace. Treat the following as s
 - `inspect_zone`
 - `analyze_route_sketch` (read-only for drill decisions, but it changes the visible sketch and trace)
 - `read_room_profile`
+- `read_equipment` (optional item selection and 3D focus only; it never operates a device)
+- `compare_routes` (optional visual checkpoint preview; it never records a team action)
 - `record_human_signal`
 
 Before `record_action`, repeat the action label and owner to the facilitator and obtain confirmation. The only available records are:
@@ -53,7 +55,7 @@ Before `record_action`, repeat the action label and owner to the facilitator and
 |---|---|---|---|
 | `reroute` | Route east and west zones to Stair A | East and West Fire Wardens | Stair B unavailable inject |
 | `account` | Recheck Floor 7 register at assembly area | Chief Security | Initial smoke inject |
-| `assist` | Assign mobility assistance pair | CERT Lead | Missing assistance-owner inject |
+| `assist` | Assign mobility assistance pair | S. Tan · assistance rehearsal lead | Missing assistance-owner inject |
 
 Before `record_human_signal`, confirm both the role and directly observed signal. “No response” is not consent; silence must not be converted to `confirms`.
 
@@ -107,7 +109,16 @@ Do not create personal records, infer why someone was delayed, or claim the assi
 
 ### 5. Full judge demonstration
 
-Use `run_drill_manager({"intent":"rehearse"})` only when the human explicitly asks for the complete scripted demo. It performs multiple state changes and stages a report. After it finishes, show the visible trace, call `read_status_board`, and leave approval to the human.
+Use `run_drill_manager({"intent":"rehearse"})` to open the guided sequence. The human selects Start scenario or Resume, then advances the declared actions with Next action. The manager does not execute all eleven actions autonomously. After the human completes the sequence, inspect the visible trace, call `read_status_board`, and leave report approval to the human.
+
+### 6. Inspect room geometry and preview a route
+
+1. `read_room_profile({"room_id":"studio","view":"3d"})` selects the Floor 07 cutaway and returns plan-derived dimensions and illustrative equipment positions.
+2. `read_equipment({"item_id":"MCP-07-L1","view":"3d"})` focuses the manual call point without activating anything.
+3. `compare_routes({"zone_id":"studio","preview_exit":"B","checkpoint":4,"view":"3d"})` requests a visual checkpoint. When Stair B is scripted unavailable, the returned/displayed checkpoint is capped at 3 before the landing.
+4. Explain the returned fixture, constraint, comparison, and human check. Previewing neither records an evacuation nor proves route safety. The three-metre elevation, door openings, and furniture are inferred, not surveyed.
+
+The human can use Print pack for a two-page A3 plan and review sheet, vector SVG, or 5500 × 4250 PNG. These are fictional exercise snapshots, not approved emergency signage. Missing assistance ownership and unverified assembly counts remain explicitly unresolved.
 
 ## Failure handling
 

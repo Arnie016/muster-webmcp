@@ -1,0 +1,79 @@
+const {chromium}=require('playwright');
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const url=process.env.MUSTER_URL||'http://127.0.0.1:4179';
+(async()=>{
+ const browser=await chromium.launch({headless:true});
+ try {
+  for(const width of [1600,390]) {
+   const page=await browser.newPage({viewport:{width,height:width===390?844:1100},reducedMotion:'reduce'});
+   const errors=[];page.on('pageerror',e=>errors.push(e.message));
+   await page.goto(url,{waitUntil:'networkidle'});
+   await page.locator('#interiorMode').click();
+   await page.waitForFunction(()=>document.querySelector('#interiorCanvas').dataset.ready==='true');
+   await page.locator('[data-interior-room="studio"]').click();
+   await page.waitForFunction(()=>document.querySelector('#interiorDetail').textContent.includes('13.1 × 9.25'));
+   assert.match(await page.locator('#interiorDetail').innerText(),/6.*registered people.*2 assistance/s);
+   await page.locator('[data-interior-equipment="MCP-07-L1"]').click();
+   await page.waitForFunction(()=>document.querySelector('#equipmentDetail').textContent.includes('never activates an alarm'));
+   assert.match(await page.locator('#conversationHistory').innerText(),/read_equipment/);
+   await page.locator('#interiorReset').click();
+   await page.locator('#interiorTop').click();
+   assert.equal(await page.locator('#interiorCanvas').getAttribute('data-projection'),'orthographic');
+   await page.locator('#interiorCanvas').evaluate(e=>e.scrollIntoView({block:'center'}));
+   await page.waitForTimeout(200);
+   await page.locator('#interiorCanvas').screenshot({path:path.join(__dirname,'../docs/screenshots',`muster-interior-top-${width}.png`)});
+   await page.locator('#interiorReset').click();
+   await page.locator('#walkNext').click();await page.locator('#walkNext').click();
+   assert.match(await page.locator('#interiorCaption').innerText(),/Review the corridor/);
+   await page.locator('#interiorCanvas').evaluate(e=>e.scrollIntoView({block:'center'}));
+   await page.locator('#interiorCanvas').screenshot({path:path.join(__dirname,'../docs/screenshots',`muster-interior-${width}.png`)});
+   const stateBefore=await page.evaluate(()=>JSON.parse(localStorage.getItem('muster-demo-state-v2')));
+   assert.equal(stateBefore.decisions.length,0);assert.equal(stateBefore.status,'ready');
+   await page.locator('#launchScenarioButton').click();
+   await page.locator('#deckNextButton').click();
+   await page.waitForFunction(()=>/Block Stair B/.test(document.querySelector('#deckNextButton').textContent));
+   await page.locator('#deckNextButton').click();
+   await page.waitForFunction(()=>/Compare routes/.test(document.querySelector('#deckNextButton').textContent));
+   await page.locator('#interiorMode').click();
+   await page.locator('#walkthroughExit').selectOption('B');
+   await page.waitForFunction(()=>document.querySelector('#interiorCanvas').dataset.routeAvailable==='false');
+   for(let i=0;i<3;i++)await page.locator('#walkNext').click();
+   assert.match(await page.locator('#interiorCaption').innerText(),/Stop: unavailable Stair B/);
+   assert.equal(await page.locator('[data-walk-step="4"]').isDisabled(),true);
+   assert.equal(await page.locator('#walkNext').isDisabled(),true);
+   await page.locator('#openPrintPack').click();
+   await page.frameLocator('#printPackFrame').locator('.page').first().waitFor();
+   assert.equal(await page.frameLocator('#printPackFrame').locator('.page').count(),2);
+   assert.match(await page.frameLocator('#printPackFrame').locator('body').innerText(),/UNAVAILABLE.*NOT AN APPROVED ESCAPE PLAN.*UNASSIGNED/s);
+   const svgDownload=page.waitForEvent('download');await page.locator('#savePlanSVG').click();
+   const svg=await svgDownload;await svg.saveAs(path.join(__dirname,'../docs/screenshots/muster-training-plan.svg'));
+   if(width===1600){
+    const html=await page.locator('#printPackFrame').getAttribute('srcdoc');
+    const print=await browser.newPage({viewport:{width:1560,height:1130}});await print.setContent(html);
+    const clipped=await print.evaluate(()=>Array.from(document.querySelectorAll('.page')).flatMap(p=>{const y=p.querySelector('footer').getBoundingClientRect().top;return [...p.querySelectorAll('tr,.source,.flag,.blank')].filter(e=>e.getBoundingClientRect().bottom>y).map(e=>e.textContent.slice(0,70));}));
+    assert.deepEqual(clipped,[],'print content overlaps the footer');
+    await print.screenshot({path:path.join(__dirname,'../docs/screenshots/muster-print-pack.png'),fullPage:true});
+    await print.emulateMedia({media:'print'});
+    assert.deepEqual(await print.evaluate(()=>Array.from(document.querySelectorAll('.page')).flatMap(p=>{const y=p.querySelector('footer').getBoundingClientRect().top;return [...p.querySelectorAll('tr,.source,.flag,.blank')].filter(e=>e.getBoundingClientRect().bottom>y).map(e=>e.textContent.slice(0,70));})),[],'print-media content overlaps footer');
+    await print.pdf({path:path.join(__dirname,'../docs/muster-F07-drill-pack.pdf'),preferCSSPageSize:true,printBackground:true});
+    const pngDownload=page.waitForEvent('download');await page.locator('#savePlanPNG').click();const png=await pngDownload;await png.saveAs(path.join(__dirname,'../docs/screenshots/muster-training-plan-5500.png'));
+    await print.close();
+   }
+   await page.locator('#closePrintPack').click();
+   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'horizontal overflow');
+   assert.deepEqual(errors,[]);
+   console.log(`Spatial ${width}px passed: room dimensions, equipment, real tool receipts, route checkpoints, blocked exit, no recorded-action side effects, SVG/print exports.`);
+   await page.close();
+  }
+  const fallback=await browser.newPage({viewport:{width:1000,height:900}});
+  await fallback.addInitScript(()=>{const get=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return /webgl/i.test(type)?null:get.call(this,type,...args);};});
+  await fallback.goto(url,{waitUntil:'networkidle'});await fallback.locator('#interiorMode').click();
+  assert.ok(await fallback.locator('#interiorFallback').isVisible());
+  await fallback.locator('[data-interior-room="meeting"]').click();
+  assert.match(await fallback.locator('#interiorDetail').innerText(),/Meeting suite.*13 × 9.25/s);
+  await fallback.locator('#walkNext').click();assert.match(await fallback.locator('#interiorCaption').innerText(),/Check the doorway/);
+  await fallback.locator('#openPrintPack').click();assert.ok(await fallback.locator('#printPackDialog').isVisible());await fallback.close();
+  console.log('Spatial no-WebGL passed: room data, checkpoint controls and vector print remain usable.');
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

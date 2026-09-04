@@ -54,3 +54,15 @@ Muster defines one manager and eighteen specialist tools:
 7. Call `stage_report` only when asked or after the facilitator accepts the recorded actions. State that approval is still human-only.
 
 Keep summaries short: observation, source tool, unresolved gap, and next human decision. Never turn fictional proximity or history into a cause claim.
+
+## Room-scale 3D walkthrough
+
+The tool count remains nineteen. Three existing tools also accept bounded visual options:
+
+- `read_room_profile({room_id: "studio", view: "3d"})` opens the F07 cutaway and returns room bounds, horizontal dimensions, fixture people and located equipment. `view` may be `current`, `plan` or `3d`. The 3 m elevation, door openings and furniture are inferred.
+- `read_equipment({item_id: "MCP-07-L1", view: "3d"})` opens and focuses the manual call-point marker. Other IDs: `EX-07-W1`, `HR-07-E1`, `PWD-07-S1`, `signal-7e`. Both inputs are optional. No device is operated.
+- `compare_routes({zone_id: "studio", preview_exit: "A", checkpoint: 2, view: "3d"})` displays one route checkpoint. Checkpoints 0–4 cover room, doorway, corridor, stair approach and accounting handoff. A blocked Stair B caps playback at checkpoint 3. This previews geometry; it records neither evacuation nor a team action.
+
+All three mutate only view/focus or inspection context; their annotations are therefore not read-only. Confirm intended view changes with the user when appropriate. After a route preview, summarize the returned `walkthrough.logic`: observed fixture → scripted constraint → option comparison → human check. It is an explicit rule explanation, not hidden model reasoning or a safety recommendation.
+
+The human may select **Print pack** for two A3 pages, resolution-independent SVG, a 5500 × 4250 PNG, or browser Print/Save PDF. Exports are a timestamped training snapshot, not emergency signage. They preserve missing owners, unverified assembly counts, and separate authored versus measured diagram distances. Exporting does not approve the report.

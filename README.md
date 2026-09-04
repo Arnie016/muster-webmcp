@@ -8,6 +8,16 @@ Muster is a WebMCP-enabled tabletop fire-drill command room for building Fire Sa
 
 **Agent context:** [llms.txt](https://muster-fire-drill.vercel.app/llms.txt) · [llms-full.txt](https://muster-fire-drill.vercel.app/llms-full.txt) · [operator skill](https://muster-fire-drill.vercel.app/SKILL.md)
 
+### Room-scale walkthrough and printable drill pack
+
+Choose **3D rooms · F07** for six inspectable zones, original procedural furniture, equipment markers, perspective orbit, true orthographic top view and optional marker-follow camera. A five-checkpoint route preview uses the same wall/room coordinate model as the vector plan. All ten room-to-exit paths are tested against wall intersections. Scripted blocked Stair B caps playback before entering the landing. A visual preview is not a recorded evacuation, route approval or a fire-spread simulation.
+
+**Print pack** generates a timestamped snapshot: two A3 pages for browser Print/Save PDF, a resolution-independent SVG, and a 5500 × 4250 PNG. It includes a numbered route, equipment locations, explicit missing owners, blank observed-at-assembly counts and facilitator checks. No export silently approves a report. These are fictional training materials, not approved emergency signage.
+
+The existing `read_room_profile`, `read_equipment` and `compare_routes` WebMCP tools can open these same 3D views with optional visual arguments documented in [Skill.md](SKILL.md). No extra tool count or hidden agent is invented. [Model basis and inference ledger](docs/spatial-model-basis.md) separates authored horizontal dimensions from inferred height, door openings and props. No third-party Fab asset is bundled.
+
+`npm run test:spatial` checks desktop, mobile and no-WebGL flows, route stops, tool receipts, SVG/PNG exports and print-footer bounds. The native WebMCP test also verifies agent-side room, marker and checkpoint control. The hosted video predates this additional interior/print pass.
+
 ![Muster spatial command room](docs/screenshots/muster-spatial-command.png)
 
 The interface makes the next action explicit:

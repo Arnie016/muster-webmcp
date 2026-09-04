@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests.mjs && node --test tests/people-data.test.js tests/commander-chat.test.js && node stress-tests.mjs",
+    "test": "node tests.mjs && node --test tests/people-data.test.js tests/commander-chat.test.js tests/spatial-data.test.js && node stress-tests.mjs",
+    "test:spatial": "node scripts/spatial-smoke.cjs",
     "test:chat": "node scripts/chat-smoke.cjs",
     "stress": "node stress-tests.mjs",
     "test:browser": "node scripts/browser-smoke.cjs",
